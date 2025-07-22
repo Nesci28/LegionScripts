@@ -1,0 +1,9 @@
+{
+  "python.analysis.extraPaths": [
+    "./_Classes",
+    "./_Decorators",
+    "./_Jsons",
+    "./_Skills",
+    "./_Utils",
+  ]
+}

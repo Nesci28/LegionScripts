@@ -1,0 +1,182 @@
+{
+    "world": {
+        "normal": 234,
+        "pressed": 234,
+        "hover": 234 
+    },
+    "cancel": {
+        "normal": 241,
+        "pressed": 243,
+        "hover": 242 
+    },
+    "thief": {
+        "normal": 23012,
+        "pressed": 23012,
+        "hover": 23012 
+    },
+    "caster": {
+        "normal": 23014,
+        "pressed": 23014,
+        "hover": 23014 
+    },
+    "bard": {
+        "normal": 24004,
+        "pressed": 24004,
+        "hover": 24004 
+    },
+    "skullX": {
+        "normal": 9804,
+        "pressed": 9804,
+        "hover": 9804
+    },
+    "wordOfDeath": {
+        "normal": 23013,
+        "pressed": 23013,
+        "hover": 23013
+    },
+    "poisonnedSkull": {
+        "normal": 39863,
+        "pressed": 39863,
+        "hover": 39863
+    },
+    "squareX": {
+        "normal": 40015,
+        "pressed": 40015,
+        "hover": 40015
+    },
+    "skull": {
+        "normal": 40320,
+        "pressed": 40320,
+        "hover": 40320
+    },
+    "skullWithCrown": {
+        "normal": 40321,
+        "pressed": 40321,
+        "hover": 40321
+    },
+    "default": {
+        "normal": 2444,
+        "pressed": 2443,
+        "hover": 2444
+    },
+    "arrowLeftBlue": {
+        "normal": 9706,
+        "pressed": 9707,
+        "hover": 9706
+    },
+    "arrowRightBlue": {
+        "normal": 9762,
+        "pressed": 9763,
+        "hover": 9762
+    },
+    "arrowLeftGray": {
+        "normal": 9766,
+        "pressed": 9767,
+        "hover": 9766
+    },
+    "arrowRightGray": {
+        "normal": 9702,
+        "pressed": 9703,
+        "hover": 9702
+    },
+    "okay": {
+        "normal": 247,
+        "pressed": 248,
+        "hover": 249
+    },
+    "radio": {
+        "normal": 9020,
+        "pressed": 9021,
+        "hover": 9020
+    },
+    "radioGreen": {
+        "normal": 11400,
+        "pressed": 11401,
+        "hover": 11402
+    },
+    "radioRed": {
+        "normal": 11410,
+        "pressed": 11411,
+        "hover": 11412
+    },
+    "checkboxChecked": {
+        "normal": 9027,
+        "pressed": 9026,
+        "hover": 9027
+    },
+    "checkbox": {
+        "normal": 9026,
+        "pressed": 9027,
+        "hover": 9026
+    },
+    "checkboxDiamond": {
+        "normal": 9721,
+        "pressed": 9722,
+        "hover": 9723
+    },
+    "save": {
+        "normal": 5202,
+        "pressed": 5203,
+        "hover": 5202
+    },
+    "x": {
+        "normal": 5052,
+        "pressed": 5053,
+        "hover": 5052
+    },
+    "check": {
+        "normal": 5050,
+        "pressed": 5051,
+        "hover": 5050
+    },
+    "arrowUp": {
+        "normal": 4500,
+        "pressed": 4500,
+        "hover": 4500
+    },
+    "arrowUpLeft": {
+        "normal": 4507,
+        "pressed": 4507,
+        "hover": 4507
+    },
+    "arrowUpRight": {
+        "normal": 4501,
+        "pressed": 4501,
+        "hover": 4501
+    },
+    "arrowDown": {
+        "normal": 4504,
+        "pressed": 4504,
+        "hover": 4504
+    },
+    "arrowDownLeft": {
+        "normal": 4505,
+        "pressed": 4505,
+        "hover": 4505
+    },
+    "arrowDownRight": {
+        "normal": 4503,
+        "pressed": 4503,
+        "hover": 4503
+    },
+    "arrowLeft": {
+        "normal": 4506,
+        "pressed": 4506,
+        "hover": 4506
+    },
+    "arrowRight": {
+        "normal": 4502,
+        "pressed": 4502,
+        "hover": 4502
+    },
+    "tracking": {
+        "normal": 4008,
+        "pressed": 4009,
+        "hover": 4009
+    },
+    "disable": {
+        "normal": 4020,
+        "pressed": 4021,
+        "hover": 4021
+    }
+}

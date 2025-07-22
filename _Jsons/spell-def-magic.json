@@ -1,0 +1,868 @@
+[
+  {
+    "name": "Create Food",
+    "hasTarget": false,
+    "castTime": 1.0,
+    "manaCost": 4
+  },
+  {
+    "name": "Reactive Armor",
+    "hasTarget": false,
+    "castTime": 1.0,
+    "manaCost": 4
+  },
+  {
+    "name": "Clumsy",
+    "hasTarget": true,
+    "castTime": 1.0,
+    "manaCost": 4
+  },
+  {
+    "name": "Feeblemind",
+    "hasTarget": true,
+    "castTime": 1.0,
+    "manaCost": 4
+  },
+  {
+    "name": "Heal",
+    "hasTarget": true,
+    "castTime": 1.0,
+    "manaCost": 4
+  },
+  {
+    "name": "Magic Arrow",
+    "hasTarget": true,
+    "castTime": 1.0,
+    "manaCost": 4
+  },
+  {
+    "name": "Night Sight",
+    "hasTarget": false,
+    "castTime": 1.0,
+    "manaCost": 4
+  },
+  {
+    "name": "Weaken",
+    "hasTarget": true,
+    "castTime": 1.0,
+    "manaCost": 4
+  },
+  {
+    "name": "Agility",
+    "hasTarget": true,
+    "castTime": 1.25,
+    "manaCost": 6
+  },
+  {
+    "name": "Cunning",
+    "hasTarget": true,
+    "castTime": 1.25,
+    "manaCost": 6
+  },
+  {
+    "name": "Cure",
+    "hasTarget": true,
+    "castTime": 1.25,
+    "manaCost": 6
+  },
+  {
+    "name": "Harm",
+    "hasTarget": true,
+    "castTime": 1.25,
+    "manaCost": 6
+  },
+  {
+    "name": "Magic Trap",
+    "hasTarget": true,
+    "castTime": 1.25,
+    "manaCost": 6
+  },
+  {
+    "name": "Remove Trap",
+    "hasTarget": true,
+    "castTime": 1.25,
+    "manaCost": 6
+  },
+  {
+    "name": "Protection",
+    "hasTarget": false,
+    "castTime": 1.25,
+    "manaCost": 6
+  },
+  {
+    "name": "Strength",
+    "hasTarget": true,
+    "castTime": 1.25,
+    "manaCost": 6
+  },
+  {
+    "name": "Bless",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 9
+  },
+  {
+    "name": "Fireball",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 9
+  },
+  {
+    "name": "Magic Lock",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 9
+  },
+  {
+    "name": "Poison",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 9
+  },
+  {
+    "name": "Telekinesis",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 9
+  },
+  {
+    "name": "Teleport",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 9
+  },
+  {
+    "name": "Unlock",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 9
+  },
+  {
+    "name": "Wall of Stone",
+    "hasTarget": true,
+    "castTime": 1.75,
+    "manaCost": 11
+  },
+  {
+    "name": "Arch Cure",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 11
+  },
+  {
+    "name": "Arch Protection",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 11
+  },
+  {
+    "name": "Curse",
+    "hasTarget": true,
+    "castTime": 1.75,
+    "manaCost": 11
+  },
+  {
+    "name": "Fire Field",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 11
+  },
+  {
+    "name": "Greater Heal",
+    "hasTarget": true,
+    "castTime": 1.75,
+    "manaCost": 11
+  },
+  {
+    "name": "Lightning",
+    "hasTarget": true,
+    "castTime": 1.75,
+    "manaCost": 11
+  },
+  {
+    "name": "Mana Drain",
+    "hasTarget": true,
+    "castTime": 1.75,
+    "manaCost": 11
+  },
+  {
+    "name": "Recall",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 11
+  },
+  {
+    "name": "Blade Spirits",
+    "hasTarget": true,
+    "castTime": 5.5,
+    "manaCost": 14
+  },
+  {
+    "name": "Dispel Field",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 14
+  },
+  {
+    "name": "Incognito",
+    "hasTarget": false,
+    "castTime": 1.5,
+    "manaCost": 14
+  },
+  {
+    "name": "Magic Reflection",
+    "hasTarget": false,
+    "castTime": 1.5,
+    "manaCost": 14
+  },
+  {
+    "name": "Mind Blast",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 14
+  },
+  {
+    "name": "Paralyze",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 14
+  },
+  {
+    "name": "Poison Field",
+    "hasTarget": false,
+    "castTime": 1.5,
+    "manaCost": 14
+  },
+  {
+    "name": "Summon Creature",
+    "hasTarget": false,
+    "castTime": 9.0,
+    "manaCost": 14
+  },
+  {
+    "name": "Dispel",
+    "hasTarget": true,
+    "castTime": 1.75,
+    "manaCost": 20
+  },
+  {
+    "name": "Energy Bolt",
+    "hasTarget": true,
+    "castTime": 1.75,
+    "manaCost": 20
+  },
+  {
+    "name": "Explosion",
+    "hasTarget": true,
+    "castTime": 1.75,
+    "manaCost": 20
+  },
+  {
+    "name": "Invisibility",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 20
+  },
+  {
+    "name": "Mark",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 20
+  },
+  {
+    "name": "Mass Curse",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 20
+  },
+  {
+    "name": "Paralyze Field",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 20
+  },
+  {
+    "name": "Reveal",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 20
+  },
+  {
+    "name": "Chain Lightning",
+    "hasTarget": false,
+    "castTime": 2.0,
+    "manaCost": 40
+  },
+  {
+    "name": "Energy Field",
+    "hasTarget": false,
+    "castTime": 2.0,
+    "manaCost": 40
+  },
+  {
+    "name": "Flamestrike",
+    "hasTarget": true,
+    "castTime": 2.0,
+    "manaCost": 40
+  },
+  {
+    "name": "Gate Travel",
+    "hasTarget": false,
+    "castTime": 2.0,
+    "manaCost": 40
+  },
+  {
+    "name": "Mana Vampire",
+    "hasTarget": true,
+    "castTime": 2.0,
+    "manaCost": 40
+  },
+  {
+    "name": "Mass Dispel",
+    "hasTarget": false,
+    "castTime": 2.0,
+    "manaCost": 40
+  },
+  {
+    "name": "Meteor Swarm",
+    "hasTarget": false,
+    "castTime": 2.0,
+    "manaCost": 40
+  },
+  {
+    "name": "Polymorph",
+    "hasTarget": false,
+    "castTime": 2.0,
+    "manaCost": 40
+  },
+  {
+    "name": "Earthquake",
+    "hasTarget": false,
+    "castTime": 2.0,
+    "manaCost": 40
+  },
+  {
+    "name": "Energy Vortex",
+    "hasTarget": true,
+    "castTime": 2.25,
+    "manaCost": 50
+  },
+  {
+    "name": "Resurrection",
+    "hasTarget": true,
+    "castTime": 2.25,
+    "manaCost": 50
+  },
+  {
+    "name": "Air Elemental",
+    "hasTarget": false,
+    "castTime": 2.25,
+    "manaCost": 50
+  },
+    {
+    "name": "Air Elemental",
+    "hasTarget": false,
+    "castTime": 2.25,
+    "manaCost": 50
+  },
+  {
+    "name": "Summon Daemon",
+    "hasTarget": false,
+    "castTime": 2.25,
+    "manaCost": 50
+  },
+  {
+    "name": "Earth Elemental",
+    "hasTarget": false,
+    "castTime": 2.25,
+    "manaCost": 50
+  },
+  {
+    "name": "Fire Elemental",
+    "hasTarget": false,
+    "castTime": 2.25,
+    "manaCost": 50
+  },
+  {
+    "name": "Water Elemental",
+    "hasTarget": false,
+    "castTime": 2.25,
+    "manaCost": 50
+  },
+  {
+    "name": "Animate Dead",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 14
+  },
+  {
+    "name": "Blood Oath",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 9
+  },
+  {
+    "name": "Corpse Skin",
+    "hasTarget": false,
+    "castTime": 1.5,
+    "manaCost": 11
+  },
+  {
+    "name": "Curse Weapon",
+    "hasTarget": false,
+    "castTime": 0.75,
+    "manaCost": 7
+  },
+  {
+    "name": "Evil Omen",
+    "hasTarget": false,
+    "castTime": 0.75,
+    "manaCost": 7
+  },
+  {
+    "name": "Horrific Beast",
+    "hasTarget": false,
+    "castTime": 2,
+    "manaCost": 11
+  },
+  {
+    "name": "Lich Form",
+    "hasTarget": false,
+    "castTime": 2,
+    "manaCost": 23
+  },
+  {
+    "name": "Mind Rot",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 17
+  },
+  {
+    "name": "Pain Spike",
+    "hasTarget": true,
+    "castTime": 1,
+    "manaCost": 10
+  },
+  {
+    "name": "Poison Strike",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 17
+  },
+  {
+    "name": "Strangle",
+    "hasTarget": true,
+    "castTime": 2,
+    "manaCost": 23
+  },
+  {
+    "name": "Summon Familiar",
+    "hasTarget": true,
+    "castTime": 2,
+    "manaCost": 24
+  },
+  {
+    "name": "Vampiric Embrace",
+    "hasTarget": false,
+    "castTime": 2,
+    "manaCost": 24
+  },
+  {
+    "name": "Vengeful Spirit",
+    "hasTarget": false,
+    "castTime": 2,
+    "manaCost": 20
+  },
+  {
+    "name": "Wither",
+    "hasTarget": false,
+    "castTime": 1.5,
+    "manaCost": 20
+  },
+  {
+    "name": "Wraith Form",
+    "hasTarget": false,
+    "castTime": 2,
+    "manaCost": 17
+  },
+  {
+    "name": "Exorcism",
+    "hasTarget": true,
+    "castTime": 2,
+    "manaCost": 17
+  },
+    {
+    "name": "Cleanse by Fire",
+    "hasTarget": true,
+    "castTime": 1.0,
+    "manaCost": 10
+  },
+  {
+    "name": "Close Wounds",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 10
+  },
+  {
+    "name": "Consecrate Weapon",
+    "hasTarget": false,
+    "castTime": 0.5,
+    "manaCost": 7
+  },
+  {
+    "name": "Dispel Evil",
+    "hasTarget": false,
+    "castTime": 0.25,
+    "manaCost": 5
+  },
+  {
+    "name": "Divine Fury",
+    "hasTarget": false,
+    "castTime": 1.0,
+    "manaCost": 9
+  },
+  {
+    "name": "Enemy of One",
+    "hasTarget": false,
+    "castTime": 0.5,
+    "manaCost": 11
+  },
+  {
+    "name": "Holy Light",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 14
+  },
+  {
+    "name": "Noble Sacrifice",
+    "hasTarget": false,
+    "castTime": 1.5,
+    "manaCost": 20
+  },
+  {
+    "name": "Remove Curse",
+    "hasTarget": false,
+    "castTime": 1.5,
+    "manaCost": 20
+  },
+  {
+    "name": "Sacred Journey",
+    "hasTarget": false,
+    "castTime": 1.5,
+    "manaCost": 20
+  },
+  {
+    "name": "Arcane Circle",
+    "hasTarget": false,
+    "castTime": 0.5,
+    "manaCost": 24
+  },
+  {
+    "name": "Gift of Renewal",
+    "hasTarget": true,
+    "castTime": 3.0,
+    "manaCost": 20
+  },
+  {
+    "name": "Immolating Weapon",
+    "hasTarget": false,
+    "castTime": 1.0,
+    "manaCost": 10
+  },
+  {
+    "name": "Attune Weapon",
+    "hasTarget": false,
+    "castTime": 1.0,
+    "manaCost": 11
+  },
+  {
+    "name": "Thunderstorm",
+    "hasTarget": false,
+    "castTime": 1.5,
+    "manaCost": 14
+  },
+  {
+    "name": "Nature's Fury",
+    "hasTarget": false,
+    "castTime": 1.5,
+    "manaCost": 24
+  },
+  {
+    "name": "Summon Fey",
+    "hasTarget": true,
+    "castTime": 1.5,
+    "manaCost": 20
+  },
+  {
+    "name": "Summon Fiend",
+    "hasTarget": true,
+    "castTime": 2.0,
+    "manaCost": 24
+  },
+  {
+    "name": "Reaper Form",
+    "hasTarget": false,
+    "castTime": 2.5,
+    "manaCost": 24
+  },
+  {
+    "name": "Wildfire",
+    "hasTarget": false,
+    "castTime": 2.5,
+    "manaCost": 32
+  },
+  {
+    "name": "Essence of Wind",
+    "hasTarget": false,
+    "castTime": 3.0,
+    "manaCost": 32
+  },
+  {
+    "name": "Dryad Allure",
+    "hasTarget": false,
+    "castTime": 3.0,
+    "manaCost": 32
+  },
+  {
+    "name": "Ethereal Voyage",
+    "hasTarget": false,
+    "castTime": 3.5,
+    "manaCost": 40
+  },
+  {
+    "name": "Word of Death",
+    "hasTarget": true,
+    "castTime": 3.5,
+    "manaCost": 40
+  },
+  {
+    "name": "Gift of Life",
+    "hasTarget": true,
+    "castTime": 4.0,
+    "manaCost": 40
+  },
+  {
+    "name": "Arcane Empowerment",
+    "hasTarget": false,
+    "castTime": 3.0,
+    "manaCost": 24
+  },
+  {
+    "name": "Nether Bolt",
+    "hasTarget": true,
+    "castTime": 1.0,
+    "manaCost": 9
+  },
+  {
+    "name": "Healing Stone",
+    "hasTarget": false,
+    "castTime": 5.5,
+    "manaCost": 12
+  },
+  {
+    "name": "Purge Magic",
+    "hasTarget": false,
+    "castTime": 1.5,
+    "manaCost": 14
+  },
+  {
+    "name": "Enchant",
+    "hasTarget": false,
+    "castTime": 0.75,
+    "manaCost": 10
+  },
+    {
+    "name": "Sleep",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 17
+  },
+  {
+    "name": "Eagle Strike",
+    "hasTarget": false,
+    "castTime": 1.75,
+    "manaCost": 17
+  },
+  {
+    "name": "Animated Weapon",
+    "hasTarget": false,
+    "castTime": 2.0,
+    "manaCost": 24
+  },
+  {
+    "name": "Stone Form",
+    "hasTarget": false,
+    "castTime": 2.0,
+    "manaCost": 20
+  },
+  {
+    "name": "Spell Trigger",
+    "hasTarget": false,
+    "castTime": 5.5,
+    "manaCost": 50
+  },
+  {
+    "name": "Mass Sleep",
+    "hasTarget": false,
+    "castTime": 2.0,
+    "manaCost": 24
+  },
+  {
+    "name": "Cleansing Winds",
+    "hasTarget": false,
+    "castTime": 2.0,
+    "manaCost": 24
+  },
+  {
+    "name": "Bombard",
+    "hasTarget": false,
+    "castTime": 2.75,
+    "manaCost": 30
+  },
+  {
+    "name": "Spell Plague",
+    "hasTarget": false,
+    "castTime": 2.5,
+    "manaCost": 24
+  },
+  {
+    "name": "Hail Storm",
+    "hasTarget": false,
+    "castTime": 2.5,
+    "manaCost": 28
+  },
+  {
+    "name": "Nether Cyclone",
+    "hasTarget": true,
+    "castTime": 2.75,
+    "manaCost": 30
+  },
+  {
+    "name": "Rising Colossus",
+    "hasTarget": true,
+    "castTime": 2.75,
+    "manaCost": 40
+  },
+  {
+    "name": "Inspire",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 4
+  },
+  {
+    "name": "Invigorate",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 4
+  },
+  {
+    "name": "Resilience",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 4
+  },
+  {
+    "name": "Perseverance",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 4
+  },
+  {
+    "name": "Tribulation",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 4
+  },
+  {
+    "name": "Despair",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 4
+  },
+  {
+    "name": "Death Ray",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 6
+  },
+  {
+    "name": "Ethereal Burst",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 6
+  },
+  {
+    "name": "Nether Blast",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 6
+  },
+  {
+    "name": "Mystic Weapon",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 4
+  },
+  {
+    "name": "Command Undead",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 6
+  },
+  {
+    "name": "Conduit",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 6
+  },
+  {
+    "name": "Mana Shield",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 6
+  },
+  {
+    "name": "Summon Reaper",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 6
+  },
+  {
+    "name": "Honorable Execution",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 3
+  },
+  {
+    "name": "Counter Attack",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 3
+  },
+  {
+    "name": "Lightning Strike",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 3
+  },
+  {
+    "name": "Confidence",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 3
+  },
+  {
+    "name": "Evasion",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 3
+  },
+  {
+    "name": "Momentum Strike",
+    "hasTarget": false,
+    "castTime": 0,
+    "manaCost": 3
+  }
+]
+
+ 

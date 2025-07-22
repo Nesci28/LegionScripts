@@ -1,0 +1,523 @@
+{
+    "Blacksmithy": {
+        "bod": {
+            "graphic": 8792,
+            "hue": 1102
+        },
+        "items": {
+            "Metal Kite Shield": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 16,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 7028,
+                "buttonId": 37,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Close Helmet": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 15,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 5128,
+                "buttonId": 21,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Heater Shield": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 18,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 7030,
+                "buttonId": 35,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Metal Shield": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 14,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 7035,
+                "buttonId": 36,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Tear Kite Shield": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 8,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 7032,
+                "buttonId": 38,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Buckler": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 10,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 7027,
+                "buttonId": 33,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Bronze Shield": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 12,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 7026,
+                "buttonId": 34,
+                "disposeMethod": "Salvage Bag"
+            }
+        }
+    },
+    "Tinkering": {
+        "bod": {
+            "graphic": 8792,
+            "hue": 1109
+        },
+        "items": {
+            "Nunchaku": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 3,
+                        "hasSpecialHue": true
+                    },
+                    {
+                        "graphic": 7127,
+                        "amount": 8,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": 10158,
+                "buttonId": 7,
+                "disposeMethod": "Trash"
+            }
+        }
+    },
+    "Tailoring": {
+        "bod": {
+            "graphic": "0x2258",
+            "hue": "0x0483"
+        },
+        "items": {
+            "Boots": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 8,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 5899,
+                "buttonId": 606,
+                "disposeMethod": "Trash"
+            },
+            "Thigh Boots": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 10,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 5906,
+                "buttonId": 607,
+                "disposeMethod": "Trash"
+            },
+            "Shoes": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 6,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 5904,
+                "buttonId": 605,
+                "disposeMethod": "Trash"
+            },
+            "Sandals": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 4,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 5901,
+                "buttonId": 604,
+                "disposeMethod": "Trash"
+            },
+            "Cloak": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 14,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1515",
+                "buttonId": 25,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Doublet": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 8,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1F7B",
+                "buttonId": 18,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Jester Suit": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 24,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1F9F",
+                "buttonId": 27,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Feathered Hat": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 12,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x171A",
+                "buttonId": 12,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Bonnet": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 11,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1719",
+                "buttonId": 11,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Floppy Hat": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 11,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1713",
+                "buttonId": 5,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Surcoat": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 14,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1FFD",
+                "buttonId": 22,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Jester Hat": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 15,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x171C",
+                "buttonId": 14,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Fancy Dress": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 12,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1EFF",
+                "buttonId": 24,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Half Apron": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 6,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x153B",
+                "buttonId": 45,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Body Sash": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 4,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1541",
+                "buttonId": 44,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Kilt": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 8,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1537",
+                "buttonId": 39,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Short Pants": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 6,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x152E",
+                "buttonId": 37,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Bandana": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 2,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1540",
+                "buttonId": 4,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Straw Hat": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 10,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1717",
+                "buttonId": 8,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Tall Straw Hat": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 13,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1716",
+                "buttonId": 9,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Skullcap": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 2,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1544",
+                "buttonId": 3,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Fancy Shirt": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 8,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1EFD",
+                "buttonId": 20,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Plain Dress": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 10,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1F01",
+                "buttonId": 23,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Long Pants": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 8,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1539",
+                "buttonId": 38,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Wide-brim Hat": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 12,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1714",
+                "buttonId": 7,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Tricorne Hat": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 12,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x171B",
+                "buttonId": 13,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Skirt": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 10,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1516",
+                "buttonId": 40,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Cap": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 11,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1715",
+                "buttonId": 6,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Tunic": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 12,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": "0x1FA1",
+                "buttonId": 21,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Wizard's Hat": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 15,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": 5912,
+                "buttonId": 10,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Robe": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 16,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": 7939,
+                "buttonId": 26,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Full Apron": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 10,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": 5437,
+                "buttonId": 46,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Shirt": {
+                "resources": [
+                    {
+                        "graphic": "0x1766",
+                        "amount": 8,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": 5399,
+                "buttonId": 19,
+                "disposeMethod": "Salvage Bag"
+            }
+        }
+    }
+}
