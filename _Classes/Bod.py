@@ -198,7 +198,7 @@ class Bod:
             API.Pause(0.1)
         API.ReplyGump(11, 456)
         API.WaitForTarget()
-        API.Target(API.Backpack.Serial)
+        API.Target(API.Backpack)
         API.Pause(1)
 
     def _findBridePrice(self):

@@ -107,8 +107,8 @@ class RefinementManager:
         for refinement in refinements:
             for amalgator in amalgators:
                 if self._isCompatibleAmalgator(refinement, amalgator):
-                    Util.moveItem(refinement.item.Serial, API.Backpack.Serial)
-                    Util.moveItem(amalgator.item.Serial, API.Backpack.Serial)
+                    Util.moveItem(refinement.item.Serial, API.Backpack)
+                    Util.moveItem(amalgator.item.Serial, API.Backpack)
                     API.CancelTarget()
                     API.UseObject(amalgator.item)
                     API.WaitForTarget("any", 3)
