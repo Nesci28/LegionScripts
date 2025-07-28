@@ -201,6 +201,8 @@ class StatTrainer:
             "", 10, y, "okay", g.onClick(self._onStart, "Validating...", "Training")
         )
 
+    def _isRunning(self):
+        return self._running
 
 trainer = StatTrainer()
 trainer.main()
