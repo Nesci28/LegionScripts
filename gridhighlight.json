@@ -1,1615 +1,1613 @@
-{
-    "grid_highlight_setup": [
-        {
-            "name": "Jewelry - Seth",
-            "item_names": [],
-            "hue": 180,
-            "properties": [
-                {
-                    "name": "Spell Damage Increase",
-                    "min_value": 18,
-                    "is_optional": false
-                },
-                {
-                    "name": "Faster Casting",
-                    "min_value": 1,
-                    "is_optional": false
-                },
-                {
-                    "name": "Faster Cast Recovery",
-                    "min_value": 3,
-                    "is_optional": false
-                },
-                {
-                    "name": "Lower Mana Cost",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Lower Reagent Cost",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Mana Regeneration",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Enhance Potions",
-                    "min_value": 25,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 0,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": true,
-                "ring": true,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Jewelry - Seth",
-            "item_names": [],
-            "hue": 180,
-            "properties": [
-                {
-                    "name": "Swing Speed Increase",
-                    "min_value": 10,
-                    "is_optional": false
-                },
-                {
-                    "name": "Hit Chance Increase",
-                    "min_value": 15,
-                    "is_optional": false
-                },
-                {
-                    "name": "Defense Chance Increase",
-                    "min_value": 15,
-                    "is_optional": true
-                },
-                {
-                    "name": "Damage Increase",
-                    "min_value": 20,
-                    "is_optional": true
-                },
-                {
-                    "name": "Lower Mana Cost",
-                    "min_value": 8,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 3,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": true,
-                "ring": true,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Bokuto - Seth",
-            "item_names": [],
-            "hue": 180,
-            "properties": [
-                {
-                    "name": "Splintering Weapon",
-                    "min_value": 20,
-                    "is_optional": false
-                },
-                {
-                    "name": "Hit Lightning",
-                    "min_value": 50,
-                    "is_optional": false
-                },
-                {
-                    "name": "Spell Channeling",
-                    "min_value": -1,
-                    "is_optional": false
-                },
-                {
-                    "name": "Mage Weapon",
-                    "min_value": -1,
-                    "is_optional": false
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 0,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": true,
-                "left_hand": true,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Shield - Seth",
-            "item_names": [],
-            "hue": 180,
-            "properties": [
-                {
-                    "name": "Spell Channeling",
-                    "min_value": -1,
-                    "is_optional": false
-                },
-                {
-                    "name": "Reactive Paralyze",
-                    "min_value": -1,
-                    "is_optional": false
-                },
-                {
-                    "name": "Defense Chance Increase",
-                    "min_value": 15,
-                    "is_optional": false
-                },
-                {
-                    "name": "Swing Speed Increase",
-                    "min_value": 10,
-                    "is_optional": false
-                },
-                {
-                    "name": "Lower Mana Cost",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Lower Reagent Cost",
-                    "min_value": -1,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 0,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": true,
-                "left_hand": true,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Weapon - Seth",
-            "item_names": [],
-            "hue": 180,
-            "properties": [
-                {
-                    "name": "Hit Mana Leech",
-                    "min_value": 75,
-                    "is_optional": false
-                },
-                {
-                    "name": "Hit Stamina Leech",
-                    "min_value": 50,
-                    "is_optional": false
-                },
-                {
-                    "name": "Hit Lower Defense",
-                    "min_value": 50,
-                    "is_optional": false
-                },
-                {
-                    "name": "Damage Increase",
-                    "min_value": 40,
-                    "is_optional": false
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 0,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": true,
-                "left_hand": true,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Weapon - Seth",
-            "item_names": [],
-            "hue": 180,
-            "properties": [
-                {
-                    "name": "Spell Channeling",
-                    "min_value": -1,
-                    "is_optional": false
-                },
-                {
-                    "name": "Mana Regeneration",
-                    "min_value": 9,
-                    "is_optional": false
-                },
-                {
-                    "name": "Hit Point Regeneration",
-                    "min_value": 9,
-                    "is_optional": false
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 0,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": true,
-                "left_hand": true,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Armor - Seth",
-            "item_names": [],
-            "hue": 180,
-            "properties": [
-                {
-                    "name": "Hit Point Increase",
-                    "min_value": 5,
-                    "is_optional": false
-                },
-                {
-                    "name": "Stamina Increase",
-                    "min_value": 8,
-                    "is_optional": false
-                },
-                {
-                    "name": "Mana Increase",
-                    "min_value": 8,
-                    "is_optional": false
-                },
-                {
-                    "name": "Lower Mana Cost",
-                    "min_value": 8,
-                    "is_optional": false
-                },
-                {
-                    "name": "Mana Regeneration",
-                    "min_value": 3,
-                    "is_optional": false
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 0,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": true,
-                "earring": false,
-                "neck": true,
-                "chest": true,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": true,
-                "hands": true,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": false,
-                "legs": true,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Jewelry (Dexxer) - Nikard",
-            "item_names": [],
-            "hue": 2,
-            "properties": [
-                {
-                    "name": "Swing Speed Increase",
-                    "min_value": 10,
-                    "is_optional": false
-                },
-                {
-                    "name": "Hit Chance Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Defense Chance Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Enhance Potions",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Damage Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Intelligence Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Strength Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Dexterity Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 2,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": true,
-                "ring": true,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Jewelry (Mage) - Nikard",
-            "item_names": [],
-            "hue": 2,
-            "properties": [
-                {
-                    "name": "Spell Damage Increase",
-                    "min_value": 18,
-                    "is_optional": false
-                },
-                {
-                    "name": "Mana Regeneration",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Lower Reagent Cost",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Magery",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Evaluating Intelligence",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Meditation",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Spellweaving",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Mysticism",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Animal Taming",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Animal Lore",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Veterinary",
-                    "min_value": -1,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 2,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": true,
-                "ring": true,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Jewelry (Other) - Nikard",
-            "item_names": [],
-            "hue": 2,
-            "properties": [
-                {
-                    "name": "Hit Chance Increase",
-                    "min_value": -1,
-                    "is_optional": false
-                },
-                {
-                    "name": "Enhance Potions",
-                    "min_value": -1,
-                    "is_optional": false
-                },
-                {
-                    "name": "Defense Chance Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Swing Speed Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Damage Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Intelligence Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Strength Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Dexterity Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Faster Casting",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Faster Cast Recovery",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Mana Regeneration",
-                    "min_value": -1,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 6,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": true,
-                "ring": true,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Jewelry (Other) - Nikard",
-            "item_names": [],
-            "hue": 2,
-            "properties": [
-                {
-                    "name": "Defense Chance Increase",
-                    "min_value": -1,
-                    "is_optional": false
-                },
-                {
-                    "name": "Enhance Potions",
-                    "min_value": -1,
-                    "is_optional": false
-                },
-                {
-                    "name": "Hit Chance Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Swing Speed Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Damage Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Intelligence Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Strength Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Dexterity Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Faster Casting",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Faster Cast Recovery",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Mana Regeneration",
-                    "min_value": -1,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 6,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": true,
-                "ring": true,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Weapon - Nikard",
-            "item_names": [],
-            "hue": 2,
-            "properties": [
-                {
-                    "name": "Splintering Weapon",
-                    "min_value": 20,
-                    "is_optional": false
-                },
-                {
-                    "name": "Hit Fireball",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Lightning",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Lower Defense",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Lower Attack",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Reactive Paralyze",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Spell Channeling",
-                    "min_value": -1,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 3,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": true,
-                "left_hand": true,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Armor - Nikard",
-            "item_names": [],
-            "hue": 2,
-            "properties": [
-                {
-                    "name": "Dexterity Bonus",
-                    "min_value": 8,
-                    "is_optional": true
-                },
-                {
-                    "name": "Intelligence Bonus",
-                    "min_value": 8,
-                    "is_optional": true
-                },
-                {
-                    "name": "Strength Bonus",
-                    "min_value": 8,
-                    "is_optional": true
-                },
-                {
-                    "name": "Mana Regeneration",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Point Regeneration",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Fire Eater",
-                    "min_value": 12,
-                    "is_optional": true
-                },
-                {
-                    "name": "Cold Eater",
-                    "min_value": 12,
-                    "is_optional": true
-                },
-                {
-                    "name": "Poison Eater",
-                    "min_value": 12,
-                    "is_optional": true
-                },
-                {
-                    "name": "Energy Eater",
-                    "min_value": 12,
-                    "is_optional": true
-                },
-                {
-                    "name": "Kinetic Eater",
-                    "min_value": 12,
-                    "is_optional": true
-                },
-                {
-                    "name": "Damage Eater",
-                    "min_value": 12,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Chance Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Defense Chance Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Luck",
-                    "min_value": 100,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 3,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": true,
-                "earring": false,
-                "neck": true,
-                "chest": true,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": true,
-                "hands": true,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": true,
-                "legs": true,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Jewelry - Artifact",
-            "item_names": [],
-            "hue": 28,
-            "properties": [],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 0,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [
-                "Major Artifact",
-                "Legendary Artifact"
-            ],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": true,
-                "ring": true,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Jewerly - Orion",
-            "item_names": [],
-            "hue": 43,
-            "properties": [
-                {
-                    "name": "Swing Speed Increase",
-                    "min_value": 10,
-                    "is_optional": false
-                },
-                {
-                    "name": "Dexterity Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Intelligence Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Strength Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Chance Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Damage Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Defense Chance Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Enhance Potions",
-                    "min_value": -1,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": false,
-            "overweight": true,
-            "minimum_property": 2,
-            "maximum_property": 4,
-            "exclude_negatives": [
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": true,
-                "ring": true,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Jewerly - Orion",
-            "item_names": [],
-            "hue": 43,
-            "properties": [
-                {
-                    "name": "Swing Speed Increase",
-                    "min_value": 10,
-                    "is_optional": false
-                },
-                {
-                    "name": "Dexterity Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Intelligence Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Strength Bonus",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Defense Chance Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Chance Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Damage Increase",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Enhance Potions",
-                    "min_value": -1,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 5,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": true,
-                "ring": true,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Weapon - Orion",
-            "item_names": [],
-            "hue": 43,
-            "properties": [
-                {
-                    "name": "Splintering Weapon",
-                    "min_value": 25,
-                    "is_optional": false
-                },
-                {
-                    "name": "Hit Fireball",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Harm",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Lightning",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Magic Arrow",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Lower Defense",
-                    "min_value": -1,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 2,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": true,
-                "left_hand": true,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Weapon - Orion",
-            "item_names": [],
-            "hue": 43,
-            "properties": [
-                {
-                    "name": "Splintering Weapon",
-                    "min_value": 20,
-                    "is_optional": false
-                },
-                {
-                    "name": "Hit Fireball",
-                    "min_value": 50,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Harm",
-                    "min_value": 50,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Lightning",
-                    "min_value": 50,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Magic Arrow",
-                    "min_value": 50,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 2,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": true,
-                "left_hand": true,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Weapon - Orion",
-            "item_names": [],
-            "hue": 43,
-            "properties": [
-                {
-                    "name": "Splintering Weapon",
-                    "min_value": 20,
-                    "is_optional": false
-                },
-                {
-                    "name": "Hit Harm",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Fireball",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Lightning",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Magic Arrow",
-                    "min_value": -1,
-                    "is_optional": true
-                },
-                {
-                    "name": "Hit Lower Defense",
-                    "min_value": -1,
-                    "is_optional": true
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 3,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": true,
-                "left_hand": true,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Shield - Orion",
-            "item_names": [],
-            "hue": 43,
-            "properties": [
-                {
-                    "name": "Luck",
-                    "min_value": 150,
-                    "is_optional": false
-                }
-            ],
-            "accept_extra_properties": true,
-            "overweight": true,
-            "minimum_property": 0,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": true,
-                "left_hand": true,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": false
-            }
-        },
-        {
-            "name": "Legendary Artifact",
-            "item_names": [],
-            "hue": 28,
-            "properties": [],
-            "accept_extra_properties": true,
-            "overweight": false,
-            "minimum_property": 0,
-            "maximum_property": 0,
-            "exclude_negatives": [
-                "Antique",
-                "Brittle",
-                "Cursed"
-            ],
-            "required_rarities": [
-                "Relic Fragment",
-                "Amber",
-                "Essence of Balance",
-                "Magical Residue",
-                "Sapphire",
-                "Boura Pelt",
-                "Enchanted Essence",
-                "Citrine",
-                "Crystal Shards",
-                "Tourmaline",
-                "Essence of Singularity",
-                "Ruby",
-                "Blue Diamond",
-                "Amethyst",
-                "Crushed Glass",
-                "Essence of Diligence",
-                "Essence of Achievement",
-                "Raptor Teeth",
-                "Essence of precision",
-                "Slith Tongue",
-                "Fire Ruby",
-                "Parasitic Plant",
-                "Void Orb",
-                "Essence of Passion",
-                "Luminescent Fungi",
-                "Seed of renewal",
-                "Turquoise",
-                "Essence of Order",
-                "Faery Dust",
-                "Elven Fletching",
-                "Chaga Mushroom",
-                "Arcanic Rune Stone",
-                "Bottle of Ichor",
-                "Reflective Wolf Eye",
-                "Spider Carapace",
-                "Daemon Claw",
-                "White Pearl",
-                "Vial of Vitriol",
-                "Fey Wings",
-                "Lava Serpent Crust",
-                "Goblin Blood",
-                "Undying Flesh",
-                "Crystalline Blackrock",
-                "Silver Snake Skin",
-                "Delicate Scales",
-                "Essence of Control",
-                "Essence of Direction",
-                "Star Sapphire",
-                "Diamond",
-                "Emerald"
-            ],
-            "grid_highlight_slot": {
-                "talisman": true,
-                "right_hand": true,
-                "left_hand": true,
-                "head": true,
-                "earring": true,
-                "neck": true,
-                "chest": true,
-                "shirt": true,
-                "back": true,
-                "robe": true,
-                "arms": true,
-                "hands": true,
-                "bracelet": true,
-                "ring": true,
-                "belt": true,
-                "skirt": true,
-                "legs": true,
-                "footwear": true,
-                "other": false
-            }
-        },
-        {
-            "name": "Unravel",
-            "item_names": [],
-            "hue": 19,
-            "properties": [],
-            "accept_extra_properties": true,
-            "overweight": false,
-            "minimum_property": 0,
-            "maximum_property": 0,
-            "exclude_negatives": [],
-            "required_rarities": [
-                "Greater Artifact",
-                "Legendary Artifact",
-                "Lesser Artifact",
-                "Major Artifact"
-            ],
-            "grid_highlight_slot": {
-                "talisman": true,
-                "right_hand": true,
-                "left_hand": true,
-                "head": true,
-                "earring": true,
-                "neck": true,
-                "chest": true,
-                "shirt": true,
-                "back": true,
-                "robe": true,
-                "arms": true,
-                "hands": true,
-                "bracelet": true,
-                "ring": true,
-                "belt": true,
-                "skirt": true,
-                "legs": true,
-                "footwear": true,
-                "other": false
-            }
-        },
-        {
-            "name": "Imbuing",
-            "item_names": [
-                "Relic Fragment",
-                "Amber",
-                "Essence of Balance",
-                "Magical Residue",
-                "Sapphire",
-                "Boura Pelt",
-                "Enchanted Essence",
-                "Citrine",
-                "Crystal Shards",
-                "Tourmaline",
-                "Essence of Singularity",
-                "Ruby",
-                "Blue Diamond",
-                "Amethyst",
-                "Crushed Glass",
-                "Essence of Diligence",
-                "Essence of Achievement",
-                "Raptor Teeth",
-                "Essence of precision",
-                "Slith Tongue",
-                "Fire Ruby",
-                "Parasitic Plant",
-                "Void Orb",
-                "Essence of Passion",
-                "Luminescent Fungi",
-                "Seed of renewal",
-                "Turquoise",
-                "Essence of Order",
-                "Faery Dust",
-                "Elven Fletching",
-                "Chaga Mushroom",
-                "Arcanic Rune Stone",
-                "Bottle of Ichor",
-                "Reflective Wolf Eye",
-                "Spider Carapace",
-                "Daemon Claw",
-                "White Pearl",
-                "Vial of Vitriol",
-                "Fey Wings",
-                "Lava Serpent Crust",
-                "Goblin Blood",
-                "Undying Flesh",
-                "Crystalline Blackrock",
-                "Silver Snake Skin",
-                "Delicate Scales",
-                "Essence of Control",
-                "Essence of Direction",
-                "Star Sapphire",
-                "Diamond",
-                "Emerald"
-            ],
-            "hue": 0,
-            "properties": [],
-            "accept_extra_properties": true,
-            "overweight": false,
-            "minimum_property": 0,
-            "maximum_property": 0,
-            "exclude_negatives": [],
-            "required_rarities": [],
-            "grid_highlight_slot": {
-                "talisman": false,
-                "right_hand": false,
-                "left_hand": false,
-                "head": false,
-                "earring": false,
-                "neck": false,
-                "chest": false,
-                "shirt": false,
-                "back": false,
-                "robe": false,
-                "arms": false,
-                "hands": false,
-                "bracelet": false,
-                "ring": false,
-                "belt": false,
-                "skirt": false,
-                "legs": false,
-                "footwear": false,
-                "other": true
-            }
-        }
-    ]
-}
+[
+  {
+    "Name": "Jewelry - Seth",
+    "ItemNames": [],
+    "Hue": 180,
+    "Properties": [
+      {
+        "Name": "Spell Damage Increase",
+        "MinValue": 18,
+        "IsOptional": false
+      },
+      {
+        "Name": "Faster Casting",
+        "MinValue": 1,
+        "IsOptional": false
+      },
+      {
+        "Name": "Faster Cast Recovery",
+        "MinValue": 3,
+        "IsOptional": false
+      },
+      {
+        "Name": "Lower Mana Cost",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Lower Reagent Cost",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Mana Regeneration",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Enhance Potions",
+        "MinValue": 25,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Jewelry - Seth",
+    "ItemNames": [],
+    "Hue": 180,
+    "Properties": [
+      {
+        "Name": "Swing Speed Increase",
+        "MinValue": 10,
+        "IsOptional": false
+      },
+      {
+        "Name": "Hit Chance Increase",
+        "MinValue": 15,
+        "IsOptional": false
+      },
+      {
+        "Name": "Defense Chance Increase",
+        "MinValue": 15,
+        "IsOptional": true
+      },
+      {
+        "Name": "Damage Increase",
+        "MinValue": 20,
+        "IsOptional": true
+      },
+      {
+        "Name": "Lower Mana Cost",
+        "MinValue": 8,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 3,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Bokuto - Seth",
+    "ItemNames": [],
+    "Hue": 180,
+    "Properties": [
+      {
+        "Name": "Splintering Weapon",
+        "MinValue": 20,
+        "IsOptional": false
+      },
+      {
+        "Name": "Hit Lightning",
+        "MinValue": 50,
+        "IsOptional": false
+      },
+      {
+        "Name": "Spell Channeling",
+        "MinValue": -1,
+        "IsOptional": false
+      },
+      {
+        "Name": "Mage Weapon",
+        "MinValue": -1,
+        "IsOptional": false
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Shield - Seth",
+    "ItemNames": [],
+    "Hue": 180,
+    "Properties": [
+      {
+        "Name": "Spell Channeling",
+        "MinValue": -1,
+        "IsOptional": false
+      },
+      {
+        "Name": "Reactive Paralyze",
+        "MinValue": -1,
+        "IsOptional": false
+      },
+      {
+        "Name": "Defense Chance Increase",
+        "MinValue": 15,
+        "IsOptional": false
+      },
+      {
+        "Name": "Swing Speed Increase",
+        "MinValue": 10,
+        "IsOptional": false
+      },
+      {
+        "Name": "Lower Mana Cost",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Lower Reagent Cost",
+        "MinValue": -1,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Weapon - Seth",
+    "ItemNames": [],
+    "Hue": 180,
+    "Properties": [
+      {
+        "Name": "Hit Mana Leech",
+        "MinValue": 75,
+        "IsOptional": false
+      },
+      {
+        "Name": "Hit Stamina Leech",
+        "MinValue": 50,
+        "IsOptional": false
+      },
+      {
+        "Name": "Hit Lower Defense",
+        "MinValue": 50,
+        "IsOptional": false
+      },
+      {
+        "Name": "Damage Increase",
+        "MinValue": 40,
+        "IsOptional": false
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Weapon - Seth",
+    "ItemNames": [],
+    "Hue": 180,
+    "Properties": [
+      {
+        "Name": "Spell Channeling",
+        "MinValue": -1,
+        "IsOptional": false
+      },
+      {
+        "Name": "Mana Regeneration",
+        "MinValue": 9,
+        "IsOptional": false
+      },
+      {
+        "Name": "Hit Point Regeneration",
+        "MinValue": 9,
+        "IsOptional": false
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Armor - Seth",
+    "ItemNames": [],
+    "Hue": 180,
+    "Properties": [
+      {
+        "Name": "Hit Point Increase",
+        "MinValue": 5,
+        "IsOptional": false
+      },
+      {
+        "Name": "Stamina Increase",
+        "MinValue": 8,
+        "IsOptional": false
+      },
+      {
+        "Name": "Mana Increase",
+        "MinValue": 8,
+        "IsOptional": false
+      },
+      {
+        "Name": "Lower Mana Cost",
+        "MinValue": 8,
+        "IsOptional": false
+      },
+      {
+        "Name": "Mana Regeneration",
+        "MinValue": 3,
+        "IsOptional": false
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": true,
+      "Earring": false,
+      "Neck": true,
+      "Chest": true,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": true,
+      "Hands": true,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": true,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Jewelry (Dexxer) - Nikard",
+    "ItemNames": [],
+    "Hue": 2,
+    "Properties": [
+      {
+        "Name": "Swing Speed Increase",
+        "MinValue": 10,
+        "IsOptional": false
+      },
+      {
+        "Name": "Hit Chance Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Defense Chance Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Enhance Potions",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Damage Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Intelligence Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Strength Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Dexterity Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 2,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Jewelry (Mage) - Nikard",
+    "ItemNames": [],
+    "Hue": 2,
+    "Properties": [
+      {
+        "Name": "Spell Damage Increase",
+        "MinValue": 18,
+        "IsOptional": false
+      },
+      {
+        "Name": "Mana Regeneration",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Lower Reagent Cost",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Magery",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Evaluating Intelligence",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Meditation",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Spellweaving",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Mysticism",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Animal Taming",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Animal Lore",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Veterinary",
+        "MinValue": -1,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 2,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Jewelry (Other) - Nikard",
+    "ItemNames": [],
+    "Hue": 2,
+    "Properties": [
+      {
+        "Name": "Hit Chance Increase",
+        "MinValue": -1,
+        "IsOptional": false
+      },
+      {
+        "Name": "Enhance Potions",
+        "MinValue": -1,
+        "IsOptional": false
+      },
+      {
+        "Name": "Defense Chance Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Swing Speed Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Damage Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Intelligence Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Strength Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Dexterity Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Faster Casting",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Faster Cast Recovery",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Mana Regeneration",
+        "MinValue": -1,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 6,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Jewelry (Other) - Nikard",
+    "ItemNames": [],
+    "Hue": 2,
+    "Properties": [
+      {
+        "Name": "Defense Chance Increase",
+        "MinValue": -1,
+        "IsOptional": false
+      },
+      {
+        "Name": "Enhance Potions",
+        "MinValue": -1,
+        "IsOptional": false
+      },
+      {
+        "Name": "Hit Chance Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Swing Speed Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Damage Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Intelligence Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Strength Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Dexterity Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Faster Casting",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Faster Cast Recovery",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Mana Regeneration",
+        "MinValue": -1,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 6,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Weapon - Nikard",
+    "ItemNames": [],
+    "Hue": 2,
+    "Properties": [
+      {
+        "Name": "Splintering Weapon",
+        "MinValue": 20,
+        "IsOptional": false
+      },
+      {
+        "Name": "Hit Fireball",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Lightning",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Lower Defense",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Lower Attack",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Reactive Paralyze",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Spell Channeling",
+        "MinValue": -1,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 3,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Armor - Nikard",
+    "ItemNames": [],
+    "Hue": 2,
+    "Properties": [
+      {
+        "Name": "Dexterity Bonus",
+        "MinValue": 8,
+        "IsOptional": true
+      },
+      {
+        "Name": "Intelligence Bonus",
+        "MinValue": 8,
+        "IsOptional": true
+      },
+      {
+        "Name": "Strength Bonus",
+        "MinValue": 8,
+        "IsOptional": true
+      },
+      {
+        "Name": "Mana Regeneration",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Point Regeneration",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Fire Eater",
+        "MinValue": 12,
+        "IsOptional": true
+      },
+      {
+        "Name": "Cold Eater",
+        "MinValue": 12,
+        "IsOptional": true
+      },
+      {
+        "Name": "Poison Eater",
+        "MinValue": 12,
+        "IsOptional": true
+      },
+      {
+        "Name": "Energy Eater",
+        "MinValue": 12,
+        "IsOptional": true
+      },
+      {
+        "Name": "Kinetic Eater",
+        "MinValue": 12,
+        "IsOptional": true
+      },
+      {
+        "Name": "Damage Eater",
+        "MinValue": 12,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Chance Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Defense Chance Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Luck",
+        "MinValue": 100,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 3,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": true,
+      "Earring": false,
+      "Neck": true,
+      "Chest": true,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": true,
+      "Hands": true,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": true,
+      "Legs": true,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Jewelry - Artifact",
+    "ItemNames": [],
+    "Hue": 28,
+    "Properties": [],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [
+      "Major Artifact",
+      "Legendary Artifact"
+    ],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Jewerly - Orion",
+    "ItemNames": [],
+    "Hue": 43,
+    "Properties": [
+      {
+        "Name": "Swing Speed Increase",
+        "MinValue": 10,
+        "IsOptional": false
+      },
+      {
+        "Name": "Dexterity Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Intelligence Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Strength Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Chance Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Damage Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Defense Chance Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Enhance Potions",
+        "MinValue": -1,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": false,
+    "Overweight": true,
+    "MinimumProperty": 2,
+    "MaximumProperty": 4,
+    "ExcludeNegatives": [
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Jewerly - Orion",
+    "ItemNames": [],
+    "Hue": 43,
+    "Properties": [
+      {
+        "Name": "Swing Speed Increase",
+        "MinValue": 10,
+        "IsOptional": false
+      },
+      {
+        "Name": "Dexterity Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Intelligence Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Strength Bonus",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Defense Chance Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Chance Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Damage Increase",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Enhance Potions",
+        "MinValue": -1,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 5,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Weapon - Orion",
+    "ItemNames": [],
+    "Hue": 43,
+    "Properties": [
+      {
+        "Name": "Splintering Weapon",
+        "MinValue": 25,
+        "IsOptional": false
+      },
+      {
+        "Name": "Hit Fireball",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Harm",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Lightning",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Magic Arrow",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Lower Defense",
+        "MinValue": -1,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 2,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Weapon - Orion",
+    "ItemNames": [],
+    "Hue": 43,
+    "Properties": [
+      {
+        "Name": "Splintering Weapon",
+        "MinValue": 20,
+        "IsOptional": false
+      },
+      {
+        "Name": "Hit Fireball",
+        "MinValue": 50,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Harm",
+        "MinValue": 50,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Lightning",
+        "MinValue": 50,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Magic Arrow",
+        "MinValue": 50,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 2,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Weapon - Orion",
+    "ItemNames": [],
+    "Hue": 43,
+    "Properties": [
+      {
+        "Name": "Splintering Weapon",
+        "MinValue": 20,
+        "IsOptional": false
+      },
+      {
+        "Name": "Hit Harm",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Fireball",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Lightning",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Magic Arrow",
+        "MinValue": -1,
+        "IsOptional": true
+      },
+      {
+        "Name": "Hit Lower Defense",
+        "MinValue": -1,
+        "IsOptional": true
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 3,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Shield - Orion",
+    "ItemNames": [],
+    "Hue": 43,
+    "Properties": [
+      {
+        "Name": "Luck",
+        "MinValue": 150,
+        "IsOptional": false
+      }
+    ],
+    "AcceptExtraProperties": true,
+    "Overweight": true,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Legendary Artifact",
+    "ItemNames": [],
+    "Hue": 28,
+    "Properties": [],
+    "AcceptExtraProperties": true,
+    "Overweight": false,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [
+      "Antique",
+      "Brittle",
+      "Cursed"
+    ],
+    "RequiredRarities": [
+      "Relic Fragment",
+      "Amber",
+      "Essence of Balance",
+      "Magical Residue",
+      "Sapphire",
+      "Boura Pelt",
+      "Enchanted Essence",
+      "Citrine",
+      "Crystal Shards",
+      "Tourmaline",
+      "Essence of Singularity",
+      "Ruby",
+      "Blue Diamond",
+      "Amethyst",
+      "Crushed Glass",
+      "Essence of Diligence",
+      "Essence of Achievement",
+      "Raptor Teeth",
+      "Essence of precision",
+      "Slith Tongue",
+      "Fire Ruby",
+      "Parasitic Plant",
+      "Void Orb",
+      "Essence of Passion",
+      "Luminescent Fungi",
+      "Seed of renewal",
+      "Turquoise",
+      "Essence of Order",
+      "Faery Dust",
+      "Elven Fletching",
+      "Chaga Mushroom",
+      "Arcanic Rune Stone",
+      "Bottle of Ichor",
+      "Reflective Wolf Eye",
+      "Spider Carapace",
+      "Daemon Claw",
+      "White Pearl",
+      "Vial of Vitriol",
+      "Fey Wings",
+      "Lava Serpent Crust",
+      "Goblin Blood",
+      "Undying Flesh",
+      "Crystalline Blackrock",
+      "Silver Snake Skin",
+      "Delicate Scales",
+      "Essence of Control",
+      "Essence of Direction",
+      "Star Sapphire",
+      "Diamond",
+      "Emerald"
+    ],
+    "GridHighlightSlot": {
+      "Talisman": true,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": true,
+      "Earring": true,
+      "Neck": true,
+      "Chest": true,
+      "Shirt": true,
+      "Back": true,
+      "Robe": true,
+      "Arms": true,
+      "Hands": true,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": true,
+      "Skirt": true,
+      "Legs": true,
+      "Footwear": true,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Unravel",
+    "ItemNames": [],
+    "Hue": 19,
+    "Properties": [],
+    "AcceptExtraProperties": true,
+    "Overweight": false,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [],
+    "RequiredRarities": [
+      "Greater Artifact",
+      "Legendary Artifact",
+      "Lesser Artifact",
+      "Major Artifact"
+    ],
+    "GridHighlightSlot": {
+      "Talisman": true,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": true,
+      "Earring": true,
+      "Neck": true,
+      "Chest": true,
+      "Shirt": true,
+      "Back": true,
+      "Robe": true,
+      "Arms": true,
+      "Hands": true,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": true,
+      "Skirt": true,
+      "Legs": true,
+      "Footwear": true,
+      "Other": false
+    }
+  },
+  {
+    "Name": "Imbuing",
+    "ItemNames": [
+      "Relic Fragment",
+      "Amber",
+      "Essence of Balance",
+      "Magical Residue",
+      "Sapphire",
+      "Boura Pelt",
+      "Enchanted Essence",
+      "Citrine",
+      "Crystal Shards",
+      "Tourmaline",
+      "Essence of Singularity",
+      "Ruby",
+      "Blue Diamond",
+      "Amethyst",
+      "Crushed Glass",
+      "Essence of Diligence",
+      "Essence of Achievement",
+      "Raptor Teeth",
+      "Essence of precision",
+      "Slith Tongue",
+      "Fire Ruby",
+      "Parasitic Plant",
+      "Void Orb",
+      "Essence of Passion",
+      "Luminescent Fungi",
+      "Seed of renewal",
+      "Turquoise",
+      "Essence of Order",
+      "Faery Dust",
+      "Elven Fletching",
+      "Chaga Mushroom",
+      "Arcanic Rune Stone",
+      "Bottle of Ichor",
+      "Reflective Wolf Eye",
+      "Spider Carapace",
+      "Daemon Claw",
+      "White Pearl",
+      "Vial of Vitriol",
+      "Fey Wings",
+      "Lava Serpent Crust",
+      "Goblin Blood",
+      "Undying Flesh",
+      "Crystalline Blackrock",
+      "Silver Snake Skin",
+      "Delicate Scales",
+      "Essence of Control",
+      "Essence of Direction",
+      "Star Sapphire",
+      "Diamond",
+      "Emerald"
+    ],
+    "Hue": 0,
+    "Properties": [],
+    "AcceptExtraProperties": true,
+    "Overweight": false,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [],
+    "RequiredRarities": [],
+    "GridHighlightSlot": {
+      "Talisman": false,
+      "RightHand": false,
+      "LeftHand": false,
+      "Head": false,
+      "Earring": false,
+      "Neck": false,
+      "Chest": false,
+      "Shirt": false,
+      "Back": false,
+      "Robe": false,
+      "Arms": false,
+      "Hands": false,
+      "Bracelet": false,
+      "Ring": false,
+      "Belt": false,
+      "Skirt": false,
+      "Legs": false,
+      "Footwear": false,
+      "Other": true
+    }
+  }
+]
