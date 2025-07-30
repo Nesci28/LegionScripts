@@ -2,14 +2,14 @@ import uuid
 
 class Python:
     @staticmethod
-    def find(name, arr, path):
-        option = next((x for x in arr if x[path] == name), None)
+    def find(value, arr, path):
+        option = next((x for x in arr if x[path] == value), None)
         return option
     
     @staticmethod
-    def findIndex(name, arr, path):
+    def findIndex(value, arr, path):
         for i, obj in enumerate(arr):
-            if obj.get(path) == name:
+            if obj.get(path) == value:
                 return i
         return -1
     
