@@ -168,7 +168,7 @@ class Gump:
         self.gump.Add(checkbox)
         return checkbox
 
-    def addButton(self, label, x, y, type, callback):
+    def addButton(self, label, x, y, type, callback, isDarkMode = False):
         btnDef = Gump.buttonTypes.get(type, Gump.buttonTypes["default"])
         btn = API.CreateGumpButton(
             "", 996, btnDef["normal"], btnDef["pressed"], btnDef["hover"]
@@ -178,7 +178,10 @@ class Gump:
         API.AddControlOnClick(btn, callback)
         self.gump.Add(btn)
         if type == "default":
-             labelObj = self.addTtfLabel(label, x, y, 63, 23, 12, Color.defaultBlack, "center", callback)
+            color = Color.defaultBlack
+            if isDarkMode:
+                color = Color.defaultWhite
+            labelObj = self.addTtfLabel(label, x, y, 63, 23, 12, color, "center", callback)
         else:
             labelObj = API.CreateGumpLabel(label)
             labelObj.SetY(y)

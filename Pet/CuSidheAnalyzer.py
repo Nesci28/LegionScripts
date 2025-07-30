@@ -7,10 +7,10 @@ import sys
 from decimal import Decimal
 
 sys.path.append(
-    r"C:\\Games\\Taz_BleedingEdge\\TazUO-Launcher.win-x64\\TazUO\\LegionScripts\\_Utils"
+    r".\\TazUO\\LegionScripts\\_Utils"
 )
 sys.path.append(
-    r"C:\\Games\\Taz_BleedingEdge\\TazUO-Launcher.win-x64\\TazUO\\LegionScripts\\_Classes"
+    r".\\TazUO\\LegionScripts\\_Classes"
 )
 import Util
 import Item

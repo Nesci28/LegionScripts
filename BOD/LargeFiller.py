@@ -4,13 +4,13 @@ import importlib
 import sys
 
 sys.path.append(
-    r"C:\\Games\\Taz_BleedingEdge\\TazUO-Launcher.win-x64\\TazUO\\LegionScripts"
+    r".\\TazUO\\LegionScripts"
 )
 sys.path.append(
-    r"C:\\Games\\Taz_BleedingEdge\\TazUO-Launcher.win-x64\\TazUO\\LegionScripts\\_Utils"
+    r".\\TazUO\\LegionScripts\\_Utils"
 )
 sys.path.append(
-    r"C:\\Games\\Taz_BleedingEdge\\TazUO-Launcher.win-x64\\TazUO\\LegionScripts\\_Classes"
+    r".\\TazUO\\LegionScripts\\_Classes"
 )
 
 import Util
@@ -24,7 +24,7 @@ importlib.reload(Craft)
 selectedSkill = "Tailoring"
 
 bodSkillsJson = open(
-    r"C:\\Games\\Taz_BleedingEdge\\TazUO-Launcher.win-x64\\TazUO\\LegionScripts\\_Jsons\\bod-skills.json"
+    r".\\TazUO\\LegionScripts\\_Jsons\\bod-skills.json"
 )
 bodSkillsStr = json.load(bodSkillsJson)
 bodSkills = Util.Util.convertToHex(bodSkillsStr)

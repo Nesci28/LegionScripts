@@ -128,6 +128,7 @@ class Bod:
             "resourceHue": resourceHue,
             "material": craftingInfoMaterial,
             "isSmall": isSmall,
+            "isFilled": int(amountToFill) - amountAlreadyFilled == 0,
         }
 
     def __init__(self, bodSkill, item, craftingInfo=None, craft=None):
@@ -138,7 +139,7 @@ class Bod:
         self.count = 0
         self._setup()
 
-    def bride(self):
+    def bribe(self):
         while not Bod.isMaxed(self.item):
             npcs = API.NearestMobiles([API.Notoriety.Invulnerable], 1)
             while len(npcs) == 0:
