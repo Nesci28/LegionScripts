@@ -9,7 +9,7 @@ class Python:
     @staticmethod
     def findIndex(value, arr, path):
         for i, obj in enumerate(arr):
-            if obj.get(path) == value:
+            if obj.get and obj.get(path) == value:
                 return i
         return -1
     

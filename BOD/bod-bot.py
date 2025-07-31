@@ -15,6 +15,8 @@ import Math
 import Timer
 import Magic
 import Python
+import Error
+import Craft
 
 importlib.reload(Bod)
 importlib.reload(Gump)
@@ -23,6 +25,8 @@ importlib.reload(Math)
 importlib.reload(Timer)
 importlib.reload(Magic)
 importlib.reload(Python)
+importlib.reload(Error)
+importlib.reload(Craft)
 
 from Bod import Bod
 from Gump import Gump
@@ -31,19 +35,25 @@ from Math import Math
 from Timer import Timer
 from Magic import Magic
 from Python import Python
+from Error import Error
+from Craft import Craft
 
 class BodBot:
     def __init__(self):
         bodSkillsJson = open(r".\\TazUO\\LegionScripts\\_Jsons\\bod-skills.json")
         bodSkillsStr = json.load(bodSkillsJson)
+        craftingInfosJson = open(r".\\TazUO\\LegionScripts\\_Jsons\\crafting-infos.json")
+        craftingInfosStr = json.load(craftingInfosJson)
 
         self._running = True
         self.gump = None
         self.scrollArea = None
         self.checkboxes = []
         self.typeCheckboxes = []
+        self.containerSerial = None
         
         self.bodSkills = Math.convertToHex(bodSkillsStr)
+        self.craftingInfos = Math.convertToHex(craftingInfosStr)
         self.selectedProfession = "Tailoring"
         self.selectedType = "Small"
         self.bodSkill = self.bodSkills[self.selectedProfession]
@@ -62,50 +72,6 @@ class BodBot:
             API.SysMsg(f"BodBot e: {e}", 33)
             API.SysMsg(traceback.format_exc())
             self._onClose()
-
-    def _scan(self):
-        self.scrollArea.Clear()
-        self.bodInfos = []
-        selectedBodGraphic = self.bodSkill["bod"]["graphic"]
-        selectedBodHue = self.bodSkill["bod"]["hue"]
-        isSmall = self.selectedType == "Small"
-        bodItems = Bod.findAllBodItems(selectedBodGraphic, selectedBodHue, isSmall)
-        for bodItem in bodItems:
-            bodInfo = Bod(self.bodSkill, bodItem)
-            labels = self._generateLabel(bodInfo)
-            self.bodInfos.append({ "bod": bodInfo, "id": Python.v4(), "label": labels["label"], "isFilledIcon": labels["isFilledIcon"], "isMaxBribedIcon": labels["isMaxBribedIcon"] })
-        for i, bodInfo in enumerate(self.bodInfos):
-            idLabel = API.CreateGumpLabel(bodInfo["id"])
-            idLabel.IsVisible = False
-            self.scrollArea.Add(idLabel)
-            isFilledIcon = bodInfo["isFilledIcon"]
-            isFilledIcon.SetX(0)
-            isFilledIcon.SetY(i * 18)
-            self.scrollArea.Add(isFilledIcon)
-            isMaxBribedIcon = bodInfo["isMaxBribedIcon"]
-            isMaxBribedIcon.SetX(50)
-            isMaxBribedIcon.SetY(i * 18)
-            self.scrollArea.Add(isMaxBribedIcon)
-            label = bodInfo["label"]
-            label.SetX(100)
-            label.SetY(i * 18)
-            self.scrollArea.Add(label)
-
-    def _generateLabel(self, bod):
-        isFilledIcon = 11410
-        isMaxBribedIcon = 11410
-        if (Bod.isFilled(bod.item, False)):
-            isFilledIcon = 11400
-        isFilledIcon = API.CreateGumpButton("", 996, isFilledIcon, isFilledIcon, isFilledIcon)
-        if (Bod.isMaxed(bod.item)):
-            isMaxBribedIcon = 11400
-        isMaxBribedIcon = API.CreateGumpButton("", 996, isMaxBribedIcon, isMaxBribedIcon, isMaxBribedIcon)
-        label = API.CreateGumpLabel(bod.itemName)
-        return {
-            "label": label,
-            "isFilledIcon": isFilledIcon,
-            "isMaxBribedIcon": isMaxBribedIcon,
-        }
 
     def _showGump(self):
         width = 375
@@ -144,6 +110,17 @@ class BodBot:
             )
             self.typeCheckboxes.append({"label": type, "checkbox": checkbox})
             x += 125
+        x = 1
+        y += 25
+
+        g.addButton(
+            "",
+            x,
+            y,
+            "radioGreen",
+            self.gump.onClick(lambda : self._onContainerSelectionClicked())
+        )
+        g.addLabel("Select resource container", 25, y)
         x = 1
         y += 25
 
@@ -186,61 +163,116 @@ class BodBot:
 
     def _fill(self):
         self.gump.setStatus("Filling...")
-        for i, bodInfo in enumerate(self.bodInfos):
-            self.bodInfos[i]["isFilledIcon"] = 11400
+        counter = 0
+        for bodInfo in self.bodInfos:
+            isFilled = Bod.isFilled(bodInfo["bod"].item)
+            if not isFilled:
+                counter += 1
+        currentCounter = 0
+        for bodInfo in self.bodInfos:
+            isFilled = Bod.isFilled(bodInfo["bod"].item)
+            if not isFilled:
+                currentCounter += 1
+                self.gump.setStatus(f"Filling... {currentCounter}/{counter}")
+                bodInfo["bod"].fill()
             self._resetScrollAreaElement(bodInfo)
-            API.Pause(1)
         self.gump.setStatus("Ready")
 
     def _bribe(self):
         self.gump.setStatus("Bribing...")
-        for i, bodInfo in enumerate(self.bodInfos):
+        counter = 0
+        for bodInfo in self.bodInfos:
             isMaxed = Bod.isMaxed(bodInfo["bod"].item)
             if not isMaxed:
+                counter += 1
+        currentCounter = 0
+        for bodInfo in self.bodInfos:
+            isMaxed = Bod.isMaxed(bodInfo["bod"].item)
+            if not isMaxed:
+                currentCounter += 1
+                self.gump.setStatus(f"Bribing... {currentCounter}/{counter}")
                 bodInfo["bod"].bribe()
-            self.bodInfos[i]["isMaxBribedIcon"] = 11400
             self._resetScrollAreaElement(bodInfo)
         self.gump.setStatus("Ready")
 
     def _resetScrollAreaElement(self, bodInfo):
-        try:
-            API.SysMsg(str(bodInfo["id"]))
-            API.SysMsg(str(self.scrollArea.Children))
-            index = Python.findIndex(bodInfo["id"], self.scrollArea.Children, "Text")
-            API.SysMsg(str(index))
-            if (index == -1):
-                pass
-            startIndex = index * 3
-            isFilledIcon = self.scrollArea.Children[startIndex]
-            isMaxedIcon = self.scrollArea.Children[startIndex + 1]
-            itemNameLabel = self.scrollArea.Children[startIndex + 2]
-            isFilledIconX = isFilledIcon.GetX()
-            isFilledIconY = isFilledIcon.GetY()
-            isFilledIcon.Dispose()
-            isMaxedIconX = isMaxedIcon.GetX()
-            isMaxedIconY = isMaxedIcon.GetY()
-            isMaxedIcon.Dispose()
-            itemNameLabelX = itemNameLabel.GetX()
-            itemNameLabelY = itemNameLabel.GetY()
-            itemNameLabel.Dispose()
+        for el in bodInfo["elements"]:
+            el.Dispose()
+        bodInfo["elements"].clear()
+        labels = self._generateLabel(bodInfo["bod"])
+        bodInfo["isFilledIconButton"] = labels["isFilledIconButton"]
+        bodInfo["isMaxBribedIconButton"] = labels["isMaxBribedIconButton"]
+        bodInfo["label"] = labels["label"]
+        self._appendToScrollArea(bodInfo)
 
-            bod = self.bodInfos[index]
-            isFilledIcon = bod["isFilledIcon"]
-            isFilledIcon.SetX(isFilledIconX)
-            isFilledIcon.SetY(isFilledIconY)
-            self.scrollArea.Add(isFilledIcon)
-            isMaxBribedIcon = bod["isMaxBribedIcon"]
-            isMaxBribedIcon.SetX(isMaxedIconX)
-            isMaxBribedIcon.SetY(isMaxedIconY)
-            self.scrollArea.Add(isMaxBribedIcon)
-            label = bod["label"]
-            label.SetX(itemNameLabelX)
-            label.SetY(itemNameLabelY)
-            self.scrollArea.Add(label)
-        except Exception as e:
-            API.SysMsg(str(e))
+    def _scan(self):
+        self.scrollArea.Clear()
+        self.bodInfos = []
 
+        if not self.containerSerial:
+            return
 
+        bodSkill = self.bodSkills[self.selectedProfession]
+        craftingInfo = self.craftingInfos[self.selectedProfession]
+        resourceChest = API.FindItem(self.containerSerial)
+        if not bodSkill or not craftingInfo or not resourceChest:
+            Error.error("Missing info to be able to scan", False)
+
+        selectedBodGraphic = self.bodSkill["bod"]["graphic"]
+        selectedBodHue = self.bodSkill["bod"]["hue"]
+        isSmall = self.selectedType == "Small"
+        
+        bodItems = Bod.findAllBodItems(selectedBodGraphic, selectedBodHue, isSmall)
+        for bodItem in bodItems:
+            craft = Craft(bodSkill, craftingInfo, resourceChest)
+            bodInfo = Bod(self.bodSkill, bodItem, craftingInfo, craft)
+            labels = self._generateLabel(bodInfo)
+            self.bodInfos.append({
+                "bod": bodInfo,
+                "id": Python.v4(),
+                "label": labels["label"],
+                "isFilledIconButton": labels["isFilledIconButton"],
+                "isMaxBribedIconButton": labels["isMaxBribedIconButton"],
+                "elements": []
+            })
+        for i, bodInfo in enumerate(self.bodInfos):
+            yOffset = i * 18
+            bodInfo["yOffset"] = yOffset
+            self._appendToScrollArea(bodInfo)
+
+    def _appendToScrollArea(self, bodInfo):
+        yOffset = bodInfo["yOffset"]
+        for el, dx in zip(
+            [bodInfo["isFilledIconButton"], bodInfo["isMaxBribedIconButton"], bodInfo["label"]],
+            [0, 50, 100]
+        ):
+            el.SetX(dx)
+            el.SetY(yOffset)
+            self.scrollArea.Add(el)
+            bodInfo["elements"].append(el)
+
+    def _generateLabel(self, bod):
+        isFilledIcon = 11410
+        isMaxBribedIcon = 11410
+        if (Bod.isFilled(bod.item, False)):
+            isFilledIcon = 11400
+        isFilledIconButton = API.CreateGumpButton("", 996, isFilledIcon, isFilledIcon, isFilledIcon)
+        if (Bod.isMaxed(bod.item)):
+            isMaxBribedIcon = 11400
+        isMaxBribedIconButton = API.CreateGumpButton("", 996, isMaxBribedIcon, isMaxBribedIcon, isMaxBribedIcon)
+        label = API.CreateGumpLabel(bod.itemName)
+        return {
+            "label": label,
+            "isFilledIconButton": isFilledIconButton,
+            "isMaxBribedIconButton": isMaxBribedIconButton,
+        }
+
+    def _onContainerSelectionClicked(self):
+        targetSerial = API.RequestTarget()
+        if not targetSerial:
+            return
+        self.containerSerial = targetSerial
+        self._scan()
 
     def _onTypeClicked(self, type):
         for checkbox in self.typeCheckboxes:

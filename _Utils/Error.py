@@ -3,9 +3,10 @@ import datetime
 
 class Error:
     @staticmethod
-    def error(msg):
+    def error(msg, isStopping = True):
         API.SysMsg(msg, 33)
-        API.Stop()
+        if isStopping:
+            API.Stop()
         
     @staticmethod
     def logError(e, scriptName):
