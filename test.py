@@ -34,10 +34,9 @@ class Debug:
     magic = Magic()
     
     def main(self):
-        targetSerial = API.RequestTarget()
-        item = API.FindItem(targetSerial)
-        hasLine = item.HasLineOfSightFrom()
-        API.SysMsg(f"Item: {str(hasLine)}")
+        npcs = API.NearestMobiles([API.Notoriety.Invulnerable], 1)
+        for npc in npcs:
+            API.SysMsg(npc.Title)
 
 
 Debug().main()

@@ -148,6 +148,9 @@ class Trainer:
         self.gump = None
         self.schoolInputs = []
         self.startBtn = None
+        self.tabGumpWidth = 64
+        self.mainGumpWidth = 400
+        self.totalGumpWidth = self.tabGumpWidth + self.mainGumpWidth
 
     def main(self):
         try:
@@ -192,44 +195,48 @@ class Trainer:
         self.errors.extend(errors)
 
     def _onStart(self):
-        if not self.gump.checkValidateForm():
-            return
+        try:
+            if not self.gump.checkValidateForm():
+                return
 
-        self.errors.clear()
-        workingSkills = []
+            self.errors.clear()
+            workingSkills = []
 
-        for school, box, lbl, skillLbl, spellLabel in self.schoolInputs:
-            skillName = school["skillName"]
-            desired = Decimal(box.Text)
-            current = Util.getSkillInfo(skillName)["value"]
-            if desired > current:
-                self._validate(school, desired)
-                workingSkills.append((school, box, lbl, skillLbl, spellLabel))
+            for school, box, lbl, skillLbl in self.schoolInputs:
+                skillName = school["skillName"]
+                desired = Decimal(box.Text)
+                current = Util.getSkillInfo(skillName)["value"]
+                if desired > current:
+                    self._validate(school, desired)
+                    workingSkills.append((school, box, lbl, skillLbl))
 
-        totalNeeded = sum(
-            Decimal(box.Text) - Util.getSkillInfo(school["skillName"])["value"]
-            for school, box, *_ in workingSkills
-        )
-        charInfo = Util.getCharSkillInfo()
-        if charInfo["totalPlus"] + totalNeeded - charInfo["totalMinus"] > 720:
-            self.errors.append("Too many distributed skill point")
+            totalNeeded = sum(
+                Decimal(box.Text) - Util.getSkillInfo(school["skillName"])["value"]
+                for school, box, *_ in workingSkills
+            )
+            charInfo = Util.getCharSkillInfo()
+            if charInfo["totalPlus"] + totalNeeded - charInfo["totalMinus"] > 720:
+                self.errors.append("Too many distributed skill point")
 
-        self.startBtn.SetWidth(0)
-        self.startBtn.SetHeight(0)
+            self.startBtn.SetWidth(0)
+            self.startBtn.SetHeight(0)
 
-        if self.errors:
-            self.gump.setStatus("Validation failed, error detected", 33)
-            errorHeight = max(20 * len(self.errors), 100)
-            subGump = self.gump.createSubGump(self.gumpWidth, errorHeight, "bottom")
-            subGump.addLabel("Validation errors:", 10, 10)
-            for i, error in enumerate(self.errors):
-                subGump.addLabel(error, 10, 30 + 15 * i, 33)
-        else:
-            for school, box, lbl, skillLbl, spellLabel in workingSkills:
-                skillCap = Decimal(box.Text)
-                trainer = school["trainer"](skillCap, lbl, skillLbl, spellLabel)
-                self.gump.setStatus(f"Training {school['skillName']}...")
-                trainer.train(self.calculateSkillLabels)
+            if self.errors:
+                self.gump.setStatus("Validation failed, error detected", 33)
+                errorHeight = max(20 * len(self.errors), 100)
+                subGump = self.gump.createSubGump(self.totalGumpWidth, errorHeight, "bottom")
+                subGump.addLabel("Validation errors:", 10, 10)
+                for i, error in enumerate(self.errors):
+                    subGump.addLabel(error, 10, 30 + 15 * i, 33)
+            else:
+                for school, box, lbl, skillLbl in workingSkills:
+                    skillCap = Decimal(box.Text)
+                    trainer = school["trainer"](skillCap, lbl, skillLbl)
+                    self.gump.setStatus(f"Training {school['skillName']}...")
+                    trainer.train(self.calculateSkillLabels)
+        except Exception as e:
+            API.SysMsg(str(e))
+            API.SysMsg(traceback.format_exc())
 
     def _setSkillToCap(self, textbox, maxValue):
         textbox.SetText(str(maxValue))
@@ -264,9 +271,12 @@ class Trainer:
             y += 30
 
         self.calculateSkillLabels(schoolName)
+        self.startBtn = gump.addButton(
+            "", 10, y, "okay", gump.onClick(self._onStart, "Validating...", "")
+        )
 
     def _showGump(self):
-        g = Gump(64, 400, None, False)
+        g = Gump(self.tabGumpWidth, 400, None, False)
         self.gump = g
 
         casterGump = g.addTabButton("Caster", "caster", 400)
@@ -278,7 +288,7 @@ class Trainer:
         thiefGump = g.addTabButton("Thief", "thief", 400)
         self._createSchoolGump(thiefGump, "Thief")
 
-        statusGump = g.createSubGump(464, 100, withStatus=True)
+        g.createSubGump(self.totalGumpWidth, 100, withStatus=True)
 
         g.setActiveTab("Caster")
         g.create()
@@ -286,11 +296,22 @@ class Trainer:
     def _isRunning(self):
         return self._running
 
+    def tick(self):
+        if not self._running:
+            return False
+        if self.gump:
+            trainer.gump.tick()
+            trainer.gump.tickSubGumps()
+            if self.gump.gump.IsDisposed:
+                self._onClose()
+                return False
+        return True
+
 
 trainer = Trainer()
 trainer.main()
 while trainer._isRunning():
-    trainer.gump.tick()
-    trainer.gump.tickSubGumps()
-    # trainer.tick()
+    # trainer.gump.tick()
+    # trainer.gump.tickSubGumps()
+    trainer.tick()
     API.Pause(0.1)

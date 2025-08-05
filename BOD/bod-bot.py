@@ -51,6 +51,7 @@ class BodBot:
         self.checkboxes = []
         self.typeCheckboxes = []
         self.containerSerial = None
+        self.bodCountLabel = None
         
         self.bodSkills = Math.convertToHex(bodSkillsStr)
         self.craftingInfos = Math.convertToHex(craftingInfosStr)
@@ -137,7 +138,11 @@ class BodBot:
         self.scrollArea = API.CreateGumpScrollArea(x, y, scrollAreaWidth, scrollAreaHeight)
         self.gump.gump.Add(self.scrollArea)
         self._scan()
-        y += scrollAreaHeight + 20
+        y += scrollAreaHeight + 25
+
+        bodCountLabel = g.addLabel("Bod count: 0", 25, y)
+        self.bodCountLabel = bodCountLabel
+        y += 25
 
         for action in ["Bribe", "Fill", "Turn in"]:
             g.addButton(
@@ -150,16 +155,27 @@ class BodBot:
             )
             x += 75
         x = 1
+        self._scan()
         self.gump.create()
 
     def _onActionClicked(self, action):
         if action == "Bribe":
             self._bribe()
-            return
         if action == "Fill":
             self._fill()
         if action == "Turn in":
-            return
+            self._turnIn()
+
+    def _turnIn(self):
+        self.gump.setStatus("Turn In...")
+        for bodInfo in self.bodInfos:
+            isFilled = Bod.isFilled(bodInfo["bod"].item)
+            if not isFilled:
+                continue
+            bodInfo["bod"].turnIn()
+            self._resetScrollAreaElement(bodInfo, False)
+            API.Pause(1)
+        self.gump.setStatus("Ready")
 
     def _fill(self):
         self.gump.setStatus("Filling...")
@@ -195,9 +211,11 @@ class BodBot:
             self._resetScrollAreaElement(bodInfo)
         self.gump.setStatus("Ready")
 
-    def _resetScrollAreaElement(self, bodInfo):
+    def _resetScrollAreaElement(self, bodInfo, isChanging = True):
         for el in bodInfo["elements"]:
             el.Dispose()
+        if not isChanging:
+            return
         bodInfo["elements"].clear()
         labels = self._generateLabel(bodInfo["bod"])
         bodInfo["isFilledIconButton"] = labels["isFilledIconButton"]
@@ -209,22 +227,24 @@ class BodBot:
         self.scrollArea.Clear()
         self.bodInfos = []
 
-        if not self.containerSerial:
-            return
-
         bodSkill = self.bodSkills[self.selectedProfession]
-        craftingInfo = self.craftingInfos[self.selectedProfession]
-        resourceChest = API.FindItem(self.containerSerial)
-        if not bodSkill or not craftingInfo or not resourceChest:
-            Error.error("Missing info to be able to scan", False)
+        craftingInfo = None
+        resourceChest = None
+        if self.containerSerial:
+            resourceChest = API.FindItem(self.containerSerial)
 
         selectedBodGraphic = self.bodSkill["bod"]["graphic"]
         selectedBodHue = self.bodSkill["bod"]["hue"]
         isSmall = self.selectedType == "Small"
         
         bodItems = Bod.findAllBodItems(selectedBodGraphic, selectedBodHue, isSmall)
-        for bodItem in bodItems:
+        craft = None
+        if resourceChest:
+            craftingInfo = self.craftingInfos[self.selectedProfession]
             craft = Craft(bodSkill, craftingInfo, resourceChest)
+
+
+        for bodItem in bodItems:
             bodInfo = Bod(self.bodSkill, bodItem, craftingInfo, craft)
             labels = self._generateLabel(bodInfo)
             self.bodInfos.append({
@@ -239,6 +259,9 @@ class BodBot:
             yOffset = i * 18
             bodInfo["yOffset"] = yOffset
             self._appendToScrollArea(bodInfo)
+
+        if self.bodCountLabel:
+            self.bodCountLabel.Text = f"Bod count: {len(self.bodInfos)}"
 
     def _appendToScrollArea(self, bodInfo):
         yOffset = bodInfo["yOffset"]

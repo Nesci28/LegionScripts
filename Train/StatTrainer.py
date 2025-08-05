@@ -117,7 +117,8 @@ class StatTrainer:
                 mode = "up"
             else:
                 mode = "down"
-            if getattr(API.Player, stat["lock"]).lower() != mode:
+            
+            if str(getattr(API.Player, stat["lock"])).lower() != mode:
                 API.SetStatLock(stat["name"], mode)
 
     def _onStart(self):

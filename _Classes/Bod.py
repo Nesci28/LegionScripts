@@ -1,13 +1,20 @@
 import re
+import time
+import importlib
+import traceback
 
 import Util
+
+importlib.reload(Util)
+
+from Util import Util
 
 
 class Bod:
     @staticmethod
     def findAllBodItems(selectedBodGraphic, selectedBodHue, isSmall):
         bods = []
-        items = Util.Util.itemsInContainer(API.Backpack)
+        items = Util.itemsInContainer(API.Backpack)
         for item in items:
             if item.Graphic != selectedBodGraphic or item.Hue != selectedBodHue:
                 continue
@@ -139,6 +146,31 @@ class Bod:
         self.count = 0
         self._setup()
 
+    def turnIn(self):
+        if not Bod.isFilled(self.item):
+            return
+        npcs = API.NearestMobiles([API.Notoriety.Invulnerable], 1)
+        while len(npcs) == 0:
+            API.SysMsg("No npcs found. move", 32)
+            API.Pause(1)
+            npcs = API.NearestMobiles([API.Notoriety.Invulnerable], 1)
+
+        API.ClearJournal()
+        while not API.InJournalAny(["$An offer may be available in about (.*) minutes."]):
+            self._acceptBod(npcs)
+            API.Pause(1)
+        for npc in npcs:
+            Util.moveItem(self.item.Serial, npc.Serial)
+            # while not API.HasGump(17003):
+            #     API.Pause(0.1)
+            # API.ReplyGump(7, 17003)
+            # while not API.HasGump(17000):
+            #     API.Pause(0.1)
+            # API.CloseGump(17000)
+            self._acceptBod(npcs)
+            API.Pause(1)
+            break
+
     def bribe(self):
         while not Bod.isMaxed(self.item):
             npcs = API.NearestMobiles([API.Notoriety.Invulnerable], 1)
@@ -163,7 +195,7 @@ class Bod:
                         API.Target(self.item.Serial)
                         while not self._findBridePrice():
                             API.Pause(0.1)
-                        Util.Util.moveItem(self.item.Serial, npc.Serial)
+                        Util.moveItem(self.item.Serial, npc.Serial)
                         API.Pause(1)
                         break
                     API.Pause(0.1)
@@ -193,6 +225,18 @@ class Bod:
         Bod.isFilled(self.item)
         self.craft.emptyResource()
 
+    def _acceptBod(self, npcs):
+        for npc in npcs:
+            API.ContextMenu(npc.Serial, 403)
+            start_time = time.time()
+            while not API.HasGump(455):
+                if time.time() - start_time > 1:
+                    API.SysMsg("Timeout", 33)
+                    API.CancelTarget()
+                    break
+                API.Pause(0.1)
+            API.ReplyGump(1, 455)
+
     def _fillBod(self):
         while not API.HasGump(456):
             API.UseObject(self.item.Serial)
@@ -203,40 +247,7 @@ class Bod:
         API.Pause(1)
 
     def _findBridePrice(self):
-        if API.InJournal("0 gold coin"):
-            API.SysMsg("0 Gold Coin")
-            return True
-        if API.InJournal("100 gold coin"):
-            API.SysMsg("100 Gold Coin")
-            return True
-        if API.InJournal("200 gold coin"):
-            API.SysMsg("200 Gold Coin")
-            return True
-        if API.InJournal("300 gold coin"):
-            API.SysMsg("300 Gold Coin")
-            return True
-        if API.InJournal("400 gold coin"):
-            API.SysMsg("400 Gold Coin")
-            return True
-        if API.InJournal("500 gold coin"):
-            API.SysMsg("500 Gold Coin")
-            return True
-        if API.InJournal("600 gold coin"):
-            API.SysMsg("600 Gold Coin")
-            return True
-        if API.InJournal("700 gold coin"):
-            API.SysMsg("700 Gold Coin")
-            return True
-        if API.InJournal("800 gold coin"):
-            API.SysMsg("800 Gold Coin")
-            return True
-        if API.InJournal("900 gold coin"):
-            API.SysMsg("900 Gold Coin")
-            return True
-        if API.InJournal("1000 gold coin"):
-            API.SysMsg("1000 Gold Coin")
-            return True
-        return False
+        return API.InJournal("$\d gold coin")
 
     def _update(self):
         values = Bod._parse(self.item, self.craftingInfo)
