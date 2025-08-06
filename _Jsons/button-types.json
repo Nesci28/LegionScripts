@@ -99,6 +99,11 @@
         "pressed": 11411,
         "hover": 11412
     },
+    "radioBlue": {
+        "normal": 30083,
+        "pressed": 30084,
+        "hover": 30085
+    },
     "checkboxChecked": {
         "normal": 9027,
         "pressed": 9026,

@@ -114,14 +114,15 @@ class BodBot:
         x = 1
         y += 25
 
+        resourceLabel = g.addLabel("Select resource container", 25, y)
         g.addButton(
             "",
             x,
             y,
-            "radioGreen",
-            self.gump.onClick(lambda : self._onContainerSelectionClicked())
+            "radioBlue",
+            self.gump.onClick(lambda resourceLabel=resourceLabel: self._onContainerSelectionClicked(resourceLabel))
         )
-        g.addLabel("Select resource container", 25, y)
+        
         x = 1
         y += 25
 
@@ -129,10 +130,14 @@ class BodBot:
         scrollAreaHeight = round(height / 2)
 
         g.addLabel("Filled", x, y)
+        x += 40
+        g.addLabel("Partial", x, y)
         x += 50
         g.addLabel("Maxed", x, y)
-        x += 50
+        x += 47
         g.addLabel("Item required", x, y)
+        x += 150
+        g.addLabel("Mark", x, y)
         x = 1
         y += 20
         self.scrollArea = API.CreateGumpScrollArea(x, y, scrollAreaWidth, scrollAreaHeight)
@@ -144,7 +149,7 @@ class BodBot:
         self.bodCountLabel = bodCountLabel
         y += 25
 
-        for action in ["Bribe", "Fill", "Turn in"]:
+        for action in ["Bribe", "Fill", "Turn in", "Rescan"]:
             g.addButton(
                 action,
                 x,
@@ -165,6 +170,8 @@ class BodBot:
             self._fill()
         if action == "Turn in":
             self._turnIn()
+        if action == "Rescan":
+            self._scan()
 
     def _turnIn(self):
         self.gump.setStatus("Turn In...")
@@ -217,9 +224,11 @@ class BodBot:
         if not isChanging:
             return
         bodInfo["elements"].clear()
-        labels = self._generateLabel(bodInfo["bod"])
+        labels = self._generateLabels(bodInfo["bod"])
         bodInfo["isFilledIconButton"] = labels["isFilledIconButton"]
         bodInfo["isMaxBribedIconButton"] = labels["isMaxBribedIconButton"]
+        bodInfo["isPartiallyFilledIconButton"] = labels["isPartiallyFilledIconButton"]
+        bodInfo["markButton"] = labels["markButton"]
         bodInfo["label"] = labels["label"]
         self._appendToScrollArea(bodInfo)
 
@@ -243,16 +252,17 @@ class BodBot:
             craftingInfo = self.craftingInfos[self.selectedProfession]
             craft = Craft(bodSkill, craftingInfo, resourceChest)
 
-
         for bodItem in bodItems:
             bodInfo = Bod(self.bodSkill, bodItem, craftingInfo, craft)
-            labels = self._generateLabel(bodInfo)
+            labels = self._generateLabels(bodInfo)
             self.bodInfos.append({
                 "bod": bodInfo,
                 "id": Python.v4(),
                 "label": labels["label"],
                 "isFilledIconButton": labels["isFilledIconButton"],
                 "isMaxBribedIconButton": labels["isMaxBribedIconButton"],
+                "isPartiallyFilledIconButton": labels["isPartiallyFilledIconButton"],
+                "markButton": labels["markButton"],
                 "elements": []
             })
         for i, bodInfo in enumerate(self.bodInfos):
@@ -266,35 +276,48 @@ class BodBot:
     def _appendToScrollArea(self, bodInfo):
         yOffset = bodInfo["yOffset"]
         for el, dx in zip(
-            [bodInfo["isFilledIconButton"], bodInfo["isMaxBribedIconButton"], bodInfo["label"]],
-            [0, 50, 100]
+            [bodInfo["isFilledIconButton"], bodInfo["isPartiallyFilledIconButton"], bodInfo["isMaxBribedIconButton"], bodInfo["label"], bodInfo["markButton"]],
+            [7, 53, 100, 137, 288]
         ):
             el.SetX(dx)
             el.SetY(yOffset)
             self.scrollArea.Add(el)
             bodInfo["elements"].append(el)
+        API.AddControlOnClick(bodInfo["markButton"], self.gump.onClick(lambda bodInfo=bodInfo: self._markBod(bodInfo)))
 
-    def _generateLabel(self, bod):
+    def _generateLabels(self, bod):
         isFilledIcon = 11410
         isMaxBribedIcon = 11410
+        isPartiallyFilledIcon = 11410
         if (Bod.isFilled(bod.item, False)):
             isFilledIcon = 11400
         isFilledIconButton = API.CreateGumpButton("", 996, isFilledIcon, isFilledIcon, isFilledIcon)
+        if (Bod.isPartiallyFilled(bod.item)):
+            isPartiallyFilledIcon = 11400
+        isPartiallyFilledIconButton = API.CreateGumpButton("", 996, isPartiallyFilledIcon, isPartiallyFilledIcon, isPartiallyFilledIcon)
         if (Bod.isMaxed(bod.item)):
             isMaxBribedIcon = 11400
         isMaxBribedIconButton = API.CreateGumpButton("", 996, isMaxBribedIcon, isMaxBribedIcon, isMaxBribedIcon)
         label = API.CreateGumpLabel(bod.itemName)
+        markButton = API.CreateGumpButton("", 996, 30083, 30084, 30085)
         return {
             "label": label,
             "isFilledIconButton": isFilledIconButton,
             "isMaxBribedIconButton": isMaxBribedIconButton,
+            "isPartiallyFilledIconButton": isPartiallyFilledIconButton,
+            "markButton": markButton,
         }
 
-    def _onContainerSelectionClicked(self):
+    def _markBod(self, bodInfo):
+        bodInfo["bod"].item.SetHue(11)
+
+
+    def _onContainerSelectionClicked(self, resourceLabel):
         targetSerial = API.RequestTarget()
         if not targetSerial:
             return
         self.containerSerial = targetSerial
+        resourceLabel.Text = f"Select resource container ({targetSerial})"
         self._scan()
 
     def _onTypeClicked(self, type):

@@ -58,6 +58,28 @@ class Bod:
         if isDone and isColoring:
             item.Hue = 33
         return isDone
+    
+    @staticmethod
+    def isPartiallyFilled(item):
+        values = Bod._parse(item)
+        isDone = False
+        amountToFill = values["amountToFill"]
+        if values["isSmall"]:
+            amountAlreadyFilled = values["amountAlreadyFilled"]
+            isDone = amountToFill - amountAlreadyFilled == 0
+            return not isDone and amountAlreadyFilled > 0
+
+        comparisonResults = []
+        props = API.ItemNameAndProps(item.Serial).split("\n")
+        for prop in reversed(props):
+            if prop.strip().lower().startswith("amount to make"):
+                break
+            parts = prop.rsplit(": ", 1)
+            if len(parts) == 2:
+                value = int(parts[1])
+                comparisonResults.append(value == amountToFill)
+        isPartiallyDone = any(comparisonResults)
+        return isPartiallyDone
 
     @staticmethod
     def isMaxed(item):
