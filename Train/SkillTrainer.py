@@ -233,7 +233,7 @@ class Trainer:
                     skillCap = Decimal(box.Text)
                     trainer = school["trainer"](skillCap, lbl, skillLbl)
                     self.gump.setStatus(f"Training {school['skillName']}...")
-                    trainer.train(self.calculateSkillLabels)
+                    trainer.train(lambda shcoolName=school["name"]: self.calculateSkillLabels(shcoolName))
         except Exception as e:
             API.SysMsg(str(e))
             API.SysMsg(traceback.format_exc())
@@ -267,6 +267,7 @@ class Trainer:
             )
             school["skillLabel"] = gump.addLabel("", x + 115, y)
             school["capLabel"] = gump.addLabel("", x + 165, y)
+            school["name"] = schoolName
             self.schoolInputs.append((school, textbox, lbl, school["skillLabel"]))
             y += 30
 

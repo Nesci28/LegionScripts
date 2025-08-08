@@ -1,7 +1,17 @@
 import API
+import importlib
+import sys
+
+sys.path.append(r".\\TazUO\\LegionScripts\\_Utils")
+
+import Util
+
+importlib.reload(Util)
+
+from Util import Util
 
 # ========== Configurable Toggles ==========
-isDestroyingCorpse = True
+isDestroyingCorpse = False
 takeLeather = True
 takeMeat = False
 takeFeathers = False
@@ -69,13 +79,13 @@ def runButcher():
 
     isHarvestersBlade = getItemName(dagger.Serial) == "Harvester's Blade"
 
-    for _ in range(20):  # Try multiple cycles
-        corpse = API.NearestCorpse(2)
-        if not corpse:
-            break
+    while True:
+        API.Pause(1)
+        corpse = API.NearestCorpse(1)
+        if not corpse or corpse.Serial == 0:
+            continue
 
-        API.UseObject(dagger.Serial)
-        API.WaitForTarget()
+        Util.useObjectWithTarget(dagger.Serial)
         API.Target(corpse.Serial)
 
         if not isHarvestersBlade:

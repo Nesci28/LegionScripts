@@ -3,10 +3,12 @@ import importlib
 import sys
 import traceback
 import json
+import time
 
 sys.path.append(r".\\TazUO\\LegionScripts\\_Classes")
 sys.path.append(r".\\TazUO\\LegionScripts\\_Utils")
 sys.path.append(r".\\TazUO\\LegionScripts\\_Skills")
+sys.path.append(r".\\TazUO\\LegionScripts\\_Decorators")
 
 import Bod
 import Gump
@@ -17,6 +19,8 @@ import Magic
 import Python
 import Error
 import Craft
+import Item
+import Debug
 
 importlib.reload(Bod)
 importlib.reload(Gump)
@@ -27,6 +31,8 @@ importlib.reload(Magic)
 importlib.reload(Python)
 importlib.reload(Error)
 importlib.reload(Craft)
+importlib.reload(Item)
+importlib.reload(Debug)
 
 from Bod import Bod
 from Gump import Gump
@@ -37,12 +43,17 @@ from Magic import Magic
 from Python import Python
 from Error import Error
 from Craft import Craft
+from Item import Item
+from Debug import tryExcept
+
 
 class BodBot:
     def __init__(self):
         bodSkillsJson = open(r".\\TazUO\\LegionScripts\\_Jsons\\bod-skills.json")
         bodSkillsStr = json.load(bodSkillsJson)
-        craftingInfosJson = open(r".\\TazUO\\LegionScripts\\_Jsons\\crafting-infos.json")
+        craftingInfosJson = open(
+            r".\\TazUO\\LegionScripts\\_Jsons\\crafting-infos.json"
+        )
         craftingInfosStr = json.load(craftingInfosJson)
 
         self._running = True
@@ -50,13 +61,16 @@ class BodBot:
         self.scrollArea = None
         self.checkboxes = []
         self.typeCheckboxes = []
-        self.containerSerial = None
+        self.containerSerial = API.GetSharedVar("BOD_BOT_CONTAINER_SERIAL") or None
+        self.tailorSerial = API.GetSharedVar("BOD_BOT_TAILOR_SERIAL") or None
+        self.runebookSerial = API.GetSharedVar("BOD_BOT_RUNEBOOK_SERIAL") or None
         self.bodCountLabel = None
-        
+        self.runebookItem = API.GetSharedVar("BOD_BOT_RUNEBOOK_ITEM") or None
+
         self.bodSkills = Math.convertToHex(bodSkillsStr)
         self.craftingInfos = Math.convertToHex(craftingInfosStr)
-        self.selectedProfession = "Tailoring"
-        self.selectedType = "Small"
+        self.selectedProfession = API.GetSharedVar("BOD_BOT_SELECTED_PROFESSION") or "Tailoring"
+        self.selectedType = API.GetSharedVar("BOD_BOT_SELECTED_TYPE") or "Small"
         self.bodSkill = self.bodSkills[self.selectedProfession]
         self.professions = self.bodSkills.keys()
         self.selectedBodGraphic = None
@@ -76,7 +90,7 @@ class BodBot:
 
     def _showGump(self):
         width = 375
-        height = 400
+        height = 450
         g = Gump(width, height, self._onClose)
         self.gump = g
 
@@ -90,7 +104,9 @@ class BodBot:
                 x,
                 y,
                 self.selectedProfession == label,
-                self.gump.onClick(lambda profession=profession: self._onProfessionClicked(profession))
+                self.gump.onClick(
+                    lambda profession=profession: self._onProfessionClicked(profession)
+                ),
             )
             self.checkboxes.append({"label": label, "checkbox": checkbox})
             if (i + 1) % 3 == 0 and i != len(self.professions) - 1:
@@ -107,24 +123,73 @@ class BodBot:
                 x,
                 y,
                 i == 0,
-                self.gump.onClick(lambda type=type: self._onTypeClicked(type))
+                self.gump.onClick(lambda type=type: self._onTypeClicked(type)),
             )
             self.typeCheckboxes.append({"label": type, "checkbox": checkbox})
             x += 125
         x = 1
         y += 25
 
-        resourceLabel = g.addLabel("Select resource container", 25, y)
+        selectResourceContainerText = "Select resource container"
+        if (self.containerSerial):
+            selectResourceContainerText = f"Selected resource container ({self.containerSerial})"
+        resourceLabel = g.addLabel(selectResourceContainerText, 25, y)
         g.addButton(
             "",
             x,
             y,
             "radioBlue",
-            self.gump.onClick(lambda resourceLabel=resourceLabel: self._onContainerSelectionClicked(resourceLabel))
+            self.gump.onClick(
+                lambda resourceLabel=resourceLabel: self._onContainerSelectionClicked(
+                    resourceLabel
+                )
+            ),
         )
-        
+
         x = 1
-        y += 25
+        y += 20
+
+        selectNpcText = "Select npc"
+        if (self.tailorSerial):
+            selectNpcText = f"Selected npc ({self.tailorSerial})"
+        npcLabel = g.addLabel(selectNpcText, 25, y)
+        g.addButton(
+            "",
+            x,
+            y,
+            "radioBlue",
+            self.gump.onClick(
+                lambda npcLabel=npcLabel: self._onNpcSelectionClicked(npcLabel)
+            ),
+        )
+
+        x = 1
+        y += 20
+
+        selectNpcText = "Select runebook"
+        if (self.runebookSerial):
+            selectNpcText = f"Selected runebook ({self.runebookSerial})"
+        npcLabel = g.addLabel(selectNpcText, 25, y)
+        g.addButton(
+            "",
+            x,
+            y,
+            "radioBlue",
+            self.gump.onClick(
+                lambda npcLabel=npcLabel: self._onRunebookSelectionClicked(npcLabel)
+            ),
+        )
+        g.addButton(
+            "Next",
+            225,
+            y,
+            "default",
+            self.gump.onClick(lambda: self._onNextClicked()),
+            True,
+        )
+
+        x = 1
+        y += 20
 
         scrollAreaWidth = width - 13
         scrollAreaHeight = round(height / 2)
@@ -140,10 +205,14 @@ class BodBot:
         g.addLabel("Mark", x, y)
         x = 1
         y += 20
-        self.scrollArea = API.CreateGumpScrollArea(x, y, scrollAreaWidth, scrollAreaHeight)
+        self.scrollArea = API.CreateGumpScrollArea(
+            x, y, scrollAreaWidth, scrollAreaHeight
+        )
         self.gump.gump.Add(self.scrollArea)
         self._scan()
-        y += scrollAreaHeight + 25
+
+        y += scrollAreaHeight
+        x = 1
 
         bodCountLabel = g.addLabel("Bod count: 0", 25, y)
         self.bodCountLabel = bodCountLabel
@@ -156,7 +225,7 @@ class BodBot:
                 y,
                 "default",
                 self.gump.onClick(lambda action=action: self._onActionClicked(action)),
-                True
+                True,
             )
             x += 75
         x = 1
@@ -173,18 +242,53 @@ class BodBot:
         if action == "Rescan":
             self._scan()
 
+    def _getFilledBods(self):
+        selectedBodGraphic = self.bodSkill["bod"]["graphic"]
+        selectedBodHue = self.bodSkill["bod"]["hue"]
+        isSmall = self.selectedType == "Small"
+
+        bodItems = Bod.findAllBodItems(selectedBodGraphic, selectedBodHue, isSmall)
+        filledBodItems = []
+        for bodItem in bodItems:
+            if Bod.isFilled(bodItem):
+                filledBodItems.append(bodItem)
+        return filledBodItems
+
     def _turnIn(self):
+        if not self.npcSerial:
+            return
+        npc = API.FindMobile(self.npcSerial)
+        distance = Math.distanceBetween(API.Player, npc)
+        API.SysMsg(str(distance))
+        if distance > 1:
+            return
         self.gump.setStatus("Turn In...")
-        for bodInfo in self.bodInfos:
-            isFilled = Bod.isFilled(bodInfo["bod"].item)
-            if not isFilled:
-                continue
-            bodInfo["bod"].turnIn()
-            self._resetScrollAreaElement(bodInfo, False)
-            API.Pause(1)
+        counter = 0
+        filledBods = self._getFilledBods()
+        while len(filledBods) > 0:
+            counter += 1
+            self.gump.setStatus(f"Turn In... {counter}/{len(filledBods)}")
+            filledBod = filledBods.pop()
+            Util.moveItem(filledBod.Serial, self.npcSerial)
+            API.ContextMenu(self.npcSerial, 403)
+            start_time = time.time()
+            while not API.HasGump(455):
+                if time.time() - start_time > 1:
+                    API.SysMsg("Timeout", 33)
+                    API.CancelTarget()
+                    break
+                API.Pause(0.1)
+            API.ReplyGump(1, 455)
+            filledBods = self._getFilledBods()
         self.gump.setStatus("Ready")
 
     def _fill(self):
+        if not self.containerSerial:
+            return
+        resourceChest = API.FindItem(self.containerSerial)
+        distance = Math.distanceBetween(API.Player, resourceChest)
+        if distance > 1:
+            return
         self.gump.setStatus("Filling...")
         counter = 0
         for bodInfo in self.bodInfos:
@@ -218,7 +322,7 @@ class BodBot:
             self._resetScrollAreaElement(bodInfo)
         self.gump.setStatus("Ready")
 
-    def _resetScrollAreaElement(self, bodInfo, isChanging = True):
+    def _resetScrollAreaElement(self, bodInfo, isChanging=True):
         for el in bodInfo["elements"]:
             el.Dispose()
         if not isChanging:
@@ -236,7 +340,6 @@ class BodBot:
         self.scrollArea.Clear()
         self.bodInfos = []
 
-        bodSkill = self.bodSkills[self.selectedProfession]
         craftingInfo = None
         resourceChest = None
         if self.containerSerial:
@@ -245,59 +348,83 @@ class BodBot:
         selectedBodGraphic = self.bodSkill["bod"]["graphic"]
         selectedBodHue = self.bodSkill["bod"]["hue"]
         isSmall = self.selectedType == "Small"
-        
+
         bodItems = Bod.findAllBodItems(selectedBodGraphic, selectedBodHue, isSmall)
+        API.SysMsg(str(len(bodItems)))
         craft = None
         if resourceChest:
             craftingInfo = self.craftingInfos[self.selectedProfession]
-            craft = Craft(bodSkill, craftingInfo, resourceChest)
+            craft = Craft(self.bodSkill, craftingInfo, resourceChest)
 
-        for bodItem in bodItems:
-            bodInfo = Bod(self.bodSkill, bodItem, craftingInfo, craft)
-            labels = self._generateLabels(bodInfo)
-            self.bodInfos.append({
-                "bod": bodInfo,
-                "id": Python.v4(),
-                "label": labels["label"],
-                "isFilledIconButton": labels["isFilledIconButton"],
-                "isMaxBribedIconButton": labels["isMaxBribedIconButton"],
-                "isPartiallyFilledIconButton": labels["isPartiallyFilledIconButton"],
-                "markButton": labels["markButton"],
-                "elements": []
-            })
-        for i, bodInfo in enumerate(self.bodInfos):
-            yOffset = i * 18
-            bodInfo["yOffset"] = yOffset
-            self._appendToScrollArea(bodInfo)
+        try:
+            for bodItem in bodItems:
+                bodInfo = Bod(self.bodSkill, bodItem, craftingInfo, craft)
+                labels = self._generateLabels(bodInfo)
+                self.bodInfos.append(
+                    {
+                        "bod": bodInfo,
+                        "id": Python.v4(),
+                        "label": labels["label"],
+                        "isFilledIconButton": labels["isFilledIconButton"],
+                        "isMaxBribedIconButton": labels["isMaxBribedIconButton"],
+                        "isPartiallyFilledIconButton": labels[
+                            "isPartiallyFilledIconButton"
+                        ],
+                        "markButton": labels["markButton"],
+                        "elements": [],
+                    }
+                )
+            for i, bodInfo in enumerate(self.bodInfos):
+                yOffset = i * 18
+                bodInfo["yOffset"] = yOffset
+                self._appendToScrollArea(bodInfo)
 
-        if self.bodCountLabel:
-            self.bodCountLabel.Text = f"Bod count: {len(self.bodInfos)}"
+            if self.bodCountLabel:
+                self.bodCountLabel.Text = f"Bod count: {len(self.bodInfos)}"
+        except Exception as e:
+            API.SysMsg(str(e))
+            API.SysMsg(traceback.format_exc())
 
     def _appendToScrollArea(self, bodInfo):
         yOffset = bodInfo["yOffset"]
         for el, dx in zip(
-            [bodInfo["isFilledIconButton"], bodInfo["isPartiallyFilledIconButton"], bodInfo["isMaxBribedIconButton"], bodInfo["label"], bodInfo["markButton"]],
-            [7, 53, 100, 137, 288]
+            [
+                bodInfo["isFilledIconButton"],
+                bodInfo["isPartiallyFilledIconButton"],
+                bodInfo["isMaxBribedIconButton"],
+                bodInfo["label"],
+                bodInfo["markButton"],
+            ],
+            [7, 53, 100, 137, 288],
         ):
             el.SetX(dx)
             el.SetY(yOffset)
             self.scrollArea.Add(el)
             bodInfo["elements"].append(el)
-        API.AddControlOnClick(bodInfo["markButton"], self.gump.onClick(lambda bodInfo=bodInfo: self._markBod(bodInfo)))
+        API.AddControlOnClick(
+            bodInfo["markButton"],
+            self.gump.onClick(lambda bodInfo=bodInfo: self._markBod(bodInfo)),
+        )
 
     def _generateLabels(self, bod):
         isFilledIcon = 11410
         isMaxBribedIcon = 11410
         isPartiallyFilledIcon = 11410
-        if (Bod.isFilled(bod.item, False)):
+        if Bod.isFilled(bod.item, False):
             isFilledIcon = 11400
-        isFilledIconButton = API.CreateGumpButton("", 996, isFilledIcon, isFilledIcon, isFilledIcon)
-        if (Bod.isPartiallyFilled(bod.item)):
+        isFilledIconButton = API.CreateGumpButton(
+            "", 996, isFilledIcon, isFilledIcon, isFilledIcon
+        )
+        if Bod.isPartiallyFilled(bod.item):
             isPartiallyFilledIcon = 11400
-        isPartiallyFilledIconButton = API.CreateGumpButton("", 996, isPartiallyFilledIcon, isPartiallyFilledIcon, isPartiallyFilledIcon)
-        if (Bod.isMaxed(bod.item)):
+        isPartiallyFilledIconButton = API.CreateGumpButton(
+            "", 996, isPartiallyFilledIcon, isPartiallyFilledIcon, isPartiallyFilledIcon
+        )
+        if Bod.isMaxed(bod.item):
             isMaxBribedIcon = 11400
-        isMaxBribedIconButton = API.CreateGumpButton("", 996, isMaxBribedIcon, isMaxBribedIcon, isMaxBribedIcon)
+        isMaxBribedIconButton = API.CreateGumpButton(
+            "", 996, isMaxBribedIcon, isMaxBribedIcon, isMaxBribedIcon
+        )
         label = API.CreateGumpLabel(bod.itemName)
         markButton = API.CreateGumpButton("", 996, 30083, 30084, 30085)
         return {
@@ -311,13 +438,40 @@ class BodBot:
     def _markBod(self, bodInfo):
         bodInfo["bod"].item.SetHue(11)
 
+    def _onRunebookSelectionClicked(self, runebookLabel):
+        targetSerial = API.RequestTarget()
+        if not targetSerial:
+            return
+        item = API.FindItem(targetSerial)
+        isRunebook = Item.isRunebookOrAtlas(item)
+        if not isRunebook:
+            return
+        runebookItem = Item(item)
+        self.runebookItem = runebookItem
+        self.runebookSerial = targetSerial
+        API.SetSharedVar("BOD_BOT_RUNEBOOK_ITEM", runebookItem)
+        API.SetSharedVar("BOD_BOT_RUNEBOOK_SERIAL", targetSerial)
+        runebookLabel.Text = f"Selected runebook ({targetSerial})"
+
+    def _onNextClicked(self):
+        pass
+
+    def _onNpcSelectionClicked(self, npcLabel):
+        targetSerial = API.RequestTarget()
+        if not targetSerial:
+            return
+        self.npcSerial = targetSerial
+        API.SetSharedVar("BOD_BOT_TAILOR_SERIAL", targetSerial)
+        npcLabel.Text = f"Selected npc ({targetSerial})"
+        self._scan()
 
     def _onContainerSelectionClicked(self, resourceLabel):
         targetSerial = API.RequestTarget()
         if not targetSerial:
             return
         self.containerSerial = targetSerial
-        resourceLabel.Text = f"Select resource container ({targetSerial})"
+        API.SetSharedVar("BOD_BOT_CONTAINER_SERIAL", targetSerial)
+        resourceLabel.Text = f"Selected resource container ({targetSerial})"
         self._scan()
 
     def _onTypeClicked(self, type):
@@ -325,6 +479,7 @@ class BodBot:
             if checkbox["label"] != type:
                 checkbox["checkbox"].IsChecked = False
         self.selectedType = type
+        API.SetSharedVar("BOD_BOT_SELECTED_TYPE", type)
         self._scan()
 
     def _onProfessionClicked(self, profession):
@@ -332,6 +487,7 @@ class BodBot:
             if checkbox["label"] != profession:
                 checkbox["checkbox"].IsChecked = False
         self.selectedProfession = profession
+        API.SetSharedVar("BOD_BOT_SELECTED_PROFESSION", profession)
         self.bodSkill = self.bodSkills[self.selectedProfession]
         self._scan()
 
@@ -359,6 +515,7 @@ class BodBot:
                 self._onClose()
                 return False
         return True
+
 
 qt = BodBot()
 qt.main()

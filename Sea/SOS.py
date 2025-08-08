@@ -1,6 +1,5 @@
 import API
 import re
-import csv
 import importlib
 import sys
 import math
@@ -18,21 +17,24 @@ import Error
 import Util
 import Math
 import Gump
+import Item
 
 importlib.reload(Debug)
 importlib.reload(Error)
 importlib.reload(Util)
 importlib.reload(Math)
 importlib.reload(Gump)
+importlib.reload(Item)
 
 from Debug import debug
 from Error import Error
 from Util import Util
 from Math import Math
 from Gump import Gump
+from Item import Item
 
 
-class ParseSos:
+class SOS:
     GUMP_ID = 999019
     SOS_GRAPHIC = 5358
     COORD_PATTERN = re.compile(
@@ -134,7 +136,14 @@ class ParseSos:
                 API.RemoveMapMarker(self._fishingName)
                 self._fishingName = None
             if self._fishingRegionGump:
-                self._scratch(self._fishingRegionGump, self._fishingX, self._fishingY, self._fishingRowX, self._fishingRowY, self._fishingLabel)
+                self._scratch(
+                    self._fishingRegionGump,
+                    self._fishingX,
+                    self._fishingY,
+                    self._fishingRowX,
+                    self._fishingRowY,
+                    self._fishingLabel,
+                )
                 self._fishingRegionGump = None
                 self._fishingX = None
                 self._fishingY = None
@@ -199,7 +208,7 @@ class ParseSos:
     def _processParsing(self):
         if self._scanIndex >= len(self._sosSerials):
             self.rows = self._groupBySector(self._rawRows)
-            for x, y, mapIndex, name, _, color, _, _ in self.rows:
+            for x, y, mapIndex, name, _, color, _, _, _ in self.rows:
                 API.AddMapMarker(name, x, y, mapIndex, color)
             self._started = False
             try:
@@ -222,7 +231,7 @@ class ParseSos:
         coord = self._extractCoords(lines[0])
         if coord:
             x, y = Math.latLonToTiles(*coord)
-            self._rawRows.append([x, y, 1, "", "", "", "", False])
+            self._rawRows.append([x, y, 1, "", "", "", "", False, sosSerial])
         else:
             debug(f"Could not parse coordinates from: {lines[0]}")
 
@@ -401,7 +410,7 @@ class ParseSos:
 
     def _groupBySector(self, rows):
         sectorClusters = defaultdict(list)
-        for x, y, mapIndex, *_ in rows:
+        for x, y, mapIndex, _, _, _, _, _, sosSerial in rows:
             sector = self._getSector(x, y)
             sectorClusters[sector].append([x, y, mapIndex])
 
@@ -411,7 +420,9 @@ class ParseSos:
             color = self.COLOR_PALETTE[idx % len(self.COLOR_PALETTE)]
             for i, (x, y, mapIndex) in enumerate(ordered, 1):
                 name = f"{sector} - {i}"
-                clustered.append([x, y, mapIndex, name, "PIN", color, 3, False])
+                clustered.append(
+                    [x, y, mapIndex, name, "PIN", color, 3, False, sosSerial]
+                )
         return clustered
 
     def _optimizeRoute(self, points):
@@ -430,9 +441,34 @@ class ParseSos:
     def _showGump(self):
         for region in self.REGION_NAMES:
             tab = self.gump.addTabButton(
-                region, "default", self.MAIN_GUMP_WIDTH, yOffset=25, label=region
+                region,
+                "default",
+                self.MAIN_GUMP_WIDTH,
+                yOffset=25,
+                label=region,
+                isDarkMode=True,
             )
             tab.addLabel(region, 10, 10)
+            tab.addButton(
+                "",
+                200,
+                8,
+                "radioBlue",
+                self.gump.onClick(
+                    lambda region=region: self._onMarkAllClicked(region)
+                ),
+            )
+            tab.addLabel("Mark", 225, 10)
+            tab.addButton(
+                "",
+                270,
+                8,
+                "radioBlue",
+                self.gump.onClick(
+                    lambda region=region: self._onMoveAllClicked(region)
+                ),
+            )
+            tab.addLabel("Move", 295, 10)
             self.regionGumps[region] = tab
         self.gump.addButton(
             "Scan",
@@ -440,6 +476,7 @@ class ParseSos:
             self.gump.height - 38,
             "default",
             self.gump.onClick(self._scan, "", ""),
+            True
         )
         self.gump.create()
         self.gump.setActiveTab("Yew")
@@ -454,7 +491,7 @@ class ParseSos:
         for region in self.REGION_NAMES:
             regionGump = self.regionGumps[region]
             y = yOffset
-            for rowX, rowY, _, name, _, _, _, isDone in self.rows:
+            for rowX, rowY, _, name, _, _, _, isDone, _ in self.rows:
                 if name.split(" - ")[0] != region:
                     continue
                 label = regionGump.addLabel(name, x, y)
@@ -470,6 +507,7 @@ class ParseSos:
                         "Moving...",
                         "",
                     ),
+                    True
                 )
                 regionGump.addButton(
                     "Fish",
@@ -483,6 +521,7 @@ class ParseSos:
                         "Fishing...",
                         "",
                     ),
+                    True
                 )
                 regionGump.addButton(
                     "",
@@ -500,6 +539,32 @@ class ParseSos:
                 if isDone:
                     self._addColorBox(regionGump, x, y)
                 y += 25
+
+    def _onMoveAllClicked(self, region):
+        try:
+            containerSerial = API.RequestTarget()
+            if not containerSerial:
+                return
+            container = API.FindItem(containerSerial)
+            isContainer = Item.isItemContainer(container)
+            if not isContainer:
+                return
+            for _, _, _, name, _, _, _, _, sosSerial in self.rows:
+                if name.split(" - ")[0] != region:
+                    continue
+                sos = API.FindItem(sosSerial)
+                if sos:
+                    Util.moveItem(sosSerial, containerSerial)
+        except Exception as e:
+            API.SysMsg(str(e))
+
+    def _onMarkAllClicked(self, region):
+        for _, _, _, name, _, _, _, _, sosSerial in self.rows:
+            if name.split(" - ")[0] != region:
+                continue
+            sos = API.FindItem(sosSerial)
+            if sos:
+                sos.SetHue(11)
 
     def _addColorBox(self, regionGump, x, y):
         rowY = int(y + ((23 - 4) / 2))
@@ -570,10 +635,10 @@ class ParseSos:
         return self._running
 
 
-parseSos = ParseSos()
-parseSos.main()
-while parseSos._isRunning():
-    parseSos.gump.tick()
-    parseSos.gump.tickSubGumps()
-    parseSos.tick()
+sos = SOS()
+sos.main()
+while sos._isRunning():
+    sos.gump.tick()
+    sos.gump.tickSubGumps()
+    sos.tick()
     API.Pause(0.1)

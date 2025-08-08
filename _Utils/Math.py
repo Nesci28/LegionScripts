@@ -16,7 +16,7 @@ class Math:
         if not m1 or not m2:
             return 999
         return max(abs(m1.X - m2.X), abs(m1.Y - m2.Y))
-    
+
     @staticmethod
     def convertToHex(obj):
         if isinstance(obj, dict):

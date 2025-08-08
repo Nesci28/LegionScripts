@@ -106,6 +106,7 @@ class Bod:
             "cloth",
             "spined leather",
             "horned leather",
+            "barbed leather",
             "gold",
             "dull copper",
             "shadow iron",
@@ -131,7 +132,7 @@ class Bod:
         props = API.ItemNameAndProps(item.Serial).split("\n")
         isSmall = props[2 + 1] == "Small Bulk Order"
         itemName = None
-        amountAlreadyFilled = None
+        amountAlreadyFilled = 0
         amountToFill = None
         isExceptionalLine = props[4 + 1]
         isExceptional = isExceptionalLine != "Normal"
@@ -141,13 +142,14 @@ class Bod:
         amountToMakeLine = props[5 + 1]
         match = re.search(r"Amount To Make:\s*(\d+)", amountToMakeLine)
         amountToFill = match.group(1)
+        itemNameLine = props[6 + 1]
+        match = re.search(r"([a-zA-Z '-]+):\s*(\d+)", itemNameLine)
+        itemName = match.group(1).strip()
         if craftingInfo:
             resourceHue = craftingInfo["materialHues"][material]["hue"]
             craftingInfoMaterial = craftingInfo["materialHues"][material]
         if isSmall:
-            itemNameLine = props[6 + 1]
-            match = re.search(r"([a-zA-Z '-]+):\s*(\d+)", itemNameLine)
-            itemName = match.group(1).strip()
+
             amountAlreadyFilled = int(match.group(2))
         return {
             "itemName": itemName,

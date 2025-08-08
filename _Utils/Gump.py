@@ -132,7 +132,7 @@ class Gump:
         tabGump = self.tabGumps[name]
         tabGump.gump.IsVisible = True
 
-    def addTabButton(self, name, iconType, gumpWidth, callback=None, yOffset=45, withStatus=False, label=""):
+    def addTabButton(self, name, iconType, gumpWidth, callback=None, yOffset=45, withStatus=False, label="", isDarkMode=False):
         y = 10 + len(self.tabGumps) * yOffset
         x = 0
 
@@ -141,7 +141,7 @@ class Gump:
             if callback:
                 callback()
 
-        btn = self.addButton(label, x + 5, y, iconType, self.onClick(onClick))
+        btn = self.addButton(label, x + 5, y, iconType, self.onClick(onClick), isDarkMode)
         self.buttons.append(btn)
         tabGump = self.createSubGump(gumpWidth, self.height, "right", withStatus, False)
         tabGump.gump.IsVisible = False
