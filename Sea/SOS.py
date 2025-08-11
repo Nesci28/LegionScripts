@@ -79,24 +79,37 @@ class SOS:
         "gray",
     ]
 
+    # ------------------------------
+    # Lifecycle
+    # ------------------------------
     def __init__(self):
         self._running = True
         self._started = False
+
+        # parsing/scan state
         self._sosSerials = []
         self._scanIndex = 0
-        self._rawRows = []
+        self._rawRows = []  # temporary rows before clustering
+        # row shape: [x, y, mapIndex, name, pinType, color, size, isDone, sosSerial]
         self.rows = []
+
+        # UI
         self.markerNames = []
         self.regionGumps = {}
+        self.gump = Gump(self.GUMP_WIDTH, self.GUMP_HEIGHT, self._onClose, False)
+        self.statusGump = self.gump.createSubGump(483, 100, withStatus=True)
+        self.progressBar = None
 
+        # inventory
         self.fishingPoleSerial = self._findItem(0x0DBF)
 
+        # movement
         self._moveActive = False
         self._moveTarget = (0, 0)
-        self._moveLastCommand = None
         self._lastDirectionSent = None
         self._lockedDirection = None
 
+        # fishing
         self._fishingActive = False
         self._fishingResult = []
         self._fishingOffset = (3, -3)
@@ -107,10 +120,6 @@ class SOS:
         self._fishingY = None
         self._fishingRowX = None
         self._fishingRowY = None
-
-        self.gump = Gump(self.GUMP_WIDTH, self.GUMP_HEIGHT, self._onClose, False)
-        self.statusGump = self.gump.createSubGump(483, 100, withStatus=True)
-        self.progressBar = None
 
     def main(self):
         self._showGump()
@@ -124,16 +133,46 @@ class SOS:
         if self._fishingActive:
             self._processFishing()
 
+    # ------------------------------
+    # JSON helpers
+    # ------------------------------
+    @staticmethod
+    def _json_default(o):
+        # Future-proof CLR numerics/objects coming from .NET
+        try:
+            return int(o)
+        except Exception:
+            pass
+        try:
+            return float(o)
+        except Exception:
+            pass
+        return str(o)
+
+    def _save_rows(self):
+        try:
+            with open(self.SAVE_FILE, "w", encoding="utf-8") as f:
+                json.dump(self.rows, f, default=self._json_default)
+        except Exception as e:
+            API.SysMsg(str(e))
+
+    # ------------------------------
+    # Fishing pipeline
+    # ------------------------------
     def _processFishing(self):
         if not self._fishingResult:
             xOffset, yOffset = self._fishingOffset
             self._fishingResult = self._fish(xOffset, yOffset)
+
         if "Finish" in self._fishingResult:
             self.statusGump.setStatus("Fishing complete!")
             self._fishingActive = False
             self._fishingResult = []
             if self._fishingName:
                 API.RemoveMapMarker(self._fishingName)
+                # keep markerNames list consistent
+                if self._fishingName in self.markerNames:
+                    self.markerNames.remove(self._fishingName)
                 self._fishingName = None
             if self._fishingRegionGump:
                 self._scratch(
@@ -152,24 +191,111 @@ class SOS:
             if self._fishingLabel:
                 self._fishingLabel.Hue = 996
                 self._fishingLabel = None
+
         elif "Continue" in self._fishingResult:
             self._fishingResult = []
+
         else:
             self.statusGump.setStatus("Fishing stopped (no result).")
             self._fishingActive = False
 
+    def _startFishing(self, name, label, regionGump, fishingX, fishingY, rowX, rowY):
+        self._fishingActive = True
+        self._fishingResult = []
+        self._fishingName = name
+        self._fishingLabel = label
+        label.Hue = 80
+        self._fishingRegionGump = regionGump
+        self._fishingX = fishingX
+        self._fishingY = fishingY
+        self._fishingRowX = rowX
+        self._fishingRowY = rowY
+
+    def _fish(self, xOffset, yOffset):
+        self.statusGump.setStatus("Fishing...")
+        API.ClearJournal()
+        Util.useObjectWithTarget(self.fishingPoleSerial)
+        API.TargetLandRel(xOffset, yOffset)
+        API.CreateCooldownBar(11, "Fishing...", 88)
+        return self._scanJournal()
+
+    def _scanJournal(self):
+        while True:
+            res = []
+            if API.InJournalAny(
+                [
+                    "You pull out torso!",
+                    "You pull out bone pile!",
+                    "You pull out barrel staves!",
+                    "You pull out skullcap!",
+                    "You pull out nautilus!",
+                    "You pull out painting!",
+                    "You pull out anchor!",
+                    "You pull out porthole!",
+                    "You pull out fish heads!",
+                    "You pull out skull!",
+                    "You pull out leg!",
+                    "You pull out shoes!",
+                    "You pull out pillow!",
+                    "You pull out shells!",
+                    "You pull out stool!",
+                    "You pull out portrait!",
+                    "You pull out chain!",
+                    "You pull out ship in a bottle!",
+                    "You pull out candelabra!",
+                    "You pull out shell!",
+                    "You pull out conch shell!",
+                    "You pull out boots!",
+                    "You pull out thigh boots!",
+                    "You pull out globe!",
+                    "You pull out tricorne hat!",
+                    "You pull out head!",
+                    "You pull out unfinished barrel!",
+                    "You pull out chest of drawers!",
+                    "You pull out arm!",
+                    "You pull out pelvis bone!",
+                    "You pull out table legs!",
+                    "You pull out sandals!",
+                    "You pull out broken clock!",
+                    "You pull out oars!",
+                    "You pull out Yellow Polkadot Bikini Top!",
+                    "$You pull out.*!",
+                ]
+            ):
+                res.append("Continue")
+            if API.InJournal("You pull up a heavy chest from the depths of the ocean!"):
+                res.append("Finish")
+            if res:
+                return res
+            API.Pause(0.5)
+
+    # ------------------------------
+    # Scan / parse
+    # ------------------------------
     def _loadScan(self):
         if os.path.exists(self.SAVE_FILE):
             try:
-                with open(self.SAVE_FILE, "r") as f:
-                    self.rows = json.load(f)
-                self.statusGump.setStatus("Loaded saved SOS data.")
-                self._updateRegionGump()
+                with open(self.SAVE_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+                # Basic sanity: each row should have 9 fields
+                if isinstance(data, list) and all(
+                    isinstance(r, (list, tuple)) and len(r) == 9 for r in data
+                ):
+                    self.rows = data
+                    self.statusGump.setStatus("Loaded saved SOS data.")
+                    self._updateRegionGump()
+                    # Re-add markers for loaded rows
+                    for x, y, mapIndex, name, _, color, _, _, _ in self.rows:
+                        API.AddMapMarker(name, x, y, mapIndex, color)
+                        if name not in self.markerNames:
+                            self.markerNames.append(name)
+                    return
+                else:
+                    self.statusGump.setStatus("Saved data corrupted; re-scanning.")
             except Exception as e:
-                debug(f"Failed to load SOS data: {e}")
-                self.statusGump.setStatus("Error loading saved SOS data.")
-        else:
-            self._scan()
+                API.SysMsg(str(e))
+                self.statusGump.setStatus("Error loading saved SOS data; re-scanning.")
+        self._scan()
 
     def _scan(self):
         self._clearExistingMarkers()
@@ -187,35 +313,17 @@ class SOS:
         self.statusGump.gump.Add(self.progressBar)
         self._started = True
 
-    def _clearExistingMarkers(self):
-        marker_path = r".\\TazUO\\Data\\Client\\userMarkers.usr"
-        if not os.path.exists(marker_path):
-            return
-        row_pattern = re.compile(
-            r"^\d{1,4},\d{1,4},1,[^,]+ - \d+,\s*,(red|blue|green|orange|purple|cyan|yellow|white|gray),\d+\s*$"
-        )
-        try:
-            with open(marker_path, "r", encoding="utf-8") as f:
-                lines = f.readlines()
-            filtered_lines = [
-                line for line in lines if not row_pattern.match(line.strip())
-            ]
-            with open(marker_path, "w", encoding="utf-8") as f:
-                f.writelines(filtered_lines)
-        except Exception as e:
-            debug(f"Failed to clean userMarkers.usr: {e}")
-
     def _processParsing(self):
         if self._scanIndex >= len(self._sosSerials):
+            # Cluster and create final rows
             self.rows = self._groupBySector(self._rawRows)
+            # Add markers and remember names for cleanup
             for x, y, mapIndex, name, _, color, _, _, _ in self.rows:
                 API.AddMapMarker(name, x, y, mapIndex, color)
+                if name not in self.markerNames:
+                    self.markerNames.append(name)
             self._started = False
-            try:
-                with open(self.SAVE_FILE, "w") as f:
-                    json.dump(self.rows, f)
-            except Exception as e:
-                debug(f"Failed to save SOS data: {e}")
+            self._save_rows()
             self._updateRegionGump()
             return
 
@@ -231,7 +339,8 @@ class SOS:
         coord = self._extractCoords(lines[0])
         if coord:
             x, y = Math.latLonToTiles(*coord)
-            self._rawRows.append([x, y, 1, "", "", "", "", False, sosSerial])
+            # raw row (pre-cluster): [x, y, mapIndex, "", "", "", "", False, sosSerial]
+            self._rawRows.append([x, y, 1, "", "", "", "", False, int(sosSerial)])
         else:
             debug(f"Could not parse coordinates from: {lines[0]}")
 
@@ -239,8 +348,66 @@ class SOS:
         API.Pause(self.TIMEOUT)
 
         self._scanIndex += 1
-        self.progressBar.SetProgress(self._scanIndex, len(self._sosSerials))
+        if self.progressBar:
+            self.progressBar.SetProgress(self._scanIndex, len(self._sosSerials))
 
+    # ------------------------------
+    # Grouping / route
+    # ------------------------------
+    def _groupBySector(self, rows):
+        """
+        Input rows (raw) shape:
+            [x, y, mapIndex, "", "", "", "", False, sosSerial]
+        Output clustered rows shape:
+            [x, y, mapIndex, name, "PIN", color, 3, False, sosSerial]
+        """
+        sectorClusters = defaultdict(list)
+
+        for x, y, mapIndex, _, _, _, _, _, sosSerial in rows:
+            sector = self._getSector(x, y)
+            # Keep serial with point
+            sectorClusters[sector].append([x, y, mapIndex, int(sosSerial)])
+
+        clustered = []
+
+        # Deterministic ordering by REGION_NAMES, then any leftover sectors
+        ordered_sectors = [s for s in self.REGION_NAMES if s in sectorClusters] + [
+            s for s in sectorClusters.keys() if s not in self.REGION_NAMES
+        ]
+
+        for idx, sector in enumerate(ordered_sectors):
+            cluster = sectorClusters[sector]
+            ordered = self._optimizeRoute(cluster)  # keeps 4-field shape
+            color = self.COLOR_PALETTE[idx % len(self.COLOR_PALETTE)]
+            for i, (x, y, mapIndex, sosSerial) in enumerate(ordered, 1):
+                name = f"{sector} - {i}"
+                clustered.append(
+                    [x, y, mapIndex, name, "PIN", color, 3, False, int(sosSerial)]
+                )
+
+        return clustered
+
+    def _optimizeRoute(self, points):
+        """
+        points: list[[x, y, mapIndex, sosSerial]]
+        returns ordered list with same shape
+        """
+        if not points:
+            return []
+        points = points[:]  # don't mutate caller list
+        ordered = [points.pop(0)]
+        while points:
+            last = ordered[-1]
+            next_point = min(
+                points, key=lambda p: math.hypot(last[0] - p[0], last[1] - p[1])
+            )
+            points.remove(next_point)
+            ordered.append(next_point)
+        return ordered
+
+    # ------------------------------
+    # Movement
+    # ------------------------------
     def _move(self, x, y, name, label, regionGump, fishingX, fishingY):
         self._moveTarget = (x, y)
         self._moveActive = True
@@ -321,123 +488,9 @@ class SOS:
 
         return dir_y or dir_x
 
-    def _findItem(self, itemId):
-        # API.ClearLeftHand()
-        # API.ClearRightHand()
-        API.Pause(1)
-        fishingPole = Util.findType(API.Backpack, itemId)
-        if not fishingPole:
-            API.SysMsg(f"No: {str(itemId)}", 33)
-            API.Stop()
-        return fishingPole.Serial
-
-    def _startFishing(self, name, label, regionGump, fishingX, fishingY, rowX, rowY):
-        self._fishingActive = True
-        self._fishingResult = []
-        self._fishingName = name
-        self._fishingLabel = label
-        label.Hue = 80
-        self._fishingRegionGump = regionGump
-        self._fishingX = fishingX
-        self._fishingY = fishingY
-        self._fishingRowX = rowX
-        self._fishingRowY = rowY
-
-    def _fish(self, xOffset, yOffset):
-        self.statusGump.setStatus("Fishing...")
-        API.ClearJournal()
-        Util.useObjectWithTarget(self.fishingPoleSerial)
-        API.TargetLandRel(xOffset, yOffset)
-        API.CreateCooldownBar(11, "Fishing...", 88)
-        return self._scanJournal()
-
-    def _scanJournal(self):
-        while True:
-            res = []
-            if API.InJournalAny(
-                [
-                    "You pull out torso!",
-                    "You pull out bone pile!",
-                    "You pull out barrel staves!",
-                    "You pull out skullcap!",
-                    "You pull out nautilus!",
-                    "You pull out painting!",
-                    "You pull out anchor!",
-                    "You pull out porthole!",
-                    "You pull out fish heads!",
-                    "You pull out skull!",
-                    "You pull out leg!",
-                    "You pull out shoes!",
-                    "You pull out pillow!",
-                    "You pull out shells!",
-                    "You pull out stool!",
-                    "You pull out portrait!",
-                    "You pull out chain!",
-                    "You pull out ship in a bottle!",
-                    "You pull out candelabra!",
-                    "You pull out shell!",
-                    "You pull out conch shell!",
-                    "You pull out boots!",
-                    "You pull out thigh boots!",
-                    "You pull out globe!",
-                    "You pull out tricorne hat!",
-                    "You pull out head!",
-                    "You pull out unfinished barrel!",
-                    "You pull out chest of drawers!",
-                    "You pull out arm!",
-                    "You pull out pelvis bone!",
-                    "You pull out table legs!",
-                    "You pull out sandals!",
-                    "You pull out broken clock!",
-                    "You pull out oars!",
-                    "You pull out Yellow Polkadot Bikini Top!",
-                    "$You pull out.*!",
-                ]
-            ):
-                res.append("Continue")
-            if API.InJournal("You pull up a heavy chest from the depths of the ocean!"):
-                res.append("Finish")
-            if res:
-                return res
-            API.Pause(0.5)
-
-    def _extractCoords(self, line):
-        match = self.COORD_PATTERN.search(line)
-        if not match:
-            return None
-        latDeg, latMin, latDir, lonDeg, lonMin, lonDir = match.groups()
-        return int(latDeg), int(latMin), latDir, int(lonDeg), int(lonMin), lonDir
-
-    def _groupBySector(self, rows):
-        sectorClusters = defaultdict(list)
-        for x, y, mapIndex, _, _, _, _, _, sosSerial in rows:
-            sector = self._getSector(x, y)
-            sectorClusters[sector].append([x, y, mapIndex])
-
-        clustered = []
-        for idx, (sector, cluster) in enumerate(sectorClusters.items()):
-            ordered = self._optimizeRoute(cluster)
-            color = self.COLOR_PALETTE[idx % len(self.COLOR_PALETTE)]
-            for i, (x, y, mapIndex) in enumerate(ordered, 1):
-                name = f"{sector} - {i}"
-                clustered.append(
-                    [x, y, mapIndex, name, "PIN", color, 3, False, sosSerial]
-                )
-        return clustered
-
-    def _optimizeRoute(self, points):
-        if not points:
-            return []
-        ordered = [points.pop(0)]
-        while points:
-            last = ordered[-1]
-            next_point = min(
-                points, key=lambda p: math.hypot(last[0] - p[0], last[1] - p[1])
-            )
-            points.remove(next_point)
-            ordered.append(next_point)
-        return ordered
-
+    # ------------------------------
+    # UI
+    # ------------------------------
     def _showGump(self):
         for region in self.REGION_NAMES:
             tab = self.gump.addTabButton(
@@ -454,9 +507,7 @@ class SOS:
                 200,
                 8,
                 "radioBlue",
-                self.gump.onClick(
-                    lambda region=region: self._onMarkAllClicked(region)
-                ),
+                self.gump.onClick(lambda region=region: self._onMarkAllClicked(region)),
             )
             tab.addLabel("Mark", 225, 10)
             tab.addButton(
@@ -464,19 +515,18 @@ class SOS:
                 270,
                 8,
                 "radioBlue",
-                self.gump.onClick(
-                    lambda region=region: self._onMoveAllClicked(region)
-                ),
+                self.gump.onClick(lambda region=region: self._onMoveAllClicked(region)),
             )
             tab.addLabel("Move", 295, 10)
             self.regionGumps[region] = tab
+
         self.gump.addButton(
             "Scan",
             5,
             self.gump.height - 38,
             "default",
             self.gump.onClick(self._scan, "", ""),
-            True
+            True,
         )
         self.gump.create()
         self.gump.setActiveTab("Yew")
@@ -507,7 +557,7 @@ class SOS:
                         "Moving...",
                         "",
                     ),
-                    True
+                    True,
                 )
                 regionGump.addButton(
                     "Fish",
@@ -521,7 +571,7 @@ class SOS:
                         "Fishing...",
                         "",
                     ),
-                    True
+                    True,
                 )
                 regionGump.addButton(
                     "",
@@ -540,31 +590,66 @@ class SOS:
                     self._addColorBox(regionGump, x, y)
                 y += 25
 
-    def _onMoveAllClicked(self, region):
+  # ------------------------------
+    # Bulk actions: Mark / Move
+    # ------------------------------
+    def _onMoveAllClicked(self, region: str):
+        """
+        Prompt for a container, then move all SOS bottles belonging to `region`
+        into that container.
+        """
         try:
             containerSerial = API.RequestTarget()
             if not containerSerial:
+                self.statusGump.setStatus("No container targeted.")
                 return
-            container = API.FindItem(containerSerial)
-            isContainer = Item.isItemContainer(container)
-            if not isContainer:
+
+            container = API.FindItem(int(containerSerial))
+            if not container or not Item.isItemContainer(container):
+                API.SysMsg("Target is not a container.", 33)
+                self.statusGump.setStatus("Move aborted: invalid container.")
                 return
+
+            moved = 0
+            for _, _, _, name, _, _, _, _, sosSerial in self.rows:
+                # match e.g. "Yew - 1" -> "Yew"
+                if name.split(" - ")[0] != region:
+                    continue
+                if sosSerial is None:
+                    continue
+
+                sos = API.FindItem(int(sosSerial))
+                if sos:
+                    Util.moveItem(int(sosSerial), int(containerSerial))
+                    moved += 1
+
+            self.statusGump.setStatus(f"Moved {moved} SOS to the target container.")
+        except Exception as e:
+            API.SysMsg(str(e))
+            self.statusGump.setStatus("Error while moving SOS.")
+
+    def _onMarkAllClicked(self, region: str):
+        """
+        Hue all SOS bottles belonging to `region` so they stand out in your pack.
+        """
+        try:
+            marked = 0
             for _, _, _, name, _, _, _, _, sosSerial in self.rows:
                 if name.split(" - ")[0] != region:
                     continue
-                sos = API.FindItem(sosSerial)
+                if sosSerial is None:
+                    continue
+
+                sos = API.FindItem(int(sosSerial))
                 if sos:
-                    Util.moveItem(sosSerial, containerSerial)
+                    # 11 = the hue you were using previously
+                    sos.SetHue(11)
+                    marked += 1
+
+            self.statusGump.setStatus(f"Marked {marked} SOS in {region}.")
         except Exception as e:
             API.SysMsg(str(e))
-
-    def _onMarkAllClicked(self, region):
-        for _, _, _, name, _, _, _, _, sosSerial in self.rows:
-            if name.split(" - ")[0] != region:
-                continue
-            sos = API.FindItem(sosSerial)
-            if sos:
-                sos.SetHue(11)
+            self.statusGump.setStatus("Error while marking SOS.")
 
     def _addColorBox(self, regionGump, x, y):
         rowY = int(y + ((23 - 4) / 2))
@@ -574,14 +659,52 @@ class SOS:
         label.Hue = 996
         self._addColorBox(regionGump, x, y)
         for i, row in enumerate(self.rows):
-            rowX, rowY, a, b, c, d, e, _ = row
+            rowX, rowY, a, b, c, d, e, isDone, sosSerial = row  # 9 fields
             if rowX == sosX and rowY == sosY:
-                self.rows[i] = (rowX, rowY, a, b, c, d, e, True)
+                self.rows[i] = [rowX, rowY, a, b, c, d, e, True, int(sosSerial)]
+        self._save_rows()
+
+    # ------------------------------
+    # Map markers file cleanup
+    # ------------------------------
+    def _clearExistingMarkers(self):
+        marker_path = self.USER_MARKERS_FILE
+        if not os.path.exists(marker_path):
+            return
+        row_pattern = re.compile(
+            r"^\d{1,4},\d{1,4},1,[^,]+ - \d+,\s*,(red|blue|green|orange|purple|cyan|yellow|white|gray),\d+\s*$"
+        )
         try:
-            with open(self.SAVE_FILE, "w") as f:
-                json.dump(self.rows, f)
+            with open(marker_path, "r", encoding="utf-8") as f:
+                lines = f.readlines()
+            filtered_lines = [
+                line for line in lines if not row_pattern.match(line.strip())
+            ]
+            with open(marker_path, "w", encoding="utf-8") as f:
+                f.writelines(filtered_lines)
         except Exception as e:
-            debug(f"Failed to update scratched state: {e}")
+            debug(f"Failed to clean userMarkers.usr: {e}")
+
+    # ------------------------------
+    # Inventory
+    # ------------------------------
+    def _findItem(self, itemId):
+        API.Pause(1)
+        fishingPole = Util.findType(API.Backpack, itemId)
+        if not fishingPole:
+            API.SysMsg(f"No: {str(itemId)}", 33)
+            API.Stop()
+        return fishingPole.Serial
+
+    # ------------------------------
+    # Utils
+    # ------------------------------
+    def _extractCoords(self, line):
+        match = self.COORD_PATTERN.search(line)
+        if not match:
+            return None
+        latDeg, latMin, latDir, lonDeg, lonMin, lonDir = match.groups()
+        return int(latDeg), int(latMin), latDir, int(lonDeg), int(lonMin), lonDir
 
     def _getSector(self, x, y):
         if x < 1385 and 0 <= y < 1280:
@@ -627,8 +750,9 @@ class SOS:
         for sub in self.gump.subGumps:
             sub.destroy()
         self.gump.destroy()
-        for name in self.markerNames:
+        for name in list(self.markerNames):
             API.RemoveMapMarker(name)
+        self.markerNames = []
         API.Stop()
 
     def _isRunning(self):

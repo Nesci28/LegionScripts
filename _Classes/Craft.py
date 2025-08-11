@@ -116,7 +116,7 @@ class Craft:
 
     def _useTool(self):
         toolId = self.craftingInfo["tool"]["graphic"]
-        tool = API.FindType(toolId, API.Backpack)
+        tool = API.FindType(toolId, API.Backpack, hue=0)
         API.UseObject(tool)
         if API.HasGump(460) and not self.hasChangedTool:
             return
