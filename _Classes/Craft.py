@@ -79,6 +79,8 @@ class Craft:
         for resource in resources:
             resourceMinAmount = resource["amount"]
             resourceId = resource["graphic"]
+            if not resource["hasSpecialHue"]:
+                resourceHue = 0
             resourceAmount = 200
             resourceInBackpack = Util.Util.findTypeWithSpecialHue(
                 resourceId,

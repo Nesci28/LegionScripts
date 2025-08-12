@@ -34,9 +34,16 @@ class Debug:
     magic = Magic()
     
     def main(self):
-        npcs = API.NearestMobiles([API.Notoriety.Invulnerable], 1)
-        for npc in npcs:
-            API.SysMsg(npc.Title)
+        container = API.FindItem(0x41C617E5)
+        Util.openContainer(container)
+        # API.SysMsg(str(container))
+        resourceInChest = Util.findTypeWithSpecialHue(
+            3966,
+            container,
+            200,
+            0,
+        )
+        API.SysMsg(str(resourceInChest))
 
 
 Debug().main()

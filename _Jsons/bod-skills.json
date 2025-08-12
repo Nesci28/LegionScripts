@@ -529,6 +529,91 @@
                 "graphic": 5078,
                 "buttonId": 625,
                 "disposeMethod": "Salvage Bag"
+            },
+            "Bone Helmet": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 4,
+                        "hasSpecialHue": true
+                    },
+                    {
+                        "graphic": 3966,
+                        "amount": 2,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": 5206,
+                "buttonId": 641,
+                "disposeMethod": "Trash"
+            },
+            "Bone Gloves": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 6,
+                        "hasSpecialHue": true
+                    },
+                    {
+                        "graphic": 3966,
+                        "amount": 2,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": 5205,
+                "buttonId": 642,
+                "disposeMethod": "Trash"
+            },
+            "Bone Arms": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 8,
+                        "hasSpecialHue": true
+                    },
+                    {
+                        "graphic": 3966,
+                        "amount": 4,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": 5203,
+                "buttonId": 643,
+                "disposeMethod": "Trash"
+            },
+            "Bone Leggings": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 10,
+                        "hasSpecialHue": true
+                    },
+                    {
+                        "graphic": 3966,
+                        "amount": 6,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": 5202,
+                "buttonId": 644,
+                "disposeMethod": "Trash"
+            },
+            "Bone Armor": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 12,
+                        "hasSpecialHue": true
+                    },
+                    {
+                        "graphic": 3966,
+                        "amount": 10,
+                        "hasSpecialHue": false
+                    }
+                ],
+                "graphic": 5199,
+                "buttonId": 645,
+                "disposeMethod": "Trash"
             }
         }
     }
