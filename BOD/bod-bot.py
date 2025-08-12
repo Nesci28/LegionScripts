@@ -259,7 +259,6 @@ class BodBot:
             return
         npc = API.FindMobile(self.npcSerial)
         distance = Math.distanceBetween(API.Player, npc)
-        API.SysMsg(str(distance))
         if distance > 1:
             return
         self.gump.setStatus("Turn In...")
@@ -350,7 +349,6 @@ class BodBot:
         isSmall = self.selectedType == "Small"
 
         bodItems = Bod.findAllBodItems(selectedBodGraphic, selectedBodHue, isSmall)
-        API.SysMsg(str(len(bodItems)))
         craft = None
         if resourceChest:
             craftingInfo = self.craftingInfos[self.selectedProfession]
@@ -358,22 +356,25 @@ class BodBot:
 
         try:
             for bodItem in bodItems:
-                bodInfo = Bod(self.bodSkill, bodItem, craftingInfo, craft)
-                labels = self._generateLabels(bodInfo)
-                self.bodInfos.append(
-                    {
-                        "bod": bodInfo,
-                        "id": Python.v4(),
-                        "label": labels["label"],
-                        "isFilledIconButton": labels["isFilledIconButton"],
-                        "isMaxBribedIconButton": labels["isMaxBribedIconButton"],
-                        "isPartiallyFilledIconButton": labels[
-                            "isPartiallyFilledIconButton"
-                        ],
-                        "markButton": labels["markButton"],
-                        "elements": [],
-                    }
-                )
+                try:
+                    bodInfo = Bod(self.bodSkill, bodItem, craftingInfo, craft)
+                    labels = self._generateLabels(bodInfo)
+                    self.bodInfos.append(
+                        {
+                            "bod": bodInfo,
+                            "id": Python.v4(),
+                            "label": labels["label"],
+                            "isFilledIconButton": labels["isFilledIconButton"],
+                            "isMaxBribedIconButton": labels["isMaxBribedIconButton"],
+                            "isPartiallyFilledIconButton": labels[
+                                "isPartiallyFilledIconButton"
+                            ],
+                            "markButton": labels["markButton"],
+                            "elements": [],
+                        }
+                    )
+                except:
+                    pass
             for i, bodInfo in enumerate(self.bodInfos):
                 yOffset = i * 18
                 bodInfo["yOffset"] = yOffset
