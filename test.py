@@ -34,16 +34,9 @@ class Debug:
     magic = Magic()
     
     def main(self):
-        container = API.FindItem(0x41C617E5)
-        Util.openContainer(container)
-        # API.SysMsg(str(container))
-        resourceInChest = Util.findTypeWithSpecialHue(
-            3966,
-            container,
-            200,
-            0,
-        )
-        API.SysMsg(str(resourceInChest))
-
+        while True:
+            API.SysMsg(str(len(API.JournalEntries)))
+            API.ClearJournal()
+            API.Pause(1)
 
 Debug().main()

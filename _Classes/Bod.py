@@ -208,6 +208,7 @@ class Bod:
                 if not API.WaitForTarget("any", 1):
                     API.IgnoreObject(npc.Serial)
                     continue
+                total = 0
                 while True:
                     if API.InJournal("My business is being watched by the Guild"):
                         API.IgnoreObject(npc.Serial)
@@ -219,10 +220,18 @@ class Bod:
                         API.Target(self.item.Serial)
                         while not self._findBridePrice():
                             API.Pause(0.1)
-                        Util.moveItem(self.item.Serial, npc.Serial)
+                        API.ClearJournal()
+                        while not self._findBridePrice():
+                            Util.moveItem(self.item.Serial, npc.Serial)
+                            API.Pause(0.1)
+                        for journalEntry in API.JournalEntries:
+                            match = re.search(r"([0-9][0-9,]*)\s+gold", journalEntry.Text, re.IGNORECASE)
+                            if match:
+                                total += int(match.group(1).replace(",", ""))
                         API.Pause(1)
                         break
                     API.Pause(0.1)
+                return total
 
     def fill(self):
         self._fillBod()
@@ -271,7 +280,7 @@ class Bod:
         API.Pause(1)
 
     def _findBridePrice(self):
-        return API.InJournal("$\d gold coin")
+        return API.InJournal("$\d gold")
 
     def _update(self):
         values = Bod._parse(self.item, self.craftingInfo)

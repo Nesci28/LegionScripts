@@ -64,8 +64,12 @@ class BodBot:
         self.containerSerial = API.GetSharedVar("BOD_BOT_CONTAINER_SERIAL") or None
         self.tailorSerial = API.GetSharedVar("BOD_BOT_TAILOR_SERIAL") or None
         self.runebookSerial = API.GetSharedVar("BOD_BOT_RUNEBOOK_SERIAL") or None
+        self.beetleSerial = API.GetSharedVar("BOD_BOT_BEETLE_SERIAL") or None
         self.bodCountLabel = None
+        self.totalLabel = None
+        self.total = 0
         self.runebookItem = API.GetSharedVar("BOD_BOT_RUNEBOOK_ITEM") or None
+        self.beetleMobile = API.GetSharedVar("BOD_BOT_BEETLE_MOBILE") or None
 
         self.bodSkills = Math.convertToHex(bodSkillsStr)
         self.craftingInfos = Math.convertToHex(craftingInfosStr)
@@ -90,7 +94,7 @@ class BodBot:
 
     def _showGump(self):
         width = 375
-        height = 450
+        height = 470
         g = Gump(width, height, self._onClose)
         self.gump = g
 
@@ -191,6 +195,31 @@ class BodBot:
         x = 1
         y += 20
 
+        selectBeetleText = "Select Beetle"
+        if (self.beetleSerial):
+            selectBeetleText = f"Selected Beetle ({self.beetleSerial})"
+        beetleLabel = g.addLabel(selectBeetleText, 25, y)
+        g.addButton(
+            "",
+            x,
+            y,
+            "radioBlue",
+            self.gump.onClick(
+                lambda beetleLabel=beetleLabel: self._onBeetleSelectionClicked(beetleLabel)
+            ),
+        )
+        g.addButton(
+            "Cloth",
+            225,
+            y,
+            "default",
+            self.gump.onClick(lambda: self._onClothClicked()),
+            True,
+        )
+
+        x = 1
+        y += 20
+
         scrollAreaWidth = width - 13
         scrollAreaHeight = round(height / 2)
 
@@ -211,11 +240,14 @@ class BodBot:
         self.gump.gump.Add(self.scrollArea)
         self._scan()
 
-        y += scrollAreaHeight
+        y += scrollAreaHeight + 2
         x = 1
 
-        bodCountLabel = g.addLabel("Bod count: 0", 25, y)
+        bodCountLabel = g.addLabel("Bod count: 0", 1, y)
         self.bodCountLabel = bodCountLabel
+
+        totalLabel = g.addLabel("Bribe total: 0", 150, y)
+        self.totalLabel = totalLabel
         y += 25
 
         for action in ["Bribe", "Fill", "Turn in", "Rescan"]:
@@ -306,6 +338,7 @@ class BodBot:
 
     def _bribe(self):
         self.gump.setStatus("Bribing...")
+        self.total = 0
         counter = 0
         for bodInfo in self.bodInfos:
             isMaxed = Bod.isMaxed(bodInfo["bod"].item)
@@ -317,7 +350,9 @@ class BodBot:
             if not isMaxed:
                 currentCounter += 1
                 self.gump.setStatus(f"Bribing... {currentCounter}/{counter}")
-                bodInfo["bod"].bribe()
+                total = bodInfo["bod"].bribe()
+                self.total += total
+                self.totalLabel.Text = f"Bribe total: {str(self.total)}"
             self._resetScrollAreaElement(bodInfo)
         self.gump.setStatus("Ready")
 
@@ -439,6 +474,17 @@ class BodBot:
     def _markBod(self, bodInfo):
         bodInfo["bod"].item.SetHue(11)
 
+    def _onBeetleSelectionClicked(self, beetleLabel):
+        targetSerial = API.RequestTarget()
+        if not targetSerial:
+            return
+        mobile = API.FindMobile(targetSerial)
+        self.beetleMobile = mobile
+        self.beetleSerial = targetSerial
+        API.SetSharedVar("BOD_BOT_BEETLE_ITEM", mobile)
+        API.SetSharedVar("BOD_BOT_BEETLE_SERIAL", targetSerial)
+        beetleLabel.Text = f"Selected beetle ({targetSerial})"
+
     def _onRunebookSelectionClicked(self, runebookLabel):
         targetSerial = API.RequestTarget()
         if not targetSerial:
@@ -456,6 +502,31 @@ class BodBot:
 
     def _onNextClicked(self):
         pass
+
+    def _onClothClicked(self):
+        self.gump.setStatus("Grabing and cuting bolts")
+        if not self.beetleMobile:
+            self.gump.setStatus("Ready")
+            return
+        bolts = Util.findTypeWorld(3995)
+        beetle = API.FindMobile(self.beetleSerial)
+        scissors = API.FindType(3998, API.Backpack)
+        if not bolts or not beetle or not scissors:
+            return
+        API.ClearJournal()
+        while not API.InJournalAny(["That container cannot hold more weight."]):
+            Util.moveItem(bolts.Serial, API.Backpack, 60)
+            Util.useObjectWithTarget(scissors.Serial)
+            inBackpackBolts = API.FindType(3995, API.Backpack)
+            API.Target(inBackpackBolts)
+            inBackpackCloths = None
+            while not inBackpackCloths:
+                inBackpackCloths = API.FindType(5990, API.Backpack)
+                API.Pause(0.1)
+            API.SysMsg(f"Found cloths {inBackpackCloths.Serial} - {self.beetleSerial}")
+            Util.moveItem(inBackpackCloths.Serial, self.beetleSerial)
+            API.SysMsg("Moving")
+        self.gump.setStatus("Ready")
 
     def _onNpcSelectionClicked(self, npcLabel):
         targetSerial = API.RequestTarget()

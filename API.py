@@ -81,6 +81,7 @@ class PyEntity:
         pass
 
 class PyGameObject:
+    Impassible: bool = None
     __class__: str = None
     X: int = None
     Y: int = None
@@ -150,6 +151,8 @@ class PyProfile:
     AutoLootEnabled: bool = None
 
 class PyStatic:
+    IsImpassible: bool = None
+    IsVegetation: bool = None
     __class__: str = None
 
 JournalEntries = None
@@ -880,13 +883,20 @@ def Dismount(skipQueue: bool = True) -> None:
     """
     pass
 
-def Mount(serial: int, skipQueue: bool = True) -> None:
+def Mount(serial: int = 1337, skipQueue: bool = True) -> None:
     """
      Attempt to mount(double click)
      Example:
      ```py
      API.Mount(0x12345678)
      ```
+    
+    """
+    pass
+
+def SetMount(serial: int) -> None:
+    """
+     This will set your saved mount for this character.
     
     """
     pass
@@ -990,6 +1000,38 @@ def CancelTarget() -> None:
      if API.WaitForTarget():
        API.CancelTarget()
        API.SysMsg("Targeting cancelled, april fools made you target something!")
+     ```
+    
+    """
+    pass
+
+def PreTarget(serial: int, targetType: str = "neutral") -> None:
+    """
+     Sets a pre-target that will be automatically applied when the next targeting request comes from the server.
+     This is useful for automating actions that require targeting, like using bandages or spells.
+     Example:
+     ```py
+     # Pre-target self for healing
+     API.PreTarget(API.Player.Serial, "beneficial")
+     API.UseObject(bandage_item)  # This will automatically target self when targeting request comes
+    
+     # Pre-target an enemy for attack spells
+     enemy = API.FindMobile(mobile_serial)
+     API.PreTarget(enemy.Serial, "harmful")
+     API.CastSpell("Lightning")  # This will automatically target the enemy
+     ```
+    
+    """
+    pass
+
+def CancelPreTarget() -> None:
+    """
+     Cancels any active pre-target.
+     Example:
+     ```py
+     API.PreTarget(enemy.Serial, "harmful")
+     # Changed my mind, cancel the pre-target
+     API.CancelPreTarget()
      ```
     
     """
@@ -1371,6 +1413,65 @@ def GetTile(x: int, y: int) -> PyGameObject:
      tile = API.GetTile(1414, 1515)
      if tile:
        API.SysMsg(f"Found a tile with graphic: {tile.Graphic}")
+     ```
+    
+    """
+    pass
+
+def GetStaticsAt(x: int, y: int) -> list[Any]:
+    """
+     Gets all static objects at a specific position (x, y coordinates).
+     This includes trees, vegetation, buildings, and other non-movable scenery.
+     Example:
+     ```py
+     statics = API.GetStaticsAt(1000, 1000)
+     for s in statics:
+         API.SysMsg(f"Static Graphic: {s.Graphic}, Z: {s.Z}")
+     ```
+    
+    """
+    pass
+
+def GetStaticsInArea(x1: int, y1: int, x2: int, y2: int) -> list[Any]:
+    """
+     Gets all static objects within a rectangular area defined by coordinates.
+     This includes trees, vegetation, buildings, and other non-movable scenery.
+     Example:
+     ```py
+     statics = API.GetStaticsInArea(1000, 1000, 1010, 1010)
+     API.SysMsg(f"Found {len(statics)} statics in area")
+     for s in statics:
+         if s.IsVegetation:
+             API.SysMsg(f"Vegetation Graphic: {s.Graphic} at {s.X}, {s.Y}")
+     ```
+    
+    """
+    pass
+
+def GetMultisAt(x: int, y: int) -> list[Any]:
+    """
+     Gets all multi objects at a specific position (x, y coordinates).
+     This includes server-side house data.
+     Example:
+     ```py
+     multis = API.GetMultisAt(1000, 1000)
+     for m in multis:
+         API.SysMsg(f"Multi Graphic: {m.Graphic}, Z: {m.Z}")
+     ```
+    
+    """
+    pass
+
+def GetMultisInArea(x1: int, y1: int, x2: int, y2: int) -> list[Any]:
+    """
+     Gets all multi objects within a rectangular area defined by coordinates.
+     This includes server-side house data.
+     Example:
+     ```py
+     multis = API.GetMultisInArea(1000, 1000, 1010, 1010)
+     API.SysMsg(f"Found {len(multis)} multis in area")
+     for m in multis:
+         API.SysMsg(f"Multi Graphic: {m.Graphic} at {m.X}, {m.Y}")
      ```
     
     """
