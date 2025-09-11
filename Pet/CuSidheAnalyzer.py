@@ -3,15 +3,11 @@ import re
 import urllib.request
 from urllib.parse import urlencode
 import importlib
-import sys
 from decimal import Decimal
+from LegionPath import LegionPath
 
-sys.path.append(
-    r".\\TazUO\\LegionScripts\\_Utils"
-)
-sys.path.append(
-    r".\\TazUO\\LegionScripts\\_Classes"
-)
+LegionPath.addSubdirs()
+
 import Util
 import Item
 

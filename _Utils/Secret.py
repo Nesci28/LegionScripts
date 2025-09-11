@@ -1,8 +1,10 @@
 import os
 
+from LegionPath import LegionPath
+
 class Secret:
     @staticmethod
-    def loadEnv(path=".\\TazUO\\LegionScripts\\.env"):
+    def loadEnv(path=LegionPath.createPath("\\.env")):
         if not os.path.exists(path):
             print(f"Warning: {path} file not found")
             return

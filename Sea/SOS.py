@@ -1,16 +1,13 @@
 import API
 import re
 import importlib
-import sys
 import math
 from collections import defaultdict
 import json
 import os
+from LegionPath import LegionPath
 
-sys.path.append(r".\\TazUO\\LegionScripts\\_Decorators")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Classes")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Utils")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Skills")
+LegionPath.addSubdirs()
 
 import Debug
 import Error

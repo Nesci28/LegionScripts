@@ -1,15 +1,11 @@
 import API
 import time
 import importlib
-import sys
 import json
+from LegionPath import LegionPath
 
-sys.path.append(
-    r".\\TazUO\\LegionScripts\\_Classes"
-)
-sys.path.append(
-    r".\\TazUO\\LegionScripts\\_Utils"
-)
+LegionPath.addSubdirs()
+
 import Bod
 import Util
 import Math
@@ -23,7 +19,7 @@ from Util import Util
 from Math import Math
 
 bodSkillsJson = open(
-    r".\\TazUO\\LegionScripts\\_Jsons\\bod-skills.json"
+    LegionPath.createPath("_Jsons\\bod-skills.json")
 )
 bodSkillsStr = json.load(bodSkillsJson)
 bodSkills = Math.convertToHex(bodSkillsStr)

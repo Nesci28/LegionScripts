@@ -1,10 +1,10 @@
 import API
 import importlib
-import sys
 
-sys.path.append(
-    r".\\TazUO\\LegionScripts\\_Utils"
-)
+from LegionPath import LegionPath
+
+LegionPath.addSubdirs()
+
 import Gump
 
 importlib.reload(Gump)

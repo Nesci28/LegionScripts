@@ -2,7 +2,8 @@
   {
     "Name": "Jewelry - Seth",
     "ItemNames": [],
-    "Hue": 180,
+    "Hue": 255,
+    "HighlightColor": "#FF0000",
     "Properties": [
       {
         "Name": "Spell Damage Increase",
@@ -70,12 +71,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Jewelry - Seth",
     "ItemNames": [],
     "Hue": 180,
+    "HighlightColor": "#FF0000",
     "Properties": [
       {
         "Name": "Swing Speed Increase",
@@ -133,12 +136,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Bokuto - Seth",
     "ItemNames": [],
     "Hue": 180,
+    "HighlightColor": "#FF0000",
     "Properties": [
       {
         "Name": "Splintering Weapon",
@@ -191,12 +196,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Shield - Seth",
     "ItemNames": [],
     "Hue": 180,
+    "HighlightColor": "#FF0000",
     "Properties": [
       {
         "Name": "Spell Channeling",
@@ -259,12 +266,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Weapon - Seth",
     "ItemNames": [],
     "Hue": 180,
+    "HighlightColor": "#FF0000",
     "Properties": [
       {
         "Name": "Hit Mana Leech",
@@ -317,12 +326,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Weapon - Seth",
     "ItemNames": [],
     "Hue": 180,
+    "HighlightColor": "#FF0000",
     "Properties": [
       {
         "Name": "Spell Channeling",
@@ -370,12 +381,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Armor - Seth",
     "ItemNames": [],
     "Hue": 180,
+    "HighlightColor": "#FF0000",
     "Properties": [
       {
         "Name": "Hit Point Increase",
@@ -433,12 +446,14 @@
       "Legs": true,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Jewelry (Dexxer) - Nikard",
     "ItemNames": [],
-    "Hue": 2,
+    "Hue": 0,
+    "HighlightColor": "#0000FF",
     "Properties": [
       {
         "Name": "Swing Speed Increase",
@@ -511,12 +526,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Jewelry (Mage) - Nikard",
     "ItemNames": [],
-    "Hue": 2,
+    "Hue": 0,
+    "HighlightColor": "#0000FF",
     "Properties": [
       {
         "Name": "Spell Damage Increase",
@@ -604,12 +621,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Jewelry (Other) - Nikard",
     "ItemNames": [],
-    "Hue": 2,
+    "Hue": 0,
+    "HighlightColor": "#0000FF",
     "Properties": [
       {
         "Name": "Hit Chance Increase",
@@ -696,12 +715,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Jewelry (Other) - Nikard",
     "ItemNames": [],
-    "Hue": 2,
+    "Hue": 0,
+    "HighlightColor": "#0000FF",
     "Properties": [
       {
         "Name": "Defense Chance Increase",
@@ -788,12 +809,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Weapon - Nikard",
     "ItemNames": [],
-    "Hue": 2,
+    "Hue": 0,
+    "HighlightColor": "#0000FF",
     "Properties": [
       {
         "Name": "Splintering Weapon",
@@ -861,12 +884,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Armor - Nikard",
     "ItemNames": [],
-    "Hue": 2,
+    "Hue": 0,
+    "HighlightColor": "#0000FF",
     "Properties": [
       {
         "Name": "Dexterity Bonus",
@@ -968,12 +993,14 @@
       "Legs": true,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Jewelry - Artifact",
     "ItemNames": [],
-    "Hue": 28,
+    "Hue": 65535,
+    "HighlightColor": "#FFFF00",
     "Properties": [],
     "AcceptExtraProperties": true,
     "Overweight": true,
@@ -1008,12 +1035,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Jewerly - Orion",
     "ItemNames": [],
-    "Hue": 43,
+    "Hue": 255,
+    "HighlightColor": "#FF00FF",
     "Properties": [
       {
         "Name": "Swing Speed Increase",
@@ -1085,12 +1114,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Jewerly - Orion",
     "ItemNames": [],
-    "Hue": 43,
+    "Hue": 255,
+    "HighlightColor": "#FF00FF",
     "Properties": [
       {
         "Name": "Swing Speed Increase",
@@ -1162,12 +1193,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Weapon - Orion",
     "ItemNames": [],
-    "Hue": 43,
+    "Hue": 255,
+    "HighlightColor": "#FF00FF",
     "Properties": [
       {
         "Name": "Splintering Weapon",
@@ -1228,12 +1261,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Weapon - Orion",
     "ItemNames": [],
-    "Hue": 43,
+    "Hue": 255,
+    "HighlightColor": "#FF00FF",
     "Properties": [
       {
         "Name": "Splintering Weapon",
@@ -1289,12 +1324,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Weapon - Orion",
     "ItemNames": [],
-    "Hue": 43,
+    "Hue": 255,
+    "HighlightColor": "#FF00FF",
     "Properties": [
       {
         "Name": "Splintering Weapon",
@@ -1355,12 +1392,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Shield - Orion",
     "ItemNames": [],
-    "Hue": 43,
+    "Hue": 255,
+    "HighlightColor": "#FF00FF",
     "Properties": [
       {
         "Name": "Luck",
@@ -1398,12 +1437,14 @@
       "Legs": false,
       "Footwear": false,
       "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Legendary Artifact",
     "ItemNames": [],
-    "Hue": 28,
+    "Hue": 65535,
+    "HighlightColor": "#FFFF00",
     "Properties": [],
     "AcceptExtraProperties": true,
     "Overweight": false,
@@ -1415,56 +1456,7 @@
       "Cursed"
     ],
     "RequiredRarities": [
-      "Relic Fragment",
-      "Amber",
-      "Essence of Balance",
-      "Magical Residue",
-      "Sapphire",
-      "Boura Pelt",
-      "Enchanted Essence",
-      "Citrine",
-      "Crystal Shards",
-      "Tourmaline",
-      "Essence of Singularity",
-      "Ruby",
-      "Blue Diamond",
-      "Amethyst",
-      "Crushed Glass",
-      "Essence of Diligence",
-      "Essence of Achievement",
-      "Raptor Teeth",
-      "Essence of precision",
-      "Slith Tongue",
-      "Fire Ruby",
-      "Parasitic Plant",
-      "Void Orb",
-      "Essence of Passion",
-      "Luminescent Fungi",
-      "Seed of renewal",
-      "Turquoise",
-      "Essence of Order",
-      "Faery Dust",
-      "Elven Fletching",
-      "Chaga Mushroom",
-      "Arcanic Rune Stone",
-      "Bottle of Ichor",
-      "Reflective Wolf Eye",
-      "Spider Carapace",
-      "Daemon Claw",
-      "White Pearl",
-      "Vial of Vitriol",
-      "Fey Wings",
-      "Lava Serpent Crust",
-      "Goblin Blood",
-      "Undying Flesh",
-      "Crystalline Blackrock",
-      "Silver Snake Skin",
-      "Delicate Scales",
-      "Essence of Control",
-      "Essence of Direction",
-      "Star Sapphire",
-      "Diamond",
-      "Emerald"
+      "Legendary Artifact"
     ],
     "GridHighlightSlot": {
       "Talisman": true,
@@ -1486,45 +1478,8 @@
       "Legs": true,
       "Footwear": true,
       "Other": false
-    }
-  },
-  {
-    "Name": "Unravel",
-    "ItemNames": [],
-    "Hue": 19,
-    "Properties": [],
-    "AcceptExtraProperties": true,
-    "Overweight": false,
-    "MinimumProperty": 0,
-    "MaximumProperty": 0,
-    "ExcludeNegatives": [],
-    "RequiredRarities": [
-      "Greater Artifact",
-      "Legendary Artifact",
-      "Lesser Artifact",
-      "Major Artifact"
-    ],
-    "GridHighlightSlot": {
-      "Talisman": true,
-      "RightHand": true,
-      "LeftHand": true,
-      "Head": true,
-      "Earring": true,
-      "Neck": true,
-      "Chest": true,
-      "Shirt": true,
-      "Back": true,
-      "Robe": true,
-      "Arms": true,
-      "Hands": true,
-      "Bracelet": true,
-      "Ring": true,
-      "Belt": true,
-      "Skirt": true,
-      "Legs": true,
-      "Footwear": true,
-      "Other": false
-    }
+    },
+    "LootOnMatch": false
   },
   {
     "Name": "Imbuing",
@@ -1580,7 +1535,8 @@
       "Diamond",
       "Emerald"
     ],
-    "Hue": 0,
+    "Hue": 154,
+    "HighlightColor": "#9A00FD",
     "Properties": [],
     "AcceptExtraProperties": true,
     "Overweight": false,
@@ -1608,6 +1564,47 @@
       "Legs": false,
       "Footwear": false,
       "Other": true
-    }
+    },
+    "LootOnMatch": false
+  },
+  {
+    "Name": "Unravel",
+    "ItemNames": [],
+    "Hue": 52691,
+    "HighlightColor": "#D3CDCF",
+    "Properties": [],
+    "AcceptExtraProperties": true,
+    "Overweight": false,
+    "MinimumProperty": 0,
+    "MaximumProperty": 0,
+    "ExcludeNegatives": [],
+    "RequiredRarities": [
+      "Greater Artifact",
+      "Legendary Artifact",
+      "Lesser Artifact",
+      "Major Artifact"
+    ],
+    "GridHighlightSlot": {
+      "Talisman": true,
+      "RightHand": true,
+      "LeftHand": true,
+      "Head": true,
+      "Earring": true,
+      "Neck": true,
+      "Chest": true,
+      "Shirt": true,
+      "Back": true,
+      "Robe": true,
+      "Arms": true,
+      "Hands": true,
+      "Bracelet": true,
+      "Ring": true,
+      "Belt": true,
+      "Skirt": true,
+      "Legs": true,
+      "Footwear": true,
+      "Other": false
+    },
+    "LootOnMatch": false
   }
 ]

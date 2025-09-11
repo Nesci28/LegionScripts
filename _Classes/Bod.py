@@ -1,7 +1,9 @@
 import re
 import time
 import importlib
-import traceback
+from LegionPath import LegionPath
+
+LegionPath.addSubdirs()
 
 import Util
 

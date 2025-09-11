@@ -1,15 +1,12 @@
 import API
 import importlib
-import sys
 import time
 import os
 import json
 from collections import OrderedDict
+from LegionPath import LegionPath
 
-sys.path.append(r".\\TazUO\\LegionScripts\\_Decorators")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Classes")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Utils")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Skills")
+LegionPath.addSubdirs()
 
 import Debug
 import Error
@@ -279,12 +276,14 @@ class Fishing:
 
     @debug
     def _updateStatLabels(self):
+        API.SysMsg("UPDATE STAT LABELS")
         for name, countLabel, type in self.statLabels:
             count = self.stats[name][type]
-            countLabel.Text = str(count)
+            # countLabel.Text = str(count)
         for name, countLabel, type in self.lootLabels:
             count = self.loots[name][type]
-            countLabel.Text = str(count)
+            # countLabel.Text = str(count)
+            API.SysMsg("UPDATE STAT LABELS - DONE")
 
     @debug
     def _onClose(self):

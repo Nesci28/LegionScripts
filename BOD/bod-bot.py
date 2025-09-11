@@ -1,14 +1,10 @@
 import API
 import importlib
-import sys
 import traceback
 import json
-import time
+from LegionPath import LegionPath
 
-sys.path.append(r".\\TazUO\\LegionScripts\\_Classes")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Utils")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Skills")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Decorators")
+LegionPath.addSubdirs()
 
 import Bod
 import Gump
@@ -44,16 +40,13 @@ from Python import Python
 from Error import Error
 from Craft import Craft
 from Item import Item
-from Debug import tryExcept
 
 
 class BodBot:
     def __init__(self):
-        bodSkillsJson = open(r".\\TazUO\\LegionScripts\\_Jsons\\bod-skills.json")
+        bodSkillsJson = open(LegionPath.createPath("_Jsons\\bod-skills.json"))
         bodSkillsStr = json.load(bodSkillsJson)
-        craftingInfosJson = open(
-            r".\\TazUO\\LegionScripts\\_Jsons\\crafting-infos.json"
-        )
+        craftingInfosJson = open(LegionPath.createPath("_Jsons\\crafting-infos.json"))
         craftingInfosStr = json.load(craftingInfosJson)
 
         self._running = True
@@ -73,7 +66,9 @@ class BodBot:
 
         self.bodSkills = Math.convertToHex(bodSkillsStr)
         self.craftingInfos = Math.convertToHex(craftingInfosStr)
-        self.selectedProfession = API.GetSharedVar("BOD_BOT_SELECTED_PROFESSION") or "Tailoring"
+        self.selectedProfession = (
+            API.GetSharedVar("BOD_BOT_SELECTED_PROFESSION") or "Tailoring"
+        )
         self.selectedType = API.GetSharedVar("BOD_BOT_SELECTED_TYPE") or "Small"
         self.bodSkill = self.bodSkills[self.selectedProfession]
         self.professions = self.bodSkills.keys()
@@ -135,8 +130,10 @@ class BodBot:
         y += 25
 
         selectResourceContainerText = "Select resource container"
-        if (self.containerSerial):
-            selectResourceContainerText = f"Selected resource container ({self.containerSerial})"
+        if self.containerSerial:
+            selectResourceContainerText = (
+                f"Selected resource container ({self.containerSerial})"
+            )
         resourceLabel = g.addLabel(selectResourceContainerText, 25, y)
         g.addButton(
             "",
@@ -154,7 +151,7 @@ class BodBot:
         y += 20
 
         selectNpcText = "Select npc"
-        if (self.tailorSerial):
+        if self.tailorSerial:
             selectNpcText = f"Selected npc ({self.tailorSerial})"
         npcLabel = g.addLabel(selectNpcText, 25, y)
         g.addButton(
@@ -171,7 +168,7 @@ class BodBot:
         y += 20
 
         selectNpcText = "Select runebook"
-        if (self.runebookSerial):
+        if self.runebookSerial:
             selectNpcText = f"Selected runebook ({self.runebookSerial})"
         npcLabel = g.addLabel(selectNpcText, 25, y)
         g.addButton(
@@ -196,7 +193,7 @@ class BodBot:
         y += 20
 
         selectBeetleText = "Select Beetle"
-        if (self.beetleSerial):
+        if self.beetleSerial:
             selectBeetleText = f"Selected Beetle ({self.beetleSerial})"
         beetleLabel = g.addLabel(selectBeetleText, 25, y)
         g.addButton(
@@ -205,7 +202,9 @@ class BodBot:
             y,
             "radioBlue",
             self.gump.onClick(
-                lambda beetleLabel=beetleLabel: self._onBeetleSelectionClicked(beetleLabel)
+                lambda beetleLabel=beetleLabel: self._onBeetleSelectionClicked(
+                    beetleLabel
+                )
             ),
         )
         g.addButton(
@@ -301,16 +300,16 @@ class BodBot:
             self.gump.setStatus(f"Turn In... {counter}/{len(filledBods)}")
             filledBod = filledBods.pop()
             Util.moveItem(filledBod.Serial, self.npcSerial)
-            API.ContextMenu(self.npcSerial, 403)
-            start_time = time.time()
+            isStillInBackpack = API.FindItem(filledBod.Serial)
+            if isStillInBackpack.Serial != 0:
+                filledBods = self._getFilledBods()
+                continue
             while not API.HasGump(455):
-                if time.time() - start_time > 1:
-                    API.SysMsg("Timeout", 33)
-                    API.CancelTarget()
-                    break
+                API.ContextMenu(self.npcSerial, 403)
                 API.Pause(0.1)
             API.ReplyGump(1, 455)
             filledBods = self._getFilledBods()
+            API.Pause(5)
         self.gump.setStatus("Ready")
 
     def _fill(self):
@@ -350,9 +349,10 @@ class BodBot:
             if not isMaxed:
                 currentCounter += 1
                 self.gump.setStatus(f"Bribing... {currentCounter}/{counter}")
-                total = bodInfo["bod"].bribe()
-                self.total += total
-                self.totalLabel.Text = f"Bribe total: {str(self.total)}"
+                while not Bod.isMaxed(bodInfo["bod"].item):
+                    total = bodInfo["bod"].bribe()
+                    self.total += total
+                    self.totalLabel.Text = f"Bribe total: {str(self.total)}"
             self._resetScrollAreaElement(bodInfo)
         self.gump.setStatus("Ready")
 

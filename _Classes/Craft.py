@@ -1,3 +1,7 @@
+from LegionPath import LegionPath
+
+LegionPath.addSubdirs()
+
 import Util
 
 

@@ -1,11 +1,9 @@
 import API
 import importlib
-import sys
 import traceback
-import time
+from LegionPath import LegionPath
 
-sys.path.append(".\\TazUO\\LegionScripts\\_Classes")
-sys.path.append(".\\TazUO\\LegionScripts\\_Utils")
+LegionPath.addSubdirs()
 
 import Util
 import Gump

@@ -1,42 +1,12 @@
 import API
+from LegionPath import LegionPath
 import importlib
-import sys
-import traceback
-from collections import OrderedDict
 
-sys.path.append(r".\\TazUO\\LegionScripts\\_Classes")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Utils")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Skills")
+LegionPath.addSubdirs()
 
-import Gump
 import Util
-import Math
-import Musicianship
-import Peacemaking
-import Magic
-
-importlib.reload(Gump)
 importlib.reload(Util)
-importlib.reload(Math)
-importlib.reload(Musicianship)
-importlib.reload(Peacemaking)
-importlib.reload(Magic)
 
-from Gump import Gump
 from Util import Util
-from Math import Math
-from Musicianship import Musicianship
-from Peacemaking import Peacemaking
-from Magic import Magic
 
-
-class Debug:
-    magic = Magic()
-    
-    def main(self):
-        while True:
-            API.SysMsg(str(len(API.JournalEntries)))
-            API.ClearJournal()
-            API.Pause(1)
-
-Debug().main()
+API.SysMsg("Util")

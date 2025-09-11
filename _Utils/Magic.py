@@ -1,19 +1,15 @@
 import json
-import importlib
-import sys
 import time
+import importlib
+from LegionPath import LegionPath
 
-sys.path.append(
-    r".\\TazUO\\LegionScripts\\_Utils"
-)
+LegionPath.addSubdirs()
 
 import Util
 
 importlib.reload(Util)
 
-with open(
-    r"C:\Games\Taz_BleedingEdge\TazUO-Launcher.win-x64\TazUO\LegionScripts\_Jsons\spell-def-magic.json"
-) as f:
+with open(LegionPath.createPath("_Jsons\\spell-def-magic.json")) as f:
     SPELLS = json.load(f)
 
 

@@ -1,13 +1,9 @@
 import API
 import importlib
-import sys
 
-sys.path.append(
-    r".\\TazUO\\LegionScripts\\_Classes"
-)
-sys.path.append(
-    r".\\TazUO\\LegionScripts\\_Utils"
-)
+LegionPath.addSubdirs()
+
+from LegionPath import LegionPath
 import Util
 
 importlib.reload(Util)

@@ -1,11 +1,10 @@
 from decimal import Decimal
 import json
-import importlib
-import sys
 import time
+import importlib
+from LegionPath import LegionPath
 
-sys.path.append(r".\\TazUO\\LegionScripts\\_Classes")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Utils")
+LegionPath.addSubdirs()
 
 import Util
 import Math
@@ -19,7 +18,7 @@ from Util import Util
 from Math import Math
 from Color import Color
 
-with open(r".\\TazUO\\LegionScripts\\_Jsons\\button-types.json") as f:
+with open(LegionPath.createPath("_Jsons\\button-types.json")) as f:
     buttonTypesStr = json.load(f)
 
 

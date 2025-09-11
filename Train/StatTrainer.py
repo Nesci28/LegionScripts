@@ -1,11 +1,9 @@
 import API
 import importlib
-import sys
 import traceback
+from LegionPath import LegionPath
 
-sys.path.append(r".\\TazUO\\LegionScripts\\_Classes")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Utils")
-sys.path.append(r".\\TazUO\\LegionScripts\\_Skills")
+LegionPath.addSubdirs()
 
 import Gump
 import Util

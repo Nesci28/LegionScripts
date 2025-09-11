@@ -1,9 +1,13 @@
 from decimal import Decimal
 import re
 import importlib
+from LegionPath import LegionPath
+import System
+
+LegionPath.addSubdirs()
+
 import Item
 import Math
-import System
 
 importlib.reload(Item)
 importlib.reload(Math)

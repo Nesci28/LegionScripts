@@ -1,10 +1,8 @@
 import API
 import importlib
-import sys
+from LegionPath import LegionPath
 
-sys.path.append(
-    r".\\TazUO\\LegionScripts\\_Utils"
-)
+LegionPath.addSubdirs()
 
 import Math
 

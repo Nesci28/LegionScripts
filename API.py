@@ -108,7 +108,7 @@ class PyGameObject:
     def __repr__() -> str:
         """
          Returns a detailed string representation of the object.
-         This string is used by Pythonâ€™s built-in <c>repr()</c> function.
+         This string is used by Python’s built-in <c>repr()</c> function.
         
         """
         pass
@@ -603,6 +603,13 @@ def EmoteMsg(message: str) -> None:
     """
     pass
 
+def PromptResponse(message: str) -> None:
+    """
+     Send a response to a server prompt(Like renaming a rune for example).
+    
+    """
+    pass
+
 def FindItem(serial: int) -> PyItem:
     """
      Try to get an item by its serial.
@@ -656,6 +663,19 @@ def FindLayer(layer: str, serial: int = 1337) -> PyItem:
      item = API.FindLayer("Helmet")
      if item:
        API.SysMsg("Wearing a helmet!")
+     ```
+    
+    """
+    pass
+
+def GetItemsOnGround(distance: int = int.MaxValue, graphic: int = 1337) -> Any:
+    """
+     Get all items on the ground within specified range.
+     Example:
+     ```py
+     items = API.GetItemsOnGround(10)  # All items within 10 tiles
+     if items:
+       API.SysMsg("Found " + str(len(items)) + " items on ground!")
      ```
     
     """
@@ -992,6 +1012,24 @@ def TargetTileRel(xOffset: int, yOffset: int, graphic: int = 1337) -> None:
     """
     pass
 
+def TargetResource(itemSerial: int, resource: int) -> None:
+    """
+     This will attempt to use an item and target a resource, some servers may not support this.
+     ```
+     0: ore
+     1: sand
+     2: wood
+     3: graves
+     4: red_mushrooms
+     ```
+     Example:
+     ```py
+     API.TargetResource(MY_SHOVEL_SERIAL, 0)
+     ```
+    
+    """
+    pass
+
 def CancelTarget() -> None:
     """
      Cancel targeting.
@@ -1172,6 +1210,20 @@ def GetGump(ID: int = 1337) -> Gump:
     """
     pass
 
+def WaitForGump(ID: int = 1337, delay: float = 5) -> bool:
+    """
+     Wait for a server-side gump.
+     Example:
+     ```py
+     if API.WaitForGump(1951773915):
+       API.HeadMsg("SUCCESS", API.Player, 62)
+     else:
+      API.HeadMsg("FAILURE", API.Player, 32)
+     ```
+    
+    """
+    pass
+
 def ToggleFly() -> None:
     """
      Toggle flying if you are a gargoyle.
@@ -1219,7 +1271,7 @@ def SecondaryAbilityActive() -> bool:
     """
     pass
 
-def InJournal(msg: str) -> bool:
+def InJournal(msg: str, clearMatches: bool = False) -> bool:
     """
      Check if your journal contains a message.
      Example:
@@ -1231,7 +1283,7 @@ def InJournal(msg: str) -> bool:
     """
     pass
 
-def InJournalAny(msgs: list[str]) -> bool:
+def InJournalAny(msgs: list[str], clearMatches: bool = False) -> bool:
     """
      Check if the journal contains *any* of the strings in this list.
      Can be regex, prepend your msgs with $
@@ -1244,9 +1296,25 @@ def InJournalAny(msgs: list[str]) -> bool:
     """
     pass
 
-def ClearJournal() -> None:
+def GetJournalEntries(seconds: float, matchingText: str = "") -> Any:
+    """
+     Get all the journal entires in the last X seconds.
+     matchingText supports regex with $ prepended.
+     Example:
+     ```py
+     list = API.GetJournalEntries(30)
+     if list:
+       for entry in list:
+         entry.Text # Do something with this
+     ```
+    
+    """
+    pass
+
+def ClearJournal(matchingEntries: str = "") -> None:
     """
      Clear your journal(This is specific for each script).
+     Supports regex matching if prefixed with $
      Example:
      ```py
      API.ClearJournal()
@@ -1912,6 +1980,17 @@ def MarkTile(x: int, y: int, hue: int, map: int = -1) -> None:
 def RemoveMarkedTile(x: int, y: int, map: int = -1) -> None:
     """
      Remove a marked tile. See MarkTile for more info.
+    
+    """
+    pass
+
+def TrackingArrow(x: int, y: int, identifier: int = 1337) -> None:
+    """
+     Create a tracking arrow pointing towards a location.
+     Set x or y to a negative value to close existing tracker arrow.
+     ```py
+     API.TrackingArrow(400, 400)
+     ```
     
     """
     pass
