@@ -1,10 +1,10 @@
 import API
 from math import floor
 import importlib
+from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
 
-from LegionPath import LegionPath
 import Util
 
 importlib.reload(Util)
@@ -138,7 +138,7 @@ def sendGump():
     g.Add(bg)
 
     buttonRows = [
-        [("Left", fireCannons, "port"), ("Right", fireCannons, "starboard")],
+        [("Left", fireCannons, "port"), ("Right (NPC)", fireCannons, "starboard")],
         [("Reload", reload, None), ("Prep", prepAll, "all")],
     ]
 

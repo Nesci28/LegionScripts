@@ -4,9 +4,13 @@ import importlib
 
 LegionPath.addSubdirs()
 
-import Util
-importlib.reload(Util)
 
-from Util import Util
+runebookItem = API.FindItem(0x43E95D7B)
+while not API.HasGump(498):
+    API.UseObject(0x43E95D7B)
+    API.WaitForGump(498)
 
-API.SysMsg("Util")
+gump = API.GetGump(498)
+values = gump.PacketGumpText.split("\n")
+for value in values:
+    API.SysMsg(value)

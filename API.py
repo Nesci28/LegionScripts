@@ -5,60 +5,229 @@ class Buff:
     Type = None
     Title: str = None
 
+class Events:
+
+    def OnPlayerHitsChanged(self, callback: Any) -> None:
+        """
+         Subscribe to player hits changed event. Callback receives the new hits value as an integer.
+         Example:
+         ```py
+         def on_hits_changed(new_hits):
+           API.SysMsg(f"Player hits changed to: {new_hits}")
+         API.Events.OnPlayerHitsChanged(on_hits_changed)
+         while not API.StopRequested:
+           API.ProcessCallbacks()
+           API.Pause(0.25)
+         ```
+        
+        """
+        pass
+
+    def OnBuffAdded(self, callback: Any) -> None:
+        """
+         Called when a buff is added to your char. Callback receives a Buff object.
+        
+        """
+        pass
+
+    def OnBuffRemoved(self, callback: Any) -> None:
+        """
+         Called when a buff is removed from your char. Callback receives a Buff object.
+        
+        """
+        pass
+
+    def OnPlayerDeath(self, callback: Any) -> None:
+        """
+         Called when the player dies. Callback receives your characters serial.
+        
+        """
+        pass
+
+    def OnOpenContainer(self, callback: Any) -> None:
+        """
+         Called when a container is opened. Callback receives the container serial.
+        
+        """
+        pass
+
+    def OnPlayerMoved(self, callback: Any) -> None:
+        """
+         Called when the player moves. Callback receives a PositionChangedArgs object with .NewLocation available in the object.
+        
+        """
+        pass
+
+    def OnItemCreated(self, callback: Any) -> None:
+        """
+         Called when a new item is created. Callback receives the item serial.
+        
+        """
+        pass
+
+class PyBaseControl:
+
+    def Add(self, childControl: PyControl) -> None:
+        """
+         Adds a child control to this control. Works with gumps too (gump.Add(control)).
+         Used in python API
+        
+        """
+        pass
+
+    def Add(self, childControl: Any) -> None:
+        pass
+
+    def GetX(self) -> int:
+        """
+         Returns the control's X position.
+         Used in python API
+        
+        """
+        pass
+
+    def GetY(self) -> int:
+        """
+         Returns the control's Y position.
+         Used in python API
+        
+        """
+        pass
+
+    def SetX(self, x: int) -> None:
+        """
+         Sets the control's X position.
+         Used in python API
+        
+        """
+        pass
+
+    def SetY(self, y: int) -> None:
+        """
+         Sets the control's Y position.
+         Used in python API
+        
+        """
+        pass
+
+    def SetPos(self, x: int, y: int) -> None:
+        """
+         Sets the control's X and Y positions.
+         Used in python API
+        
+        """
+        pass
+
+    def SetWidth(self, width: int) -> None:
+        """
+         Sets the control's width.
+         Used in python API
+        
+        """
+        pass
+
+    def SetHeight(self, height: int) -> None:
+        """
+         Sets the control's height.
+         Used in python API
+        
+        """
+        pass
+
+    def SetRect(self, x: int, y: int, width: int, height: int) -> None:
+        """
+         Sets the control's position and size in one operation.
+         Used in python API
+        
+        """
+        pass
+
+    def CenterXInViewPort(self) -> None:
+        """
+         Centers a GUMP horizontally in the viewport. Only works on Gump instances.
+         Used in python API
+        
+        """
+        pass
+
+    def CenterYInViewPort(self) -> None:
+        """
+         Centers a GUMP vertically in the viewport. Only works on Gump instances.
+         Used in python API
+        
+        """
+        pass
+
+    def Dispose(self) -> None:
+        """
+         Close/Destroy the control
+        
+        """
+        pass
+
 class PyControl:
 
-    def SetRect(x: int, y: int, w: int, h: int) -> "PyControl":
+    def SetRect(self, x: int, y: int, w: int, h: int) -> "PyControl":
         """
          Used in python API
         
         """
         pass
 
-    def SetWidth(width: int) -> "PyControl":
+    def SetWidth(self, width: int) -> "PyControl":
         """
          Used in python API
         
         """
         pass
 
-    def SetHeight(height: int) -> "PyControl":
+    def SetHeight(self, height: int) -> "PyControl":
         """
          Used in python API
         
         """
         pass
 
-    def SetX(x: int) -> "PyControl":
+    def SetX(self, x: int) -> "PyControl":
         """
          Used in python API
         
         """
         pass
 
-    def SetY(y: int) -> "PyControl":
+    def SetY(self, y: int) -> "PyControl":
         """
          Used in python API
         
         """
         pass
 
-    def SetPos(x: int, y: int) -> "PyControl":
+    def SetPos(self, x: int, y: int) -> "PyControl":
         """
          Use int python API
         
         """
         pass
 
-    def GetX() -> int:
+    def GetX(self) -> int:
         """
          Used in python API
         
         """
         pass
 
-    def GetY() -> int:
+    def GetY(self) -> int:
         """
          Used in python API
+        
+        """
+        pass
+
+class PyControlDropDown:
+
+    def GetSelectedIndex(self) -> int:
+        """
+         Get the selected index of the dropdown. The first entry is 0.
         
         """
         pass
@@ -69,7 +238,7 @@ class PyEntity:
     __class__: str = None
     Serial: int = None
 
-    def ToString() -> str:
+    def ToString(self) -> str:
         """
          Returns a readable string representation of the entity.
          Used when printing or converting the object to a string in Python scripts.
@@ -77,7 +246,15 @@ class PyEntity:
         """
         pass
 
-    def SetHue(hue: int) -> None:
+    def SetHue(self, hue: int) -> None:
+        pass
+
+    def Destroy(self) -> None:
+        """
+         This will remove the item from the client, it will reappear if you leave the area and come back.
+         This object will also no longer be available and may cause issues if you try to interact with it further.
+        
+        """
         pass
 
 class PyGameObject:
@@ -89,7 +266,7 @@ class PyGameObject:
     Graphic: int = None
     Hue: int = None
 
-    def HasLineOfSightFrom(observer: PyGameObject = None) -> bool:
+    def HasLineOfSightFrom(self, observer: PyGameObject = None) -> bool:
         """
          Determines if there is line of sight from the specified observer to this object.
          If no observer is specified, it defaults to the player.
@@ -97,7 +274,7 @@ class PyGameObject:
         """
         pass
 
-    def ToString() -> str:
+    def ToString(self) -> str:
         """
          Returns a readable string representation of the game object.
          Used when printing or converting the object to a string in Python scripts.
@@ -105,7 +282,7 @@ class PyGameObject:
         """
         pass
 
-    def __repr__() -> str:
+    def __repr__(self) -> str:
         """
          Returns a detailed string representation of the object.
          This string is used by Python’s built-in <c>repr()</c> function.
@@ -119,6 +296,15 @@ class PyItem:
     Opened: bool = None
     Container: int = None
     __class__: str = None
+
+class PyJournalEntry:
+    Hue: int = None
+    Name: str = None
+    Text: str = None
+    TextType = None
+    Time: datetime = None
+    MessageType = None
+    Disposed: bool = None
 
 class PyLand:
     __class__: str = None
@@ -141,6 +327,57 @@ class PyMobile:
 
 class PyMulti:
     __class__: str = None
+
+class PyNineSliceGump:
+    NineSliceGump = None
+    Gump: Gump = None
+
+    def GetHue(self) -> int:
+        """
+         Gets the current hue of the nine-slice gump
+        
+        """
+        pass
+
+    def SetHue(self, hue: int) -> None:
+        """
+         Sets the hue of the nine-slice gump
+        
+        """
+        pass
+
+    def GetResizable(self) -> bool:
+        """
+         Gets whether the gump is resizable
+        
+        """
+        pass
+
+    def SetResizable(self, resizable: bool) -> None:
+        """
+         Sets whether the gump is resizable
+        
+        """
+        pass
+
+    def GetBorderSize(self) -> int:
+        """
+         Gets the border size of the nine-slice
+        
+        """
+        pass
+
+    def SetBorderSize(self, borderSize: int) -> None:
+        """
+         Sets the border size of the nine-slice
+        
+        """
+        pass
+
+class ModernNineSliceGump:
+
+    def SetResizeCallback(self, callback: Any) -> None:
+        pass
 
 class PyProfile:
     CharacterName: str = None
@@ -165,6 +402,9 @@ LastTargetPos = None
 LastTargetGraphic: int = None
 Found: int = None
 PyProfile: PyProfile = None
+Events = None
+StopRequested: bool = None
+CancellationToken = None
 
 class ScanType:
     Hostile = 0
@@ -264,6 +504,13 @@ def Attack(serial: int) -> None:
      if enemy:
        API.Attack(enemy)
      ```
+    
+    """
+    pass
+
+def SetWarMode(enabled: bool) -> None:
+    """
+     Sets the player's war mode state (peace/war toggle).
     
     """
     pass
@@ -477,6 +724,17 @@ def CastSpell(spellName: str) -> None:
     """
     pass
 
+def Dress(name: str) -> None:
+    """
+     Dress from a saved dress configuration.
+     Example:
+     ```py
+     API.Dress("PvP Gear")
+     ```
+    
+    """
+    pass
+
 def BuffExists(buffName: str) -> bool:
     """
      Check if a buff is active.
@@ -599,6 +857,13 @@ def EmoteMsg(message: str) -> None:
      ```py
      API.EmoteMsg("laughing")
      ```
+    
+    """
+    pass
+
+def GlobalMsg(message: str) -> None:
+    """
+     Send a chat message via the global chat msg system ( ,message here ).
     
     """
     pass
@@ -1150,6 +1415,15 @@ def ItemNameAndProps(serial: int, wait: bool = False, timeout: int = 10) -> str:
     """
     pass
 
+def RequestOPLData(serials: list[int]) -> None:
+    """
+     Requests Object Property List (OPL) data for the specified serials.
+     If the OPL data doesn't already exist, it will be requested from the server.
+     OPL consists of item name and tooltip text(properties).
+    
+    """
+    pass
+
 def HasGump(ID: int = 1337) -> int:
     """
      Check if a player has a server gump. Leave blank to check if they have any server gump.
@@ -1457,17 +1731,19 @@ def FindMobile(serial: int) -> PyMobile:
     """
     pass
 
-def GetAllMobiles() -> list[PyMobile]:
+def GetAllMobiles(graphic: int | None = None, distance: int | None = None, notoriety: list[Notoriety] = None) -> list[PyMobile]:
     """
-     Return a list of all mobiles the client is aware of.
+     Return a list of all mobiles the client is aware of, optionally filtered by graphic, distance, and/or notoriety.
      Example:
      ```py
+     # Get all mobiles
      mobiles = API.GetAllMobiles()
-     if mobiles:
-       API.SysMsg("Found " + str(len(mobiles)) + " mobiles!")
-       for mob in mobiles:
-         API.SysMsg(mob.Name)
-         API.Pause(0.5)
+     # Get all mobiles with graphic 400
+     humans = API.GetAllMobiles(400)
+     # Get all humans within 5 tiles
+     nearby_humans = API.GetAllMobiles(400, 5)
+     # Get all enemies (murderers and criminals) within 15 tiles
+     enemies = API.GetAllMobiles(distance=15, notoriety=[API.Notoriety.Murderer, API.Notoriety.Criminal])
      ```
     
     """
@@ -1545,6 +1821,55 @@ def GetMultisInArea(x1: int, y1: int, x2: int, y2: int) -> list[Any]:
     """
     pass
 
+def IsFriend(serial: int) -> bool:
+    """
+     Check if a mobile is in the friends list.
+     Example:
+     ```py
+     if API.IsFriend(player.Serial):
+         API.SysMsg("This player is your friend!")
+     ```
+    
+    """
+    pass
+
+def AddFriend(serial: int) -> bool:
+    """
+     Add a mobile to the friends list by serial number.
+     Example:
+     ```py
+     mobile = API.FindMobile(0x12345)
+     if mobile:
+         API.AddFriend(mobile.Serial)
+     ```
+    
+    """
+    pass
+
+def RemoveFriend(serial: int) -> bool:
+    """
+     Remove a mobile from the friends list by serial number.
+     Example:
+     ```py
+     API.RemoveFriend(0x12345)
+     ```
+    
+    """
+    pass
+
+def GetAllFriends() -> Any:
+    """
+     Get all friends as an array of serials.
+     Example:
+     ```py
+     friends = API.GetAllFriends()
+     for friend in friends:
+         API.FindMobile(friend)
+     ```
+    
+    """
+    pass
+
 def CreateGump(acceptMouseInput: bool = True, canMove: bool = True, keepOpen: bool = False) -> Gump:
     """
      Get a blank gump.
@@ -1559,7 +1884,7 @@ def CreateGump(acceptMouseInput: bool = True, canMove: bool = True, keepOpen: bo
     """
     pass
 
-def AddGump(g: Gump) -> None:
+def AddGump(g: Any) -> None:
     """
      Add a gump to the players screen.
      Example:
@@ -1785,6 +2110,21 @@ def CreateGumpPic(graphic: int, x: int = 0, y: int = 0, hue: int = 0) -> PyContr
      ```py
      gumpPic = API.CreateGumpPic(0xafb)
      gump.Add(gumpPic)
+    
+    """
+    pass
+
+def CreateDropDown(width: int, items: list[str], selectedIndex: int = 0) -> PyControlDropDown:
+    """
+     Creates a dropdown control (combobox) with the specified width and items.
+    
+    """
+    pass
+
+def CreateModernGump(x: int, y: int, width: int, height: int, resizable: bool = True, minWidth: int = 50, minHeight: int = 50, onResized: Any = None) -> Any:
+    """
+     Creates a modern nine-slice gump using ModernUIConstants for consistent styling.
+     The gump uses the standard modern UI panel texture and border size internally.
     
     """
     pass

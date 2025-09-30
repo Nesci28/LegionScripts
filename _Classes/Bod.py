@@ -204,6 +204,7 @@ class Bod:
                 API.SysMsg("No npcs found. move", 32)
                 API.Pause(1)
                 npcs = API.NearestMobiles([API.Notoriety.Invulnerable], 1)
+                return -1
             for npc in npcs:
                 API.ClearJournal()
                 API.ContextMenu(npc.Serial, 419)

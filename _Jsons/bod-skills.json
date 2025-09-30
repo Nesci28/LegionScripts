@@ -614,6 +614,78 @@
                 "graphic": 5199,
                 "buttonId": 645,
                 "disposeMethod": "Trash"
+            },
+            "Leather Cap": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 2,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 7609,
+                "buttonId": 609,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Leather Gorget": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 4,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 5063,
+                "buttonId": 608,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Leather Gloves": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 3,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 5062,
+                "buttonId": 610,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Leather Leggings": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 10,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 5067,
+                "buttonId": 612,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Leather Tunic": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 12,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 5068,
+                "buttonId": 613,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Leather Sleeves": {
+                "resources": [
+                    {
+                        "graphic": 4225,
+                        "amount": 4,
+                        "hasSpecialHue": true
+                    }
+                ],
+                "graphic": 5061,
+                "buttonId": 611,
+                "disposeMethod": "Salvage Bag"
             }
         }
     }

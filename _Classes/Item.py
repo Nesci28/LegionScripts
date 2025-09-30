@@ -16,8 +16,21 @@ class Item:
         self.isAtlas = self._isAtlas(item)
         self.item = item
 
+    def recall(self, index):
+        if self.isRunebook:
+            pass
+        if self.isAtlas:
+            while not API.HasGump(498):
+                API.UseObject(self.item.Serial)
+                API.WaitForGump(498)
+            API.ReplyGump(50000 + index, 498)
+            API.Pause(0.1)
+            API.ReplyGump(4000, 498)
+        API.Pause(4)
+
     def _isRunebook(self, item):
         return item.Graphic == 8901
     
     def _isAtlas(self, item):
         return item.Graphic == 39958
+    

@@ -25,7 +25,9 @@ class TamingScript:
 
     def waitForPetInRange(self, maxRange=3):
         while not API.HasTarget():
+            API.SysMsg(str(self.pet.X - self.pet.Y))
             distance = Math.Math.distanceBetween(API.Player, self.pet)
+            API.SysMsg(str(distance))
             if distance <= maxRange:
                 break
             API.Pause(self.checkInterval)

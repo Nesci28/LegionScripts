@@ -1,9 +1,9 @@
 import API
 import importlib
+from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
 
-from LegionPath import LegionPath
 import Util
 
 importlib.reload(Util)

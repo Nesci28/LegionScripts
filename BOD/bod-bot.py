@@ -180,14 +180,14 @@ class BodBot:
                 lambda npcLabel=npcLabel: self._onRunebookSelectionClicked(npcLabel)
             ),
         )
-        g.addButton(
-            "Next",
-            225,
-            y,
-            "default",
-            self.gump.onClick(lambda: self._onNextClicked()),
-            True,
-        )
+        # g.addButton(
+        #     "Next",
+        #     225,
+        #     y,
+        #     "default",
+        #     self.gump.onClick(lambda: self._onNextClicked()),
+        #     True,
+        # )
 
         x = 1
         y += 20
@@ -336,6 +336,8 @@ class BodBot:
         self.gump.setStatus("Ready")
 
     def _bribe(self):
+        if not self.runebookSerial:
+            return
         self.gump.setStatus("Bribing...")
         self.total = 0
         counter = 0
@@ -344,6 +346,7 @@ class BodBot:
             if not isMaxed:
                 counter += 1
         currentCounter = 0
+        runeIndex = 0
         for bodInfo in self.bodInfos:
             isMaxed = Bod.isMaxed(bodInfo["bod"].item)
             if not isMaxed:
@@ -351,6 +354,10 @@ class BodBot:
                 self.gump.setStatus(f"Bribing... {currentCounter}/{counter}")
                 while not Bod.isMaxed(bodInfo["bod"].item):
                     total = bodInfo["bod"].bribe()
+                    if total == -1:
+                        self.runebookItem.recall(runeIndex)
+                        runeIndex += 1
+                        continue
                     self.total += total
                     self.totalLabel.Text = f"Bribe total: {str(self.total)}"
             self._resetScrollAreaElement(bodInfo)

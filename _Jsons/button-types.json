@@ -1,4 +1,9 @@
 {
+    "eye": {
+        "normal": 1531,
+        "pressed": 1532,
+        "hover": 1532 
+    },
     "world": {
         "normal": 234,
         "pressed": 234,
