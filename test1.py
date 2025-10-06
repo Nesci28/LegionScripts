@@ -10,7 +10,7 @@ def f1_combo():
 
 def alt_a():
     print("ALT+A Python callback firing!")   # debug to stdout
-    API.SysMsg("ALT+A pressed! 0")
+    API.SysMsg("ALT+A pressed! 1")
 API.Pause(1)
 API.SysMsg("Register")
 API.OnHotKey("CTRL+SHIFT+F1", f1_combo)  # auto-normalized

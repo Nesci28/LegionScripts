@@ -139,21 +139,27 @@ class PetIntensity:
         return Decimal("0")
 
     def _evaluatePet(self):
-        API.SysMsg("Target your pet for evaluation...")
         petSerial = API.RequestTarget()
         if not petSerial:
             return
 
         pet = API.FindMobile(petSerial)
-        Util.openGumpSkill("Animal Lore", pet.Serial, self.loreGumpId)
+        if not pet:
+            return
+
+        API.UseSkill("Animal Lore")
+        API.WaitForTarget()
+        API.Target(pet.Serial)
+        while not API.GetGump(self.loreGumpId):
+            API.Pause(0.1)
         gump = API.GetGump(self.loreGumpId)
         if not gump:
-            API.SysMsg("Animal Lore gump not found.")
             return
 
         isWild = API.GumpContains("Wild")
         lines = gump.PacketGumpText.split("\n")
         nmLower = pet.Name.lower()
+        API.CloseGump(self.loreGumpId)
         key = next((k for k in self.petConfigs.keys() if k in nmLower), None)
         if not key:
             self.state["undefined"] = pet.Name
@@ -292,17 +298,12 @@ class PetIntensity:
         self.state["pctValue"] = float(pctValue)  # keep as float for easy formatting
         self.state["pctRating"] = f"{pctValue:.2f}%"
 
-        color = "red" if pctValue < 50 else "yellow" if pctValue < 80 else "green"
-        API.SysMsg(
-            f"Pet: {self.state['name']}  Rating: {self.state['pctRating']}  ({color})"
-        )
-
     def _showGump(self):
         self.gump.addLabel("Pet Intensity Calculator", 22, 1)
         self.gump.addButton(
-            "", 1, 20, "eye", self.gump.onClick(lambda: self._evaluatePet())
+            "Evaluate", 1, 20, "default", self.gump.onClick(lambda: self._evaluatePet()), True
         )
-        self.gump.addLabel("Evaluate Pet", 25, 20)
+        # self.gump.addLabel("Evaluate Pet", 25, 20)
 
         self.undefinedLabel = self.gump.addLabel("", 1, 40)
         self.nameLabel = self.gump.addLabel("", 1, 55)
@@ -353,6 +354,7 @@ class PetIntensity:
 
     def main(self):
         self._showGump()
+        API.OnHotKey("SHIFT+A", self._evaluatePet)
 
     def _isRunning(self):
         return self._running

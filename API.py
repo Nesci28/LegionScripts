@@ -292,10 +292,12 @@ class PyGameObject:
 
 class PyItem:
     Amount: int = None
-    IsCorpse: bool = None
     Opened: bool = None
     Container: int = None
     __class__: str = None
+    IsCorpse: bool = None
+    MatchingHighlightName: str = None
+    MatchesHighlight: bool = None
 
 class PyJournalEntry:
     Hue: int = None
@@ -389,7 +391,9 @@ class PyProfile:
 
 class PyStatic:
     IsImpassible: bool = None
+    IsTree: bool = None
     IsVegetation: bool = None
+    Name: str = None
     __class__: str = None
 
 JournalEntries = None
@@ -438,6 +442,31 @@ def ProcessCallbacks() -> None:
        API.ProcessCallbacks()
        API.Pause(0.1)
      ```
+    
+    """
+    pass
+
+def Dispose() -> None:
+    pass
+
+def OnHotKey(key: str, callback: Any = None) -> None:
+    """
+     Register or unregister a Python callback for a hotkey.
+     ### Register:
+     ```py
+     def on_shift_a():
+         API.SysMsg("SHIFT+A pressed!")
+     API.OnHotKey("SHIFT+A", on_shift_a)
+     while True:
+       API.ProcessCallbacks()
+       API.Pause(0.1)
+     ```
+     ### Unregister:
+     ```py
+     API.OnHotKey("SHIFT+A")
+     ```
+     The <paramref name="key"/> can include modifiers (CTRL, SHIFT, ALT),
+     for example: "CTRL+SHIFT+F1" or "ALT+A".
     
     """
     pass
@@ -627,7 +656,7 @@ def ClearMoveQueue() -> None:
     """
     pass
 
-def QueMoveItem(serial: int, destination: int, amt: int = 0, x: int = 0xFFFF, y: int = 0xFFFF) -> None:
+def QueueMoveItem(serial: int, destination: int, amt: int = 0, x: int = 0xFFFF, y: int = 0xFFFF) -> None:
     """
      Move an item to another container.
      Use x, and y if you don't want items stacking in the desination container.
@@ -643,7 +672,7 @@ def QueMoveItem(serial: int, destination: int, amt: int = 0, x: int = 0xFFFF, y:
          for item in items:
              data = API.ItemNameAndProps(item)
              if data and "An Exotic Fish" in data:
-                 API.QueMoveItem(item, barrel)
+                 API.QueueMoveItem(item, barrel)
      ```
     
     """
@@ -672,14 +701,14 @@ def MoveItem(serial: int, destination: int, amt: int = 0, x: int = 0xFFFF, y: in
     """
     pass
 
-def QueMoveItemOffset(serial: int, amt: int = 0, x: int = 0, y: int = 0, z: int = 0, OSI: bool = False) -> None:
+def QueueMoveItemOffset(serial: int, amt: int = 0, x: int = 0, y: int = 0, z: int = 0, OSI: bool = False) -> None:
     """
      Move an item to the ground near you.
      Example:
      ```py
      items = API.ItemsInContainer(API.Backpack)
      for item in items:
-       API.QueMoveItemOffset(item, 0, 1, 0, 0)
+       API.QueueMoveItemOffset(item, 0, 1, 0, 0)
      ```
     
     """
@@ -730,6 +759,19 @@ def Dress(name: str) -> None:
      Example:
      ```py
      API.Dress("PvP Gear")
+     ```
+    
+    """
+    pass
+
+def GetAvailableDressOutfits() -> Any:
+    """
+     Get all available dress configurations.
+     Example:
+     ```py
+     outfits = API.GetAvailableDressOutfits()
+     if outfits:
+       Dress(outfits[0])
      ```
     
     """
@@ -1478,8 +1520,15 @@ def GetGump(ID: int = 1337) -> Gump:
      gump = API.GetGump()
      if gump:
        API.SysMsg("Found the gump!")
-       API.CloseGump(gump)
+       gump.Dispose() #Close it
      ```
+    
+    """
+    pass
+
+def GetAllGumps() -> Any:
+    """
+     Gets all currently open server-side gumps.
     
     """
     pass
@@ -2239,12 +2288,12 @@ def RemoveMapMarker(name: str) -> None:
     """
     pass
 
-def IsProcessingMoveQue() -> bool:
+def IsProcessingMoveQueue() -> bool:
     """
      Check if the move item queue is being processed. You can use this to prevent actions if the queue is being processed.
      Example:
      ```py
-     if API.IsProcessingMoveQue():
+     if API.IsProcessingMoveQueue():
        API.Pause(0.5)
      ```
     
