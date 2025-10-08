@@ -26,7 +26,8 @@ from Math import Math
 
 
 class AnimalTaming:
-    animals = {
+    _maxDistance = 18
+    _animals = {
         # between 30 - 31
         "cat": Animal("cat", 0x00C9, 0x0000, 30, 39, ["feline"]),
         "chicken": Animal("chicken", 0x00D0, 0x0000, 30, 39, None),
@@ -106,23 +107,42 @@ class AnimalTaming:
 
             # Check if animal is close enough to tame
             distance = Math.distanceBetween(API.Player, self._animalBeingTamed)
-            if distance > 12:
+            if distance > self._maxDistance:
                 API.SysMsg("Animal moved too far away, ignoring for now", 1100)
                 self._animalBeingTamed = None
                 return
             elif self._animalBeingTamed != None and distance > 1:
                 self._followMobile(self._animalBeingTamed)
-                while Math.distanceBetween(API.Player, self._animalBeingTamed) > 2:
+                animal = API.FindMobile(self._animalBeingTamed.Serial)
+                isBlocked = False
+                lastCoordX = None
+                lastCoordY = None
+                count = 0
+                while animal and Math.distanceBetween(API.Player, self._animalBeingTamed) > 2 and not isBlocked:
+                    if count >= 10:
+                        isBlocked = True
+                    hasMoved = False
+                    if lastCoordX != API.Player.X:
+                        lastCoordX = API.Player.X
+                        hasMoved = True
+                    if lastCoordY != API.Player.Y:
+                        lastCoordY = API.Player.Y
+                        hasMoved = True
+                    if not hasMoved:
+                        count += 1
+                    animal = API.FindMobile(self._animalBeingTamed.Serial)
                     API.Pause(0.1)
 
             # Tame the animal if a tame is not currently being attempted and enough time has passed since last using Animal Taming
             if not self._isTaming:
-                API.CancelTarget()
-                API.PreTarget(self._animalBeingTamed.Serial)
-                API.UseSkill("Animal Taming")
-                self._isTaming = True
+                self._tame()
 
         if self._isTaming:
+            if self._animalBeingTamed and not Timer.exists(13, "Animal Taming"):
+                self._animalBeingTamed = None
+                self._isTaming = False
+                return
+            self._followMobile(self._animalBeingTamed)
             self._animalBeingTamed = API.FindMobile(self._animalBeingTamed.Serial)
             if self._animalBeingTamed == None:
                 self._isTaming = False
@@ -141,10 +161,21 @@ class AnimalTaming:
                     "You must wait a few moments to use another skill.",
                     "That is too far away.",
                     "You are too far away to continue taming.",
+                    "Someone else is already taming that creature.",
                 ]
             ):
                 self._animalBeingTamed = None
                 self._isTaming = False
+
+    def _tame(self):
+        animal = API.FindMobile(self._animalBeingTamed.Serial)
+        if not animal:
+            return
+        API.CancelTarget()
+        API.PreTarget(self._animalBeingTamed.Serial)
+        API.UseSkill("Animal Taming")
+        Timer.create(13, "Animal Taming")
+        self._isTaming = True
 
     def _pathfindToMobile(animalSerial):
         animal = API.FindMobile(animal.Serial)
@@ -159,22 +190,25 @@ class AnimalTaming:
     def _attackTamed(self, animal):
         if not animal:
             return
-        while animal.Hits > 0:
-            API.HeadMsg(f"Killing this animal", animal.Serial, 90)
+        animal = API.FindMobile(animal.Serial)
+        if not animal or animal.IsDead:
+            return
+        while animal and animal.Hits > 0 and not animal.IsDead:
+            API.HeadMsg(f"Killing this animal", animal.Serial, 33)
             API.PreTarget(animal.Serial, "Harmful")
             self._magic.cast("Energy Bolt")
-            API.Pause(0.1)
-        API.IgnoreObject(animal.Serial)
+            API.Pause(3)
+            animal = API.FindMobile(animal.Serial)
 
     def _getAnimalIDsAtOrOverTamingDifficulty(self):
         animalSkillInfo = Util.getSkillInfo("Animal Taming")["value"]
         animalList = []
-        for animal in self.animals:
+        for animal in self._animals:
             if (
-                animalSkillInfo >= self.animals[animal].minTamingSkill
-                and animalSkillInfo < self.animals[animal].maxTamingSkill
+                animalSkillInfo >= self._animals[animal].minTamingSkill
+                and animalSkillInfo < self._animals[animal].maxTamingSkill
             ):
-                animalList.append(self.animals[animal].mobileID)
+                animalList.append(self._animals[animal].mobileID)
         return animalList
 
     def _findAnimalToTame(self):
@@ -183,7 +217,7 @@ class AnimalTaming:
         for animalId in animalIds:
             animals = API.GetAllMobiles(
                 animalId,
-                12,
+                self._maxDistance,
                 [
                     API.Notoriety.Enemy,
                     API.Notoriety.Criminal,
@@ -192,7 +226,7 @@ class AnimalTaming:
                 ],
             )
             for animal in animals:
-                if animal.HasLineOfSightFrom():
+                if self._hasPath(animal):
                     tameableAnimals.append(animal)
         if len(tameableAnimals) > 0:
             finalAnimal = None
@@ -203,7 +237,11 @@ class AnimalTaming:
                     finalAnimal = tameableAnimal
                     finalDistance = distance
             return finalAnimal
+        API.SysMsg("No animal")
         return None
+
+    def _hasPath(self, animal):
+        return API.GetPath(int(animal.X), int(animal.Y), distance=self._maxDistance + 4)
 
     def _checkSkill(self):
         animalSkillInfo = Util.getSkillInfo("Animal Taming")
