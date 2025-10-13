@@ -1,4 +1,9 @@
 {
+    "help": {
+        "normal": 2090,
+        "pressed": 2090,
+        "hover": 2090
+    },
     "eye": {
         "normal": 1531,
         "pressed": 1532,

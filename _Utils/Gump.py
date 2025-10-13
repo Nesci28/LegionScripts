@@ -99,6 +99,30 @@ class Gump:
             API.SysMsg(f"Gump.Dispose failed: {e}", 33)
         API.SysMsg("Gump destroyed.", 66)
 
+    def createStackedBarChart(self, x, y, height, width, count, title=""):
+        elements = []
+
+        # title
+        label = self.addLabel(title, x, y)
+        elements.append(label)
+        y += 20
+
+        # Background bar
+        bg = self.addColorBox(x, y, height, width, "#3a3a3a")
+        elements.append(bg)
+
+        # Draw green (elite) section
+        elite_width = int(width * (count / 100))
+        elite_bar = self.addColorBox(x, y, height, elite_width, "#00aa00")
+        elements.append(elite_bar)
+
+        # Draw red (non-elite) section
+        nonelite_width = width - elite_width
+        if nonelite_width > 0:
+            nonelite_bar = self.addColorBox(x + elite_width, y, height, nonelite_width, "#aa0000")
+            elements.append(nonelite_bar)
+        return elements
+
     def createSubGump(self, width, height, position="bottom", withStatus=False, alwaysVisible=True):
         gump = Gump(width, height, withStatus=withStatus)
         self._setSubGumpPosition(gump.gump, width, height, position)
