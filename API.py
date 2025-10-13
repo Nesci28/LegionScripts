@@ -67,15 +67,12 @@ class Events:
 
 class PyBaseControl:
 
-    def Add(self, childControl: PyControl) -> None:
+    def Add(self, childControl: Any) -> None:
         """
          Adds a child control to this control. Works with gumps too (gump.Add(control)).
          Used in python API
         
         """
-        pass
-
-    def Add(self, childControl: Any) -> None:
         pass
 
     def GetX(self) -> int:
@@ -165,59 +162,61 @@ class PyBaseControl:
         """
         pass
 
-class PyControl:
+class PyBaseGump:
+    Disposed: bool = None
+    PacketGumpText: str = None
+    Gump: Gump = None
 
-    def SetRect(self, x: int, y: int, w: int, h: int) -> "PyControl":
+    def SetInScreen(self) -> None:
         """
+         Ensures the gump is fully visible within the screen boundaries.
+         Adjusts the gump's position if it extends beyond the screen edges.
          Used in python API
         
         """
         pass
 
-    def SetWidth(self, width: int) -> "PyControl":
+    def CenterYInScreen(self) -> None:
         """
+         Centers the gump vertically within the entire screen.
+         This accounts for the full screen dimensions, including all UI elements.
          Used in python API
         
         """
         pass
 
-    def SetHeight(self, height: int) -> "PyControl":
+    def CenterXInScreen(self) -> None:
         """
+         Centers the gump horizontally within the entire screen.
+         This accounts for the full screen dimensions, including all UI elements.
          Used in python API
         
         """
         pass
 
-    def SetX(self, x: int) -> "PyControl":
+class PyCheckbox:
+    IsChecked: bool = None
+    Text: str = None
+
+    def GetIsChecked(self) -> bool:
         """
+         Gets the checked state of the checkbox.
          Used in python API
         
         """
         pass
 
-    def SetY(self, y: int) -> "PyControl":
+    def SetIsChecked(self, isChecked: bool) -> None:
         """
+         Sets the checked state of the checkbox.
          Used in python API
         
         """
         pass
 
-    def SetPos(self, x: int, y: int) -> "PyControl":
+    def GetText(self) -> str:
         """
-         Use int python API
-        
-        """
-        pass
-
-    def GetX(self) -> int:
-        """
-         Used in python API
-        
-        """
-        pass
-
-    def GetY(self) -> int:
-        """
+         Gets the text label displayed next to the checkbox.
          Used in python API
         
         """
@@ -1538,6 +1537,13 @@ def GumpContains(text: str, ID: int = 1337) -> bool:
     """
     pass
 
+def GetGumpContents(ID: int = 1337) -> str:
+    """
+     This will return a string of all the text in a server-side gump.
+    
+    """
+    pass
+
 def GetGump(ID: int = 1337) -> Gump:
     """
      Get a gump by ID.
@@ -1945,7 +1951,7 @@ def GetAllFriends() -> Any:
     """
     pass
 
-def CreateGump(acceptMouseInput: bool = True, canMove: bool = True, keepOpen: bool = False) -> Gump:
+def CreateGump(acceptMouseInput: bool = True, canMove: bool = True, keepOpen: bool = False) -> Any:
     """
      Get a blank gump.
      Example:
@@ -1973,7 +1979,7 @@ def AddGump(g: Any) -> None:
     """
     pass
 
-def CreateGumpCheckbox(text: str = "", hue: int = 0, isChecked: bool = False) -> PyControl:
+def CreateGumpCheckbox(text: str = "", hue: int = 0, isChecked: bool = False) -> Any:
     """
      Create a checkbox for gumps.
       Example:

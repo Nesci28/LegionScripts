@@ -129,7 +129,7 @@ class CasterTrainer:
         if self.gump:
             self.gump.tick()
             self.gump.tickSubGumps()
-            if self.gump.gump.IsDisposed:
+            if self.gump.gump.Disposed:
                 self._onClose()
                 return False
         return True

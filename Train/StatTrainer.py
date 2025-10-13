@@ -72,7 +72,7 @@ class StatTrainer:
         if self.gump:
             self.gump.tick()
             self.gump.tickSubGumps()
-            if self.gump.gump.IsDisposed:
+            if self.gump.gump.Disposed:
                 self._onClose()
                 return False
         if self._started and self._activeStat and self._activeTrainer:

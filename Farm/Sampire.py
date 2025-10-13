@@ -97,7 +97,7 @@ class Sampire:
         if self.gump:
             qt.gump.tick()
             qt.gump.tickSubGumps()
-            if self.gump.gump.IsDisposed:
+            if self.gump.gump.Disposed:
                 self._onClose()
                 return False
         return True

@@ -234,12 +234,16 @@ class PetIntensity:
 
         self.gump = Gump(self.GUMP_WIDTH, self.GUMP_HEIGHT, self._onClose, False)
         self._running = True
+        self._isTameableIcon = None
         self.state = self._emptyState()
         self.isDrawed = False
         self._historyChartY = None
         self._resistChartY = None
 
     def _emptyState(self):
+        if self._isTameableIcon:
+            self._isTameableIcon.Dispose()
+
         return {
             "petKey": None,
             "stats": [],
@@ -261,15 +265,15 @@ class PetIntensity:
     def _showGump(self):
         # widen for readability
         self.GUMP_WIDTH = 380
-        self.GUMP_HEIGHT = 460
+        self.GUMP_HEIGHT = 470
         self.gump = Gump(self.GUMP_WIDTH, self.GUMP_HEIGHT, self._onClose, False)
 
-        self.gump.addLabel("Pet Intensity Calculator", 80, 5, hue=67)
+        self.gump.addLabel("Pet Intensity Calculator", round(self.GUMP_WIDTH / 2 - 70), 5, hue=67)
         self.gump.addButton(
-            "", 290, 5, "help", self.gump.onClick(lambda: self._help()), True
+            "", 0, 0, "help", self.gump.onClick(lambda: self._help()), True
         )
 
-        y = 30
+        y = 35
         self.nameLabel = self.gump.addLabel("", 10, y)
         y += 15
         self.slotLabel = self.gump.addLabel("", 10, y)
@@ -645,40 +649,14 @@ class PetIntensity:
                 break
         self.state["cuTemplate"] = matched
         self.state["isEliteResists"] = bool(matched)
-
-        # cfg = self.petConfigs[self.state["petKey"]]
-        # s = self.state["stats"][:]
-        # r = self.state["resists"][:]
-
-        # if cfg.get("reduce") and self.state["isWild"]:
-        #     s[0] = Decimal((s[0]) / 2)
-        #     s[1] = Decimal((s[1]) / 2)
-        #     s[3] = Decimal((s[3]) / 2)
-        #     s[4] = Decimal((s[4]) / 2)
-
-        # params = {
-        #     "creature": "Cu Sidhe",
-        #     "hits": s[0],
-        #     "stamina": s[1],
-        #     "mana": self.state["stats"][2],
-        #     "str": s[3],
-        #     "dex": s[4],
-        #     "int": self.state["stats"][5],
-        #     "physical": resists["Physical"],
-        #     "fire": resists["Fire"],
-        #     "cold": resists["Cold"],
-        #     "poison": resists["Poison"],
-        #     "energy": resists["Energy"],
-        # }
-        # url = "https://www.uo-cah.com/pet-intensity-calculator?" + urlencode(params) + "&target_physical=--&target_fire=--&target_cold=--&target_poison=--&target_energy=--&wrestling=&resistingspells=100&evalintel=0&tactics=100&magery=0&poisoning=0&mic=fresh#freshresults"
-        # try:
-        #     with urllib.request.urlopen(url, timeout=5) as response:
-        #         html = response.read().decode("utf-8")
-        #         match = re.search(r"Intensity Rating: <strong>([\d.]+%)</strong>", html)
-        #         if match:
-        #             self.state["cuWebRating"] = match.group(1)
-        # except Exception as e:
-        #     API.SysMsg("Cu Sidhe web fetch error: " + str(e))
+        if self._isTameableIcon:
+            self._isTameableIcon.Dispose()
+        icon = "isTameable"
+        iconY = 10
+        if not self.state["isEliteResists"] or self.state["pctValue"] < 70:
+            icon = "isNotTameable"
+            iconY = 30
+        self._isTameableIcon = self.gump.addButton("", round(self.GUMP_WIDTH / 2 + 40), iconY, icon)
 
     def _isWithinTemplateRange(self, trained, target):
         for resist in target:

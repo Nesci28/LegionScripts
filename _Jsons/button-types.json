@@ -1,8 +1,18 @@
 {
+    "isNotTameable": {
+        "normal": 9997,
+        "pressed": 9997,
+        "hover": 9997
+    },
+    "isTameable": {
+        "normal": 9998,
+        "pressed": 9998,
+        "hover": 9998
+    },
     "help": {
-        "normal": 2090,
-        "pressed": 2090,
-        "hover": 2090
+        "normal": 9999,
+        "pressed": 9999,
+        "hover": 9999
     },
     "eye": {
         "normal": 1531,

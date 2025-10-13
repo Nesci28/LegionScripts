@@ -1,10 +1,7 @@
 import API
 from LegionPath import LegionPath
-import importlib
+import re
 
 LegionPath.addSubdirs()
 
-
-serial = API.RequestTarget()
-animal = API.FindMobile(serial)
-API.SysMsg(str(animal.Hits))
+API.ContextMenu(API.Player.Serial, 915)

@@ -60,7 +60,7 @@ class Gump:
         API.AddGump(self.gump)
 
     def tick(self):
-        if not self._running or self.gump.IsDisposed:
+        if not self._running:
             self._running = False
             if self.onCloseCb:
                 self.onCloseCb()
@@ -77,7 +77,7 @@ class Gump:
 
     def tickSubGumps(self):
         for subGump, position, _ in self.subGumps:
-            if subGump._running and not subGump.gump.IsDisposed:
+            if subGump._running and not subGump.gump.Disposed:
                 self._setSubGumpPosition(subGump.gump, subGump.width, subGump.height, position)
 
     def destroy(self):
@@ -86,18 +86,48 @@ class Gump:
         self._running = False
         for tab in self.tabGumps.values():
             try:
-                if not tab.IsDisposed:
+                if not tab.Disposed:
                     tab.Dispose()
             except:
                 pass
         for subGump in self.subGumps:
             subGump.destroy()
         try:
-            if not self.gump.IsDisposed:
+            if not self.gump.Disposed:
                 self.gump.Dispose()
         except Exception as e:
             API.SysMsg(f"Gump.Dispose failed: {e}", 33)
         API.SysMsg("Gump destroyed.", 66)
+
+    def createProgressBar(self, x, y, height, width, current, total, title=""):
+        elements = []
+
+        # Avoid division by zero
+        if total <= 0:
+            total = 1
+
+        # Title
+        if title:
+            label = self.addLabel(title, x, y)
+            elements.append(label)
+            y += 20
+
+        # Background (light gray)
+        bg = self.addColorBox(x, y, height, width, "#cccccc")
+        elements.append(bg)
+
+        # Purple fill (progress portion)
+        ratio = max(0.0, min(1.0, current / total))
+        fill_width = int(width * ratio)
+        if fill_width > 0:
+            fill = self.addColorBox(x, y, height, fill_width, "#4e009b")  # purple
+            elements.append(fill)
+
+        # Optional text overlay (e.g. “75 / 100”)
+        progress_label = self.addLabel(f"{int(current)} / {int(total)}", x + width // 2 - 15, y + (height // 2) - 7, 1)
+        elements.append(progress_label)
+
+        return elements
 
     def createStackedBarChart(self, x, y, height, width, count, title=""):
         elements = []
@@ -191,7 +221,7 @@ class Gump:
         self.gump.Add(checkbox)
         return checkbox
 
-    def addButton(self, label, x, y, type, callback, isDarkMode = False):
+    def addButton(self, label, x, y, type, callback = None, isDarkMode = False):
         btnDef = Gump.buttonTypes.get(type, Gump.buttonTypes["default"])
         btn = API.CreateGumpButton(
             "", 996, btnDef["normal"], btnDef["pressed"], btnDef["hover"]
