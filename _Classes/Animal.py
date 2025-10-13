@@ -18,3 +18,8 @@ class Animal:
         while not API.HasGump(601):
             API.Pause(0.1)
         API.ReplyGump(2, 601)
+
+    @staticmethod
+    def kill(magic, animal, spellToKill):
+        API.PreTarget(animal.Serial, "Harmful")
+        magic.cast(spellToKill)

@@ -79,93 +79,104 @@ class AnimalTaming:
         self._animalBeingTamed = None
         self._tameHandled = False
         self._isTaming = False
+        self._ownPetSerial = None
 
     def main(self):
         self._checkSkill()
 
     def tick(self):
-        if not self._isTaming:
-            self._attackTamed(self._animalBeingTamed)
+        animalSkillInfo = Util.getSkillInfo("Animal Taming")
+        if animalSkillInfo["value"] >= 90:
+            if not self._ownPetSerial:
+                self._ownPetSerial = API.RequestTarget()
+            self._magic.regenMana(26)
+            API.PreTarget(self._ownPetSerial, "beneficial")
+            API.CastSpell("Combat training")
+            API.Pause(2)
 
-            animalSkillInfo = Util.getSkillInfo("Animal Taming")
-            if animalSkillInfo["value"] == animalSkillInfo["cap"]:
-                API.SysMsg("You've already maxed out Animal Taming!", 65)
-                API.Stop()
-
-            API.ClearJournal()
-
-            # If there is no animal being tamed, try to find an animal to tame
-            if self._animalBeingTamed == None:
-                self._animalBeingTamed = self._findAnimalToTame()
-                if self._animalBeingTamed == None:
-                    API.Pause(0.5)
-                    return
-                else:
-                    API.HeadMsg(
-                        "Found animal to tame", self._animalBeingTamed.Serial, 90
-                    )
-
-            # Check if animal is close enough to tame
-            distance = Math.distanceBetween(API.Player, self._animalBeingTamed)
-            if distance > self._maxDistance:
-                API.SysMsg("Animal moved too far away, ignoring for now", 1100)
-                self._animalBeingTamed = None
-                return
-            elif self._animalBeingTamed != None and distance > 1:
-                self._followMobile(self._animalBeingTamed)
-                animal = API.FindMobile(self._animalBeingTamed.Serial)
-                isBlocked = False
-                lastCoordX = None
-                lastCoordY = None
-                count = 0
-                while animal and Math.distanceBetween(API.Player, self._animalBeingTamed) > 2 and not isBlocked:
-                    if count >= 10:
-                        isBlocked = True
-                    hasMoved = False
-                    if lastCoordX != API.Player.X:
-                        lastCoordX = API.Player.X
-                        hasMoved = True
-                    if lastCoordY != API.Player.Y:
-                        lastCoordY = API.Player.Y
-                        hasMoved = True
-                    if not hasMoved:
-                        count += 1
-                    animal = API.FindMobile(self._animalBeingTamed.Serial)
-                    API.Pause(0.1)
-
-            # Tame the animal if a tame is not currently being attempted and enough time has passed since last using Animal Taming
+        else:
             if not self._isTaming:
-                self._tame()
-
-        if self._isTaming:
-            if self._animalBeingTamed and not Timer.exists(13, "Animal Taming"):
-                self._animalBeingTamed = None
-                self._isTaming = False
-                return
-            self._followMobile(self._animalBeingTamed)
-            self._animalBeingTamed = API.FindMobile(self._animalBeingTamed.Serial)
-            if self._animalBeingTamed == None:
-                self._isTaming = False
-            if API.InJournalAny(
-                ["It seems to accept you as master.", "That wasn't even challenging."]
-            ):
-                Animal.rename(self._animalBeingTamed, "Tamed")
-                Animal.release(self._animalBeingTamed)
                 self._attackTamed(self._animalBeingTamed)
-                self._animalBeingTamed = None
-                self._isTaming = False
-            elif API.InJournalAny(
-                [
-                    "You fail to tame the creature.",
-                    "The animal is too angry to continue taming.",
-                    "You must wait a few moments to use another skill.",
-                    "That is too far away.",
-                    "You are too far away to continue taming.",
-                    "Someone else is already taming that creature.",
-                ]
-            ):
-                self._animalBeingTamed = None
-                self._isTaming = False
+
+                animalSkillInfo = Util.getSkillInfo("Animal Taming")
+                if animalSkillInfo["value"] == animalSkillInfo["cap"]:
+                    API.SysMsg("You've already maxed out Animal Taming!", 65)
+                    API.Stop()
+
+                API.ClearJournal()
+
+                # If there is no animal being tamed, try to find an animal to tame
+                if self._animalBeingTamed == None:
+                    self._animalBeingTamed = self._findAnimalToTame()
+                    if self._animalBeingTamed == None:
+                        API.Pause(0.5)
+                        return
+                    else:
+                        API.HeadMsg(
+                            "Found animal to tame", self._animalBeingTamed.Serial, 90
+                        )
+
+                # Check if animal is close enough to tame
+                distance = Math.distanceBetween(API.Player, self._animalBeingTamed)
+                if distance > self._maxDistance:
+                    API.SysMsg("Animal moved too far away, ignoring for now", 1100)
+                    self._animalBeingTamed = None
+                    return
+                elif self._animalBeingTamed != None and distance > 1:
+                    self._followMobile(self._animalBeingTamed)
+                    animal = API.FindMobile(self._animalBeingTamed.Serial)
+                    isBlocked = False
+                    lastCoordX = None
+                    lastCoordY = None
+                    count = 0
+                    while animal and Math.distanceBetween(API.Player, self._animalBeingTamed) > 2 and not isBlocked:
+                        if count >= 10:
+                            isBlocked = True
+                        hasMoved = False
+                        if lastCoordX != API.Player.X:
+                            lastCoordX = API.Player.X
+                            hasMoved = True
+                        if lastCoordY != API.Player.Y:
+                            lastCoordY = API.Player.Y
+                            hasMoved = True
+                        if not hasMoved:
+                            count += 1
+                        animal = API.FindMobile(self._animalBeingTamed.Serial)
+                        API.Pause(0.1)
+
+                # Tame the animal if a tame is not currently being attempted and enough time has passed since last using Animal Taming
+                if not self._isTaming:
+                    self._tame()
+
+            if self._isTaming:
+                if self._animalBeingTamed and not Timer.exists(13, "Animal Taming"):
+                    self._animalBeingTamed = None
+                    self._isTaming = False
+                    return
+                self._followMobile(self._animalBeingTamed)
+                self._animalBeingTamed = API.FindMobile(self._animalBeingTamed.Serial)
+                if self._animalBeingTamed == None:
+                    self._isTaming = False
+                if API.InJournalAny(
+                    ["It seems to accept you as master.", "That wasn't even challenging."]
+                ):
+                    Animal.rename(self._animalBeingTamed, "Tamed")
+                    Animal.release(self._animalBeingTamed)
+                    self._attackTamed(self._animalBeingTamed)
+                    self._animalBeingTamed = None
+                    self._isTaming = False
+                elif API.InJournalAny(
+                    [
+                        "You fail to tame the creature.",
+                        "The animal is too angry to continue taming.",
+                        "You must wait a few moments to use another skill.",
+                        "That is too far away.",
+                        "You are too far away to continue taming.",
+                        "Someone else is already taming that creature.",
+                    ]
+                ):
+                    self._animalBeingTamed = None
+                    self._isTaming = False
 
     def _tame(self):
         animal = API.FindMobile(self._animalBeingTamed.Serial)
@@ -196,7 +207,8 @@ class AnimalTaming:
         while animal and animal.Hits > 0 and not animal.IsDead:
             API.HeadMsg(f"Killing this animal", animal.Serial, 33)
             API.PreTarget(animal.Serial, "Harmful")
-            self._magic.cast("Energy Bolt")
+            spell = "Flamestrike"
+            self._magic.cast(spell)
             API.Pause(3)
             animal = API.FindMobile(animal.Serial)
 
@@ -222,7 +234,7 @@ class AnimalTaming:
                     API.Notoriety.Enemy,
                     API.Notoriety.Criminal,
                     API.Notoriety.Gray,
-                    API.Notoriety.Innocent,
+                    # API.Notoriety.Innocent,
                 ],
             )
             for animal in animals:

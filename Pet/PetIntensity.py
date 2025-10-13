@@ -4,7 +4,9 @@ import importlib
 from decimal import Decimal
 import urllib.request
 from urllib.parse import urlencode
-
+import os
+import json
+from datetime import datetime
 from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
@@ -20,26 +22,28 @@ from Util import Util
 
 
 class PetIntensity:
+    SAVE_FILE = f"{Util.getPlayerName()}_pet_intensity_history.json"
+
     loreGumpId = 0x1DB
     statRe = re.compile(r'<div align=right>(\d+(?:\.\d+)?)(?:/\d+)?%?</div>', re.IGNORECASE)
     resistRe = re.compile(r'(?:<BASEFONT[^>]*>)?<div align=right>(\d+(?:\.\d+)?)(?:/\d+)?%?</div>', re.IGNORECASE)
 
     cuSidheColors = {
-        0: ("Original", "Common - 84%"),
-        2426: ("Agapite / Rose", "Uncommon (2.1%)"),
-        2218: ("Bronze", "Uncommon (2.1%)"),
-        1447: ("Copper", "Uncommon (2.1%)"),
-        2424: ("Dull Copper", "Uncommon (2.1%)"),
-        2305: ("Grey", "Uncommon (2.1%)"),
-        1319: ("Echo Blue", "Uncommon (2.1%)"),
-        2220: ("Valorite Blue", "Uncommon (2.1%)"),
-        1301: ("Sky Blue", "Rare (0.2%)"),
-        1154: ("Ice Blue", "Rare (0.2%)"),
-        1201: ("Pink", "Rare (0.2%)"),
-        1652: ("Red", "Rare (0.2%)"),
-        1109: ("Black", "Rare (0.2%)"),
-        1153: ("Pure White", "Rare (0.2%)"),
-        1161: ("Blaze", "Extremely Rare (0.004%)"),
+        0: ("Original", "84%"),
+        2426: ("Agapite", "2.1%"),
+        2218: ("Bronze", "2.1%"),
+        1447: ("Copper", "2.1%"),
+        2424: ("Dull Copper", "2.1%"),
+        2305: ("Grey", "2.1%"),
+        1319: ("Echo Blue", "2.1%"),
+        2220: ("Valorite Blue", "2.1%"),
+        1301: ("Sky Blue", "0.2%"),
+        1154: ("Ice Blue", "0.2%"),
+        1201: ("Pink", "0.2%"),
+        1652: ("Red", "0.2%"),
+        1109: ("Black", "0.2%"),
+        1153: ("Pure White", "0.2%"),
+        1161: ("Blaze", "0.004%"),
     }
 
     resistTemplates = [
@@ -86,8 +90,8 @@ class PetIntensity:
     }
 
     def __init__(self):
-        self.GUMP_WIDTH = 200
-        self.GUMP_HEIGHT = 175
+        self.GUMP_WIDTH = 250
+        self.GUMP_HEIGHT = 300
 
         self.gump = Gump(self.GUMP_WIDTH, self.GUMP_HEIGHT, self._onClose, False)
         self._running = True
@@ -109,6 +113,7 @@ class PetIntensity:
             "cuTemplate": None,
             "cuWebRating": None,
         }
+        self.isDrawed = False
 
     @staticmethod
     def _num(s: str) -> int:
@@ -138,7 +143,28 @@ class PetIntensity:
             return Decimal(stat)
         return Decimal("0")
 
+    def _resetState(self):
+        self.state = {
+            "petKey": None,
+            "stats": [],
+            "resists": [],
+            "pretame": False,
+            "pctValue": 0,
+            "pctRating": "0%",
+            "oldSlots": "?",
+            "newSlots": "?",
+            "name": None,
+            "undefined": None,
+            "isWild": None,
+            "cuColor": None,
+            "cuRarity": None,
+            "cuTemplate": None,
+            "cuWebRating": None,
+        }
+
     def _evaluatePet(self):
+        self._resetState()
+
         petSerial = API.RequestTarget()
         if not petSerial:
             return
@@ -147,9 +173,8 @@ class PetIntensity:
         if not pet:
             return
 
+        API.PreTarget(pet.Serial)
         API.UseSkill("Animal Lore")
-        API.WaitForTarget()
-        API.Target(pet.Serial)
         while not API.GetGump(self.loreGumpId):
             API.Pause(0.1)
         gump = API.GetGump(self.loreGumpId)
@@ -194,6 +219,8 @@ class PetIntensity:
 
         if "cu sidhe" in nmLower:
             self._analyzeCuSidhe(pet, lines)
+        self._saveHistory()
+        self._drawHistoryChart()
 
     # -------------------------------
     # Cu Sidhe special analyzer
@@ -221,6 +248,7 @@ class PetIntensity:
                 matched = f"Template #{i+1} ±5"
                 break
         self.state["cuTemplate"] = matched
+        API.SysMsg(str(self.state["cuTemplate"]))
 
         # Web fetch (optional)
         params = {
@@ -244,6 +272,7 @@ class PetIntensity:
                 match = re.search(r"Intensity Rating: <strong>([\d.]+%)</strong>", html)
                 if match:
                     self.state["cuWebRating"] = match.group(1)
+                    API.SysMsg(str(self.state["cuWebRating"]))
         except Exception as e:
             API.SysMsg("Cu Sidhe web fetch error: " + str(e))
 
@@ -299,11 +328,10 @@ class PetIntensity:
         self.state["pctRating"] = f"{pctValue:.2f}%"
 
     def _showGump(self):
-        self.gump.addLabel("Pet Intensity Calculator", 22, 1)
+        self.gump.addLabel("Pet Intensity Calculator", round(self.GUMP_WIDTH / 2 - 100), 1)
         self.gump.addButton(
-            "Evaluate", 1, 20, "default", self.gump.onClick(lambda: self._evaluatePet()), True
+            "", round(self.GUMP_WIDTH / 2 + 65), 1, "eye", self.gump.onClick(lambda: self._help()), True
         )
-        # self.gump.addLabel("Evaluate Pet", 25, 20)
 
         self.undefinedLabel = self.gump.addLabel("", 1, 40)
         self.nameLabel = self.gump.addLabel("", 1, 55)
@@ -315,9 +343,12 @@ class PetIntensity:
         self.webLabel = self.gump.addLabel("", 1, 120)
 
         self.gump.create()
+        self._drawHistoryChart()
+
+    def _help(self):
+        API.SysMsg("Press SHIFT+A to analyze a pet")
 
     def _updateGump(self):
-        self.undefinedLabel.Text = f"Undefined: {self.state['undefined']}"
         self.nameLabel.Text = (
             f"{self.state['name']} {self.state['oldSlots']}→{self.state['newSlots']}"
         )
@@ -358,6 +389,122 @@ class PetIntensity:
 
     def _isRunning(self):
         return self._running
+
+    def _saveHistory(self):
+        import json, os
+        from datetime import datetime
+        from decimal import Decimal
+
+        try:
+            data = []
+            if os.path.exists(self.SAVE_FILE):
+                with open(self.SAVE_FILE, "r", encoding="utf-8") as f:
+                    data = json.load(f)
+
+            # Convert any Decimal in self.state to float recursively
+            def convert(obj):
+                if isinstance(obj, Decimal):
+                    return float(obj)
+                if isinstance(obj, list):
+                    return [convert(x) for x in obj]
+                if isinstance(obj, dict):
+                    return {k: convert(v) for k, v in obj.items()}
+                return obj
+
+            cleaned_state = convert(self.state)
+            now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+
+            entry = {
+                "timestamp": now_str,
+                **cleaned_state,
+            }
+
+            data.append(entry)
+            with open(self.SAVE_FILE, "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+
+        except Exception as e:
+            API.SysMsg(f"[PetIntensity] History save error: {e}")
+
+    def _drawHistoryChart(self):
+        """
+        Vertical bar chart:
+        X-axis = intensity bins (0–100%)
+        Y-axis = number of analyzed pets in each intensity range.
+        """
+        try:
+            if not os.path.exists(self.SAVE_FILE):
+                API.SysMsg("[PetIntensity] No history data yet.")
+                return
+
+            with open(self.SAVE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            if not data:
+                API.SysMsg("[PetIntensity] History file empty.")
+                return
+
+            # Extract intensities
+            intensities = [float(e.get("pctValue", 0)) for e in data if "pctValue" in e]
+            if not intensities:
+                API.SysMsg("[PetIntensity] No valid intensity data.")
+                return
+
+            # Group into 10 bins: 0–10, 10–20, ... 90–100
+            bins = [0] * 10
+            for val in intensities:
+                idx = min(9, int(val // 10))
+                bins[idx] += 1
+
+            maxCount = max(bins) if any(bins) else 1
+
+            # Chart geometry
+            chart_x = 10
+            chart_y = 140
+            chart_width = 180
+            chart_height = 100
+            bar_width = int(chart_width / len(bins)) - 2
+
+            # Remove old bars
+            if hasattr(self, "chartBars"):
+                for bar in self.chartBars:
+                    try:
+                        bar.Destroy()
+                    except Exception:
+                        pass
+            self.chartBars = []
+
+            # Grid lines (Y = number of pets)
+            if not self.isDrawed:
+                self.gump.addLabel("Intensity Distribution", chart_x, chart_y - 15)
+                self.totalPetLabel = self.gump.addLabel(f"Total pets: {len(intensities)}", chart_x, chart_y + chart_height + 20)
+                for frac in [0, 0.5, 1.0]:
+                    y = chart_y + chart_height - int(frac * chart_height)
+                    self.gump.addColorBox(chart_x, y, 1, chart_width, "#919191")
+                    self.gump.addLabel(f"{int(frac * maxCount)}", chart_x + chart_width + 5, y - 5)
+                self.isDrawed = True
+
+            # Draw bars
+            for i, count in enumerate(bins):
+                if count <= 0:
+                    continue
+
+                height = max(1, int((count / maxCount) * chart_height))
+                x = chart_x + i * (bar_width + 2)
+                y = chart_y + (chart_height - height)
+
+                # Draw vertical bar
+                bar = self.gump.addColorBox(int(x), int(y), int(height), int(bar_width), "#919191")
+                self.chartBars.append(bar)
+
+                # Label intensity bin below bar
+                self.gump.addLabel(f"{int(i * 10)}", x, chart_y + chart_height + 5)
+
+            # Title / Footer
+            self.totalPetLabel.Text = f"Total pets: {len(intensities)}"
+
+        except Exception as e:
+            API.SysMsg(f"[PetIntensity] Chart draw error: {e}")
+
 
 petIntensity = PetIntensity()
 petIntensity.main()

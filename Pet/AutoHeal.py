@@ -5,8 +5,13 @@ from LegionPath import LegionPath
 LegionPath.addSubdirs()
 
 import Math
+import Magic
 
 importlib.reload(Math)
+importlib.reload(Magic)
+
+from Math import Math
+from Magic import Magic
 
 
 # Settings
@@ -17,6 +22,7 @@ bandageSerial = API.Backpack
 
 petSerials = []
 petMobiles = []
+magic = Magic()
 
 # -- Movement Detection --
 def isMoving():
@@ -24,17 +30,15 @@ def isMoving():
 
 # -- Targeted Cast --
 def castAtTarget(spell, level, targetSerial, poisonCheck=0):
-    if not API.WaitForTarget("Beneficial", fcDelay(level)):
-        return False
     mob = API.FindMobile(targetSerial)
-    if not mob or Math.Math.distanceBetween(API.Player, mob) > 10:
+    if not mob or Math.distanceBetween(API.Player, mob) > 10:
         return False
     if poisonCheck == 1 and not mob.IsPoisoned:
         return False
     if poisonCheck == -1 and mob.IsPoisoned:
         return False
-    API.Target(targetSerial)
-    API.CreateCooldownBar(fcrDelay() / 1000.0, f"{spell} Cooldown", 88)
+    API.PreTarget(targetSerial, "beneficial")
+    magic.cast(spell)
     return True
 
 # -- HP Percent Helper --
@@ -68,8 +72,7 @@ def curePets(healthPercent):
         return False
     rebuildPetList()
     for mob in petMobiles:
-        if mob.IsPoisoned and mobilePercentHP(mob) < healthPercent and Math.Math.distanceBetween(API.Player, mob) <= 10:
-            API.CastSpell("Arch Cure")
+        if mob.IsPoisoned and mobilePercentHP(mob) < healthPercent and Math.distanceBetween(API.Player, mob) <= 10:
             return castAtTarget("Arch Cure", 4, mob.Serial, 1)
     return False
 
@@ -79,8 +82,7 @@ def healPets(healthPercent):
     rebuildPetList()
     for mob in petMobiles:
         isGhost = mob.Hits == 0
-        if not isGhost and not mob.IsPoisoned and mobilePercentHP(mob) < healthPercent and Math.Math.distanceBetween(API.Player, mob) <= 10:
-            API.CastSpell("Greater Heal")
+        if not isGhost and not mob.IsPoisoned and mobilePercentHP(mob) < healthPercent and Math.distanceBetween(API.Player, mob) <= 10:
             return castAtTarget("Greater Heal", 4, mob.Serial, -1)
     return False
 
@@ -89,7 +91,7 @@ def vetPets(healthPercent):
         return False
     rebuildPetList()
     for mob in petMobiles:
-        if Math.Math.distanceBetween(API.Player, mob) > 2:
+        if Math.distanceBetween(API.Player, mob) > 2:
             continue
         if mobilePercentHP(mob) >= healthPercent and not mob.IsPoisoned:
             continue

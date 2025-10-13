@@ -15,7 +15,6 @@ class TamingScript:
 
     def __init__(self):
         self.petSerial = None
-        self.pet = None
 
     def isAngry(self):
         return API.InJournalAny(["You seem to anger the beast!"])
@@ -25,8 +24,8 @@ class TamingScript:
 
     def waitForPetInRange(self, maxRange=3):
         while not API.HasTarget():
-            API.SysMsg(str(self.pet.X - self.pet.Y))
-            distance = Math.Math.distanceBetween(API.Player, self.pet)
+            pet = API.FindMobile(self.petSerial)
+            distance = Math.Math.distanceBetween(API.Player, pet)
             API.SysMsg(str(distance))
             if distance <= maxRange:
                 break
@@ -41,7 +40,6 @@ class TamingScript:
     def run(self):
         API.SysMsg("Select the wild pet to tame", 34)
         self.petSerial = API.RequestTarget()
-        self.pet = API.FindMobile(self.petSerial)
         attempts = 0
         while attempts < self.maxTamingAttempts:
             self.waitForPetInRange()
