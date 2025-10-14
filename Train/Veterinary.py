@@ -57,25 +57,27 @@ class Veterinary:
         if not bandages or not pet:
             API.SysMsg("Pet/Bandages not found", 33)
             API.Stop()
-        if Math.distanceBetween(API.Player, pet) > 1:
+        if Math.distanceBetween(API.Player, pet) > 1 and not Timer.exists(3, "All follow me", 21):
+            Timer.create(3, "All follow me", 21)
             API.Msg("All Follow Me")
         if Timer.exists(3, "Veterinary", 22):
             return
-        if pet.HitsDiff == 0:
-            API.PreTarget(self._petSerial, "harmful")
-            values = Util.getSkillInfo("Veterinary")
-            skillValue = values["value"]
-            if skillValue < 60:
-                self._magic.cast("Magic Arrow")
-            if skillValue > 60 and skillValue < 80:
-                self._magic.cast("Poison")
-            API.Pause(2)
-        if pet.HitsDiff != 0:
+        values = Util.getSkillInfo("Veterinary")
+        skillValue = values["value"]
+        if skillValue < 60 and pet.HitsDiff == 0:
+            self._cast("Magic Arrow")
+        if skillValue > 60 and skillValue < 80 and not pet.IsPoisoned:
+            self._cast("poison")
+        if pet.HitsDiff != 0 or pet.IsPoisoned:
             Util.useObject(bandages.Serial)
             API.WaitForTarget()
             API.Target(self._petSerial)
             Timer.create(3, "Veterinary", 22) 
 
+    def _cast(self, spell):
+        API.PreTarget(self._petSerial, "harmful")
+        self._magic.cast(spell)
+        API.Pause(2)
 
     def _showGump(self):
         pass
