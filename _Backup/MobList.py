@@ -215,7 +215,7 @@ class MobList:
         return False
 
     def _run(self):
-        while self._running and self.gump and not self.gump.gump.Disposed:
+        while self._running and self.gump and not self.gump.gump.IsDisposed:
             enemies = self._scan(15)
             self._createMobButtons(enemies)
             if self.isAutoHealing and not API.Player.IsDead and self.petSerials:

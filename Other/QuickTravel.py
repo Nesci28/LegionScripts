@@ -20,6 +20,13 @@ from Magic import Magic
 
 class QuickTravel:
     configs = {
+        "Beastcaller": {
+            "runebookSerial": 0x455605D2,
+            "house": 3,
+            "bank": 1,
+            "moongate": 0,
+            "library": 2,
+        },
         "Nescira": {
             "runebookSerial": 0x4090422B,
             "house": 14,
@@ -159,7 +166,7 @@ class QuickTravel:
         if self.gump:
             self.gump.tick()
             self.gump.tickSubGumps()
-            if self.gump.gump.Disposed:
+            if self.gump.gump.IsDisposed:
                 self._onClose()
                 return False
         return True

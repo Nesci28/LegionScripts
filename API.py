@@ -163,9 +163,9 @@ class PyBaseControl:
         pass
 
 class PyBaseGump:
-    Disposed: bool = None
+    IsDisposed: bool = None
     PacketGumpText: str = None
-    Gump: Gump = None
+    Gump: PyBaseGump = None
 
     def SetInScreen(self) -> None:
         """
@@ -335,7 +335,7 @@ class PyMulti:
 
 class PyNineSliceGump:
     NineSliceGump = None
-    Gump: Gump = None
+    Gump: PyBaseGump = None
 
     def GetHue(self) -> int:
         """
@@ -1544,7 +1544,7 @@ def GetGumpContents(ID: int = 1337) -> str:
     """
     pass
 
-def GetGump(ID: int = 1337) -> Gump:
+def GetGump(ID: int = 1337) -> PyBaseGump:
     """
      Get a gump by ID.
      Example:
@@ -1951,7 +1951,7 @@ def GetAllFriends() -> Any:
     """
     pass
 
-def CreateGump(acceptMouseInput: bool = True, canMove: bool = True, keepOpen: bool = False) -> Any:
+def CreateGump(acceptMouseInput: bool = True, canMove: bool = True, keepOpen: bool = False) -> PyBaseGump:
     """
      Get a blank gump.
      Example:
@@ -1996,7 +1996,7 @@ def CreateGumpCheckbox(text: str = "", hue: int = 0, isChecked: bool = False) ->
     """
     pass
 
-def CreateGumpLabel(text: str, hue: int = 996) -> PyControl:
+def CreateGumpLabel(text: str, hue: int = 996) -> PyBaseControl:
     """
      Create a label for a gump.
      Example:
@@ -2010,7 +2010,7 @@ def CreateGumpLabel(text: str, hue: int = 996) -> PyControl:
     """
     pass
 
-def CreateGumpColorBox(opacity: float = 0.7, color: str = "#000000") -> PyControl:
+def CreateGumpColorBox(opacity: float = 0.7, color: str = "#000000") -> PyBaseControl:
     """
      Get a transparent color box for gumps.
      Example:
@@ -2027,7 +2027,7 @@ def CreateGumpColorBox(opacity: float = 0.7, color: str = "#000000") -> PyContro
     """
     pass
 
-def CreateGumpItemPic(graphic: int, width: int, height: int) -> PyControl:
+def CreateGumpItemPic(graphic: int, width: int, height: int) -> PyBaseControl:
     """
      Create a picture of an item.
      Example:
@@ -2041,7 +2041,7 @@ def CreateGumpItemPic(graphic: int, width: int, height: int) -> PyControl:
     """
     pass
 
-def CreateGumpButton(text: str = "", hue: int = 996, normal: int = 0x00EF, pressed: int = 0x00F0, hover: int = 0x00EE) -> PyControl:
+def CreateGumpButton(text: str = "", hue: int = 996, normal: int = 0x00EF, pressed: int = 0x00F0, hover: int = 0x00EE) -> PyBaseControl:
     """
      Create a button for gumps.
      Example:
@@ -2061,7 +2061,7 @@ def CreateGumpButton(text: str = "", hue: int = 996, normal: int = 0x00EF, press
     """
     pass
 
-def CreateSimpleButton(text: str, width: int, height: int) -> PyControl:
+def CreateSimpleButton(text: str, width: int, height: int) -> PyBaseControl:
     """
      Create a simple button, does not use graphics.
      Example:
@@ -2076,7 +2076,7 @@ def CreateSimpleButton(text: str, width: int, height: int) -> PyControl:
     """
     pass
 
-def CreateGumpRadioButton(text: str = "", group: int = 0, inactive: int = 0x00D0, active: int = 0x00D1, hue: int = 0xFFFF, isChecked: bool = False) -> PyControl:
+def CreateGumpRadioButton(text: str = "", group: int = 0, inactive: int = 0x00D0, active: int = 0x00D1, hue: int = 0xFFFF, isChecked: bool = False) -> PyBaseControl:
     """
      Create a radio button for gumps, use group numbers to only allow one item to be checked at a time.
      Example:
@@ -2092,7 +2092,7 @@ def CreateGumpRadioButton(text: str = "", group: int = 0, inactive: int = 0x00D0
     """
     pass
 
-def CreateGumpTextBox(text: str = "", width: int = 200, height: int = 30, multiline: bool = False) -> PyControl:
+def CreateGumpTextBox(text: str = "", width: int = 200, height: int = 30, multiline: bool = False) -> PyBaseControl:
     """
      Create a text area control.
      Example:
@@ -2122,7 +2122,7 @@ def CreateGumpTextBox(text: str = "", width: int = 200, height: int = 30, multil
     """
     pass
 
-def CreateGumpTTFLabel(text: str, size: float, color: str = "#FFFFFF", font: str = TrueTypeLoader.EMBEDDED_FONT, aligned: str = "let", maxWidth: int = 0, applyStroke: bool = False) -> PyControl:
+def CreateGumpTTFLabel(text: str, size: float, color: str = "#FFFFFF", font: str = TrueTypeLoader.EMBEDDED_FONT, aligned: str = "let", maxWidth: int = 0, applyStroke: bool = False) -> PyBaseControl:
     """
      Create a TTF label with advanced options.
      Example:
@@ -2140,7 +2140,7 @@ def CreateGumpTTFLabel(text: str, size: float, color: str = "#FFFFFF", font: str
     """
     pass
 
-def CreateGumpSimpleProgressBar(width: int, height: int, backgroundColor: str = "#616161", foregroundColor: str = "#212121", value: int = 100, max: int = 100) -> PyControl:
+def CreateGumpSimpleProgressBar(width: int, height: int, backgroundColor: str = "#616161", foregroundColor: str = "#212121", value: int = 100, max: int = 100) -> PyBaseControl:
     """
      Create a progress bar. Can be updated as needed with `bar.SetProgress(current, max)`.
      Example:
@@ -2167,7 +2167,7 @@ def CreateGumpSimpleProgressBar(width: int, height: int, backgroundColor: str = 
     """
     pass
 
-def CreateGumpScrollArea(x: int, y: int, width: int, height: int) -> PyControl:
+def CreateGumpScrollArea(x: int, y: int, width: int, height: int) -> PyBaseControl:
     """
      Create a scrolling area, add and position controls to it directly.
      Example:
@@ -2184,7 +2184,7 @@ def CreateGumpScrollArea(x: int, y: int, width: int, height: int) -> PyControl:
     """
     pass
 
-def CreateGumpPic(graphic: int, x: int = 0, y: int = 0, hue: int = 0) -> PyControl:
+def CreateGumpPic(graphic: int, x: int = 0, y: int = 0, hue: int = 0) -> PyBaseControl:
     """
      Create a gump pic(Use this for gump art, not item art)
      Example:
@@ -2210,7 +2210,7 @@ def CreateModernGump(x: int, y: int, width: int, height: int, resizable: bool = 
     """
     pass
 
-def AddControlOnClick(control: PyControl, onClick: Any, leftOnly: bool = True) -> PyControl:
+def AddControlOnClick(control: PyBaseControl, onClick: Any, leftOnly: bool = True) -> PyBaseControl:
     """
      Add an onClick callback to a control.
      Example:
@@ -2226,7 +2226,7 @@ def AddControlOnClick(control: PyControl, onClick: Any, leftOnly: bool = True) -
     """
     pass
 
-def AddControlOnDisposed(control: PyControl, onDispose: Any) -> PyControl:
+def AddControlOnDisposed(control: PyBaseControl, onDispose: Any) -> PyBaseControl:
     """
      Add onDispose(Closed) callback to a control.
      Example:

@@ -77,7 +77,7 @@ class Gump:
 
     def tickSubGumps(self):
         for subGump, position, _ in self.subGumps:
-            if subGump._running and not subGump.gump.Disposed:
+            if subGump._running and not subGump.gump.IsDisposed:
                 self._setSubGumpPosition(subGump.gump, subGump.width, subGump.height, position)
 
     def destroy(self):
@@ -86,14 +86,14 @@ class Gump:
         self._running = False
         for tab in self.tabGumps.values():
             try:
-                if not tab.Disposed:
+                if not tab.IsDisposed:
                     tab.Dispose()
             except:
                 pass
         for subGump in self.subGumps:
             subGump.destroy()
         try:
-            if not self.gump.Disposed:
+            if not self.gump.IsDisposed:
                 self.gump.Dispose()
         except Exception as e:
             API.SysMsg(f"Gump.Dispose failed: {e}", 33)
