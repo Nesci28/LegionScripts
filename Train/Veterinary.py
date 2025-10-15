@@ -32,6 +32,7 @@ class Veterinary:
         self._bandageId = 0x0E21
         self._magic = Magic()
         self._petSerial = None
+        self._deadPetSerial = None
 
     def main(self):
         try:
@@ -60,19 +61,39 @@ class Veterinary:
         if Math.distanceBetween(API.Player, pet) > 1 and not Timer.exists(3, "All follow me", 21):
             Timer.create(3, "All follow me", 21)
             API.Msg("All Follow Me")
-        if Timer.exists(3, "Veterinary", 22):
-            return
         values = Util.getSkillInfo("Veterinary")
         skillValue = values["value"]
         if skillValue < 60 and pet.HitsDiff == 0:
             self._cast("Magic Arrow")
-        if skillValue > 60 and skillValue < 80 and not pet.IsPoisoned:
+
+        if skillValue > 60 and skillValue < 79.9 and not pet.IsPoisoned:
             self._cast("poison")
-        if pet.HitsDiff != 0 or pet.IsPoisoned:
+
+        timer = 3
+        if skillValue >= 80:
+            timer = 5.5
+        if Timer.exists(timer, "Veterinary", 22):
+            return
+
+        if skillValue >= 79.9:
+            if not self._deadPetSerial:
+                mobiles = API.GetAllMobiles(None, 1, [API.Notoriety.Unknown, API.Notoriety.Innocent, API.Notoriety.Ally])
+                for mobile in mobiles:
+                    if mobile.IsDead:
+                        self._deadPetSerial = mobile.Serial
+            if self._deadPetSerial:
+                deadPet = API.FindMobile(self._deadPetSerial)
+                if not deadPet:
+                    API.SysMsg("Dead pet not found", 33)
+                    API.Stop()
+        if (skillValue < 60 and pet.HitsDiff != 0) or (skillValue >= 60 and skillValue < 79.9 and pet.IsPoisoned) or (skillValue > 79.9 and pet.IsDead):
             Util.useObject(bandages.Serial)
             API.WaitForTarget()
             API.Target(self._petSerial)
-            Timer.create(3, "Veterinary", 22) 
+            timer = 3
+            if skillValue >= 80:
+                timer = 5.5
+            Timer.create(timer, "Veterinary", 22) 
 
     def _cast(self, spell):
         API.PreTarget(self._petSerial, "harmful")

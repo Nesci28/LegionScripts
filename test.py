@@ -1,7 +1,8 @@
 import API
 from LegionPath import LegionPath
-import re
 
 LegionPath.addSubdirs()
 
-API.ContextMenu(API.Player.Serial, 915)
+mobiles = API.GetAllMobiles(None, 1, [API.Notoriety.Unknown, API.Notoriety.Innocent, API.Notoriety.Ally])
+for mobile in mobiles:
+    API.SysMsg(str(mobile.IsDead))
