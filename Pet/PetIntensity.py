@@ -239,6 +239,7 @@ class PetIntensity:
         self.isDrawed = False
         self._historyChartY = None
         self._resistChartY = None
+        self._ratingThresholdTextBox = None
 
     def _emptyState(self):
         if self._isTameableIcon:
@@ -263,15 +264,16 @@ class PetIntensity:
         }
 
     def _showGump(self):
-        # widen for readability
         self.GUMP_WIDTH = 380
         self.GUMP_HEIGHT = 470
         self.gump = Gump(self.GUMP_WIDTH, self.GUMP_HEIGHT, self._onClose, False)
 
-        self.gump.addLabel("Pet Intensity Calculator", round(self.GUMP_WIDTH / 2 - 70), 5, hue=67)
         self.gump.addButton(
             "", 0, 0, "help", self.gump.onClick(lambda: self._help()), True
         )
+        self.gump.addLabel("Pet Intensity Calculator", round(self.GUMP_WIDTH / 2 - 95), 5, hue=67)
+        self.gump.addLabel("Rating:", self.GUMP_WIDTH - 75, 5, hue=901)
+        self._ratingThresholdTextBox = self.gump.addSkillTextBox(70, self.GUMP_WIDTH - 75, 25, 0, 100, 60, 20)
 
         y = 35
         self.nameLabel = self.gump.addLabel("", 10, y)
@@ -382,9 +384,10 @@ class PetIntensity:
         self._updateResistSection()
 
     def _help(self):
-        API.SysMsg("Press SHIFT+A to analyze a pet")
+        API.SysMsg("Press SHIFT+A to analyze a pet and save history")
+        API.SysMsg("Press SHIFT+S to analyze a pet and NOT save history")
 
-    def _evaluatePet(self):
+    def _evaluatePet(self, isSavingHistory):
         self.state = self._emptyState()
 
         petSerial = API.RequestTarget()
@@ -443,9 +446,10 @@ class PetIntensity:
             if "cu sidhe" in nmLower:
                 self._analyzeCuSidhe(pet)
 
-            self._saveHistory()
-            self._drawHistoryIntensityChart()
-            self._drawHistoryResistChart()
+            if isSavingHistory:
+                self._saveHistory()
+                self._drawHistoryIntensityChart()
+                self._drawHistoryResistChart()
         except Exception as e:
             API.SysMsg(str(e))
 
@@ -623,7 +627,8 @@ class PetIntensity:
 
     def main(self):
         self._showGump()
-        API.OnHotKey("SHIFT+A", self._evaluatePet)
+        API.OnHotKey("SHIFT+A", lambda: self._evaluatePet(True))
+        API.OnHotKey("SHIFT+S", lambda: self._evaluatePet(False))
 
     def _isRunning(self):
         return self._running
@@ -653,10 +658,11 @@ class PetIntensity:
             self._isTameableIcon.Dispose()
         icon = "isTameable"
         iconY = 10
-        if not self.state["isEliteResists"] or self.state["pctValue"] < 70:
+        minValue = self._ratingThresholdTextBox.Text
+        if not self.state["isEliteResists"] or self.state["pctValue"] <= int(minValue):
             icon = "isNotTameable"
             iconY = 30
-        self._isTameableIcon = self.gump.addButton("", round(self.GUMP_WIDTH / 2 + 40), iconY, icon)
+        self._isTameableIcon = self.gump.addButton("", round(self.GUMP_WIDTH / 2 + 10), iconY, icon)
 
     def _isWithinTemplateRange(self, trained, target):
         for resist in target:

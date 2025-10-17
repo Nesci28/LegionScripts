@@ -165,6 +165,7 @@ class PyBaseControl:
 class PyBaseGump:
     IsDisposed: bool = None
     PacketGumpText: str = None
+    CanCloseWithRightClick: bool = None
     Gump: PyBaseGump = None
 
     def SetInScreen(self) -> None:
@@ -2210,7 +2211,7 @@ def CreateModernGump(x: int, y: int, width: int, height: int, resizable: bool = 
     """
     pass
 
-def AddControlOnClick(control: PyBaseControl, onClick: Any, leftOnly: bool = True) -> PyBaseControl:
+def AddControlOnClick(control: Any, onClick: Any, leftOnly: bool = True) -> Any:
     """
      Add an onClick callback to a control.
      Example:

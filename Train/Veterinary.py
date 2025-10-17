@@ -66,7 +66,7 @@ class Veterinary:
         if skillValue < 60 and pet.HitsDiff == 0:
             self._cast("Magic Arrow")
 
-        if skillValue > 60 and skillValue < 79.9 and not pet.IsPoisoned:
+        if skillValue >= 60 and skillValue < 79.9 and not pet.IsPoisoned:
             self._cast("poison")
 
         timer = 3
