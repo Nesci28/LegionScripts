@@ -1,40 +1,6 @@
 {
-  "$schema": "https://biomejs.dev/schemas/2.2.6/schema.json",
+  "$schema": "https://biomejs.dev/schemas/2.2.7/schema.json",
   "extends": [
     "./node_modules/@okidoo/eslint-config/biome-node-2.2.4/biome.jsonc"
-  ],
-  "linter": {
-    "rules": {
-      "style": {
-        "useNamingConvention": {
-          "level": "error",
-          "options": {
-            "strictCase": true,
-            "requireAscii": true,
-            "conventions": [
-              {
-                "selector": {
-                  "kind": "typeMember"
-                },
-                "formats": ["PascalCase"]
-              },
-              {
-                "selector": {
-                  "kind": "variable",
-                  "scope": "global"
-                },
-                "formats": ["CONSTANT_CASE"]
-              },
-              {
-                "selector": {
-                  "kind": "variable"
-                },
-                "formats": ["camelCase"]
-              }
-            ]
-          }
-        }
-      }
-    }
-  }
+  ]
 }

@@ -14,9 +14,6 @@ import {
   jsonAssertSpell,
 } from "./utils/typia.util";
 
-// eslint-config-airbnb-base
-// eslint-config-biome@latest
-
 appRootPath.setPath(
   appRootPath.path.endsWith("/dist")
     ? appRootPath.path
