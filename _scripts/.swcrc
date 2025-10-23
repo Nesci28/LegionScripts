@@ -1,0 +1,23 @@
+{
+  "$schema": "https://swc.rs/schema.json",
+  "exclude": ["node_modules", "src/utils-raw", "src/interfaces"],
+  "sourceMaps": "inline",
+  "inlineSourcesContent": true,
+  "jsc": {
+    "parser": {
+      "syntax": "typescript",
+      "decorators": false,
+      "dynamicImport": true
+    },
+    "target": "esnext",
+    "baseUrl": "./dist"
+  },
+  "module": {
+    "type": "es6",
+    "strict": true,
+    "strictMode": true,
+    "noInterop": false,
+    "resolveFully": true,
+    "outFileExtension": "mjs"
+  }
+}

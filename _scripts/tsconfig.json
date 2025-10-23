@@ -1,0 +1,45 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "removeComments": true,
+    "declaration": true,
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "allowSyntheticDefaultImports": true,
+    "target": "es2017",
+    "sourceMap": false,
+    "rootDir": "./src",
+    "outDir": "./dist",
+    "baseUrl": "./src",
+    "incremental": false,
+    "skipLibCheck": true,
+    "strictNullChecks": true,
+    "noImplicitAny": false,
+    "strictBindCallApply": false,
+    "forceConsistentCasingInFileNames": false,
+    "noFallthroughCasesInSwitch": false,
+    "useUnknownInCatchVariables": true,
+    "allowJs": true,
+    "types": [
+      "@types/node",
+      "@total-typescript/ts-reset"
+    ],
+    "plugins": [
+      {
+        "transform": "typia/lib/transform"
+      }
+    ]
+  },
+  "watchOptions": {
+    "excludeFiles": [
+      "**/*.json"
+    ]
+  },
+  "include": [
+    "./src",
+    "reset.d.ts"
+  ],
+  "exclude": [
+    "node_modules"
+  ]
+}

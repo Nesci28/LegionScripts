@@ -1,6 +1,6 @@
 [
   {
-    "ID": -1,
+    "ID": 1,
     "Name": "Create Food",
     "PowerWords": "In Mani Ylem",
     "CursorSize": 0,
@@ -9,12 +9,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1,
+    "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
-    "ID": 0,
+    "ID": 2,
     "Name": "Reactive Armor",
     "PowerWords": "Flam Sanct",
     "CursorSize": 0,
@@ -23,12 +27,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1,
+    "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
-    "ID": 1,
+    "ID": 3,
     "Name": "Clumsy",
     "PowerWords": "Uus Jux",
     "CursorSize": 1,
@@ -39,10 +47,14 @@
     "IsLinear": false,
     "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
-    "ID": 3,
+    "ID": 4,
     "Name": "Feeblemind",
     "PowerWords": "Rel Wis",
     "CursorSize": 1,
@@ -53,10 +65,14 @@
     "IsLinear": false,
     "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
-    "ID": 4,
+    "ID": 5,
     "Name": "Heal",
     "PowerWords": "In Mani",
     "CursorSize": 1,
@@ -67,10 +83,14 @@
     "IsLinear": false,
     "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
-    "ID": 5,
+    "ID": 6,
     "Name": "Magic Arrow",
     "PowerWords": "In Por Ylem",
     "CursorSize": 1,
@@ -81,10 +101,14 @@
     "IsLinear": false,
     "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
-    "ID": 6,
+    "ID": 7,
     "Name": "Night Sight",
     "PowerWords": "In Lor",
     "CursorSize": 0,
@@ -95,7 +119,11 @@
     "IsLinear": false,
     "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 8,
@@ -109,7 +137,11 @@
     "IsLinear": false,
     "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 9,
@@ -123,7 +155,11 @@
     "IsLinear": false,
     "CastTime": 0.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 10,
@@ -137,7 +173,11 @@
     "IsLinear": false,
     "CastTime": 0.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 11,
@@ -151,7 +191,11 @@
     "IsLinear": false,
     "CastTime": 0.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 12,
@@ -165,7 +209,11 @@
     "IsLinear": false,
     "CastTime": 0.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 13,
@@ -179,11 +227,15 @@
     "IsLinear": false,
     "CastTime": 0.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 14,
-    "Name": "Remove Trap",
+    "Name": "Magic Untrap",
     "PowerWords": "An Jux",
     "CursorSize": 1,
     "CastRange": 10,
@@ -193,7 +245,11 @@
     "IsLinear": false,
     "CastTime": 0.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 15,
@@ -207,7 +263,11 @@
     "IsLinear": false,
     "CastTime": 0.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 16,
@@ -221,7 +281,11 @@
     "IsLinear": false,
     "CastTime": 0.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 17,
@@ -235,7 +299,11 @@
     "IsLinear": false,
     "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 18,
@@ -249,7 +317,11 @@
     "IsLinear": false,
     "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 19,
@@ -263,7 +335,11 @@
     "IsLinear": false,
     "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 20,
@@ -277,7 +353,11 @@
     "IsLinear": false,
     "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 21,
@@ -291,7 +371,11 @@
     "IsLinear": false,
     "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 22,
@@ -305,7 +389,11 @@
     "IsLinear": false,
     "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 23,
@@ -319,7 +407,11 @@
     "IsLinear": false,
     "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 24,
@@ -331,9 +423,13 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": true,
-    "CastTime": 1.25,
+    "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 25,
@@ -347,7 +443,11 @@
     "IsLinear": false,
     "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 26,
@@ -361,7 +461,11 @@
     "IsLinear": false,
     "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 27,
@@ -375,7 +479,11 @@
     "IsLinear": false,
     "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 28,
@@ -389,7 +497,11 @@
     "IsLinear": true,
     "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 29,
@@ -403,7 +515,11 @@
     "IsLinear": false,
     "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 30,
@@ -417,7 +533,11 @@
     "IsLinear": false,
     "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 31,
@@ -431,7 +551,11 @@
     "IsLinear": false,
     "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 32,
@@ -445,7 +569,11 @@
     "IsLinear": false,
     "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 33,
@@ -457,9 +585,13 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 6,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 34,
@@ -473,7 +605,11 @@
     "IsLinear": false,
     "CastTime": 1.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 35,
@@ -487,7 +623,11 @@
     "IsLinear": false,
     "CastTime": 1.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 36,
@@ -501,7 +641,11 @@
     "IsLinear": false,
     "CastTime": 1.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 37,
@@ -515,7 +659,11 @@
     "IsLinear": false,
     "CastTime": 1.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 38,
@@ -529,7 +677,11 @@
     "IsLinear": false,
     "CastTime": 1.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 39,
@@ -543,7 +695,11 @@
     "IsLinear": true,
     "CastTime": 1.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 40,
@@ -555,9 +711,13 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 6,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 41,
@@ -571,7 +731,11 @@
     "IsLinear": false,
     "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 42,
@@ -585,7 +749,11 @@
     "IsLinear": false,
     "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 43,
@@ -599,7 +767,11 @@
     "IsLinear": false,
     "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 44,
@@ -613,7 +785,11 @@
     "IsLinear": false,
     "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 45,
@@ -627,7 +803,11 @@
     "IsLinear": false,
     "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 46,
@@ -641,7 +821,11 @@
     "IsLinear": false,
     "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 47,
@@ -655,7 +839,11 @@
     "IsLinear": true,
     "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 48,
@@ -669,7 +857,11 @@
     "IsLinear": false,
     "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 49,
@@ -683,7 +875,11 @@
     "IsLinear": false,
     "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 50,
@@ -697,7 +893,11 @@
     "IsLinear": true,
     "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 51,
@@ -711,7 +911,11 @@
     "IsLinear": false,
     "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 52,
@@ -725,7 +929,11 @@
     "IsLinear": false,
     "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 53,
@@ -739,7 +947,11 @@
     "IsLinear": false,
     "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 54,
@@ -753,7 +965,11 @@
     "IsLinear": false,
     "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 55,
@@ -767,7 +983,11 @@
     "IsLinear": false,
     "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 56,
@@ -781,7 +1001,11 @@
     "IsLinear": false,
     "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 57,
@@ -793,9 +1017,13 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 2.25,
     "ShowCastRangeDuringCasting": true,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 58,
@@ -809,7 +1037,11 @@
     "IsLinear": false,
     "CastTime": 2.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 59,
@@ -823,7 +1055,11 @@
     "IsLinear": false,
     "CastTime": 2.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 60,
@@ -837,7 +1073,11 @@
     "IsLinear": false,
     "CastTime": 2.25,
     "ShowCastRangeDuringCasting": true,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 61,
@@ -851,7 +1091,11 @@
     "IsLinear": false,
     "CastTime": 2.25,
     "ShowCastRangeDuringCasting": true,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 62,
@@ -865,7 +1109,11 @@
     "IsLinear": false,
     "CastTime": 2.25,
     "ShowCastRangeDuringCasting": true,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 63,
@@ -879,7 +1127,11 @@
     "IsLinear": false,
     "CastTime": 2.25,
     "ShowCastRangeDuringCasting": true,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
     "ID": 64,
@@ -893,10 +1145,14 @@
     "IsLinear": false,
     "CastTime": 2.25,
     "ShowCastRangeDuringCasting": true,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Magery",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 5
   },
   {
-    "ID": 101,
+    "ID": 65,
     "Name": "Animate Dead",
     "PowerWords": "Uus Corp",
     "CursorSize": 1,
@@ -905,12 +1161,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 102,
+    "ID": 66,
     "Name": "Blood Oath",
     "PowerWords": "In Jux Mani Xen",
     "CursorSize": 1,
@@ -919,12 +1179,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 103,
+    "ID": 67,
     "Name": "Corpse Skin",
     "PowerWords": "In Agle Corp Ylem",
     "CursorSize": 0,
@@ -933,12 +1197,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 104,
+    "ID": 68,
     "Name": "Curse Weapon",
     "PowerWords": "An Sanct Gra Char",
     "CursorSize": 0,
@@ -947,12 +1215,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 0.75,
+    "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 105,
+    "ID": 69,
     "Name": "Evil Omen",
     "PowerWords": "Pas Tym An Sanct",
     "CursorSize": 0,
@@ -961,12 +1233,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 0.75,
+    "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 106,
+    "ID": 70,
     "Name": "Horrific Beast",
     "PowerWords": "Rel Xen Vas Bal",
     "CursorSize": 0,
@@ -975,12 +1251,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 107,
+    "ID": 71,
     "Name": "Lich Form",
     "PowerWords": "Rel Xen Corp Ort",
     "CursorSize": 0,
@@ -991,10 +1271,14 @@
     "IsLinear": false,
     "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 108,
+    "ID": 72,
     "Name": "Mind Rot",
     "PowerWords": "Wis An Ben",
     "CursorSize": 1,
@@ -1003,12 +1287,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 109,
+    "ID": 73,
     "Name": "Pain Spike",
     "PowerWords": "In Sar",
     "CursorSize": 1,
@@ -1017,12 +1305,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1,
+    "CastTime": 0.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 110,
+    "ID": 74,
     "Name": "Poison Strike",
     "PowerWords": "In Vas Nox",
     "CursorSize": 1,
@@ -1033,10 +1325,14 @@
     "IsLinear": false,
     "CastTime": 1.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 111,
+    "ID": 75,
     "Name": "Strangle",
     "PowerWords": "In Bal Nox",
     "CursorSize": 1,
@@ -1045,12 +1341,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 112,
+    "ID": 76,
     "Name": "Summon Familiar",
     "PowerWords": "Kal Xen Bal",
     "CursorSize": 1,
@@ -1059,12 +1359,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 113,
+    "ID": 77,
     "Name": "Vampiric Embrace",
     "PowerWords": "Rel Xen An Sanct",
     "CursorSize": 0,
@@ -1073,12 +1377,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 114,
+    "ID": 78,
     "Name": "Vengeful Spirit",
     "PowerWords": "Kal Xen Bal Beh",
     "CursorSize": 0,
@@ -1087,12 +1395,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 115,
+    "ID": 79,
     "Name": "Wither",
     "PowerWords": "Kal Vas An Flam",
     "CursorSize": 0,
@@ -1101,12 +1413,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 116,
+    "ID": 80,
     "Name": "Wraith Form",
     "PowerWords": "Rel Xen Um",
     "CursorSize": 0,
@@ -1115,12 +1431,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 117,
+    "ID": 81,
     "Name": "Exorcism",
     "PowerWords": "Ort Corp Grav",
     "CursorSize": 1,
@@ -1129,12 +1449,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 201,
+    "ID": 82,
     "Name": "Cleanse by Fire",
     "PowerWords": "Expor Flamus",
     "CursorSize": 1,
@@ -1143,12 +1467,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1,
+    "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.75,
+    "School": "Chivalry",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 202,
+    "ID": 83,
     "Name": "Close Wounds",
     "PowerWords": "Obsu Vulni",
     "CursorSize": 1,
@@ -1157,12 +1485,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 2.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.75,
+    "School": "Chivalry",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 203,
+    "ID": 84,
     "Name": "Consecrate Weapon",
     "PowerWords": "Consecrus Arma",
     "CursorSize": 0,
@@ -1171,12 +1503,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 0.5,
+    "CastTime": 1.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.75,
+    "School": "Chivalry",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 204,
+    "ID": 85,
     "Name": "Dispel Evil",
     "PowerWords": "Dispiro Malas",
     "CursorSize": 0,
@@ -1185,12 +1521,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 0.25,
+    "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.75,
+    "School": "Chivalry",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 205,
+    "ID": 86,
     "Name": "Divine Fury",
     "PowerWords": "Divinum Furis",
     "CursorSize": 0,
@@ -1199,12 +1539,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1,
+    "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.75,
+    "School": "Chivalry",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 206,
+    "ID": 87,
     "Name": "Enemy of One",
     "PowerWords": "Forul Solum",
     "CursorSize": 0,
@@ -1213,12 +1557,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 0.5,
+    "CastTime": 1.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.75,
+    "School": "Chivalry",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 207,
+    "ID": 88,
     "Name": "Holy Light",
     "PowerWords": "Augus Luminos",
     "CursorSize": 0,
@@ -1229,10 +1577,14 @@
     "IsLinear": false,
     "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.75,
+    "School": "Chivalry",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 208,
+    "ID": 89,
     "Name": "Noble Sacrifice",
     "PowerWords": "Dium Prostra",
     "CursorSize": 0,
@@ -1241,12 +1593,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 2.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.75,
+    "School": "Chivalry",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 209,
+    "ID": 90,
     "Name": "Remove Curse",
     "PowerWords": "Extermo Vomica",
     "CursorSize": 0,
@@ -1255,12 +1611,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 2.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.75,
+    "School": "Chivalry",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 210,
+    "ID": 91,
     "Name": "Sacred Journey",
     "PowerWords": "Sanctum Viatas",
     "CursorSize": 0,
@@ -1269,12 +1629,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 2.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.75,
+    "School": "Chivalry",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 601,
+    "ID": 92,
     "Name": "Arcane Circle",
     "PowerWords": "Myrshalee",
     "CursorSize": 0,
@@ -1285,10 +1649,14 @@
     "IsLinear": false,
     "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 602,
+    "ID": 93,
     "Name": "Gift of Renewal",
     "PowerWords": "Olorisstra",
     "CursorSize": 1,
@@ -1299,10 +1667,14 @@
     "IsLinear": false,
     "CastTime": 3,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 603,
+    "ID": 94,
     "Name": "Immolating Weapon",
     "PowerWords": "Thalshara",
     "CursorSize": 0,
@@ -1313,10 +1685,14 @@
     "IsLinear": false,
     "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 604,
+    "ID": 95,
     "Name": "Attune Weapon",
     "PowerWords": "Haeldril",
     "CursorSize": 0,
@@ -1327,10 +1703,14 @@
     "IsLinear": false,
     "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 605,
+    "ID": 96,
     "Name": "Thunderstorm",
     "PowerWords": "Erelonia",
     "CursorSize": 0,
@@ -1341,11 +1721,15 @@
     "IsLinear": false,
     "CastTime": 1.5,
     "ShowCastRangeDuringCasting": true,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 606,
-    "Name": "Nature\u0027s Fury",
+    "ID": 97,
+    "Name": "Nature's Fury",
     "PowerWords": "Rauvvrae",
     "CursorSize": 0,
     "CastRange": 0,
@@ -1355,10 +1739,14 @@
     "IsLinear": false,
     "CastTime": 1.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 607,
+    "ID": 98,
     "Name": "Summon Fey",
     "PowerWords": "Alalithra",
     "CursorSize": 1,
@@ -1367,12 +1755,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 608,
+    "ID": 99,
     "Name": "Summon Fiend",
     "PowerWords": "Nylisstra",
     "CursorSize": 1,
@@ -1383,10 +1775,14 @@
     "IsLinear": false,
     "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 609,
+    "ID": 100,
     "Name": "Reaper Form",
     "PowerWords": "Tarisstree",
     "CursorSize": 0,
@@ -1397,10 +1793,14 @@
     "IsLinear": false,
     "CastTime": 2.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 610,
+    "ID": 101,
     "Name": "Wildfire",
     "PowerWords": "Haelyn",
     "CursorSize": 6,
@@ -1411,10 +1811,14 @@
     "IsLinear": false,
     "CastTime": 2.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 611,
+    "ID": 102,
     "Name": "Essence of Wind",
     "PowerWords": "Anathrae",
     "CursorSize": 0,
@@ -1425,10 +1829,14 @@
     "IsLinear": false,
     "CastTime": 3,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 612,
+    "ID": 103,
     "Name": "Dryad Allure",
     "PowerWords": "Rathril",
     "CursorSize": 0,
@@ -1439,10 +1847,14 @@
     "IsLinear": false,
     "CastTime": 3,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 613,
+    "ID": 104,
     "Name": "Ethereal Voyage",
     "PowerWords": "Orlavdra",
     "CursorSize": 0,
@@ -1453,10 +1865,14 @@
     "IsLinear": false,
     "CastTime": 3.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 614,
+    "ID": 105,
     "Name": "Word of Death",
     "PowerWords": "Nyraxle",
     "CursorSize": 1,
@@ -1467,10 +1883,14 @@
     "IsLinear": false,
     "CastTime": 3.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 615,
+    "ID": 106,
     "Name": "Gift of Life",
     "PowerWords": "Illorae",
     "CursorSize": 1,
@@ -1481,10 +1901,14 @@
     "IsLinear": false,
     "CastTime": 4,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 616,
+    "ID": 107,
     "Name": "Arcane Empowerment",
     "PowerWords": "Aslavdra",
     "CursorSize": 0,
@@ -1493,12 +1917,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 3,
+    "CastTime": 4,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Spellweaving",
+    "MaxFasterCasting": 4,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 678,
+    "ID": 108,
     "Name": "Nether Bolt",
     "PowerWords": "In Corp Ylem",
     "CursorSize": 1,
@@ -1507,12 +1935,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1,
+    "CastTime": 0.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 679,
+    "ID": 109,
     "Name": "Healing Stone",
     "PowerWords": "Kal In Mani",
     "CursorSize": 0,
@@ -1521,12 +1953,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 5.5,
+    "CastTime": 5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 680,
+    "ID": 110,
     "Name": "Purge Magic",
     "PowerWords": "An Ort Sanct",
     "CursorSize": 0,
@@ -1535,12 +1971,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.5,
+    "CastTime": 0.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 681,
+    "ID": 111,
     "Name": "Enchant",
     "PowerWords": "In Ort Ylem",
     "CursorSize": 0,
@@ -1551,10 +1991,14 @@
     "IsLinear": false,
     "CastTime": 0.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 682,
+    "ID": 112,
     "Name": "Sleep",
     "PowerWords": "In Zu",
     "CursorSize": 0,
@@ -1563,12 +2007,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.75,
+    "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 683,
+    "ID": 113,
     "Name": "Eagle Strike",
     "PowerWords": "Kal Por Xen",
     "CursorSize": 0,
@@ -1577,12 +2025,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 1.75,
+    "CastTime": 1,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 684,
+    "ID": 114,
     "Name": "Animated Weapon",
     "PowerWords": "In Jux Por Ylem",
     "CursorSize": 0,
@@ -1591,12 +2043,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 685,
+    "ID": 115,
     "Name": "Stone Form",
     "PowerWords": "In Rel Ylem",
     "CursorSize": 0,
@@ -1605,12 +2061,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 686,
+    "ID": 116,
     "Name": "Spell Trigger",
     "PowerWords": "In Vas Ort Ex",
     "CursorSize": 0,
@@ -1619,12 +2079,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 5.5,
+    "CastTime": 5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 687,
+    "ID": 117,
     "Name": "Mass Sleep",
     "PowerWords": "Vas Zu",
     "CursorSize": 0,
@@ -1633,12 +2097,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.5,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 688,
+    "ID": 118,
     "Name": "Cleansing Winds",
     "PowerWords": "In Vas Mani Hur",
     "CursorSize": 0,
@@ -1647,12 +2115,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 689,
+    "ID": 119,
     "Name": "Bombard",
     "PowerWords": "Corp Por Ylem",
     "CursorSize": 0,
@@ -1661,12 +2133,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2.75,
+    "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 690,
+    "ID": 120,
     "Name": "Spell Plague",
     "PowerWords": "Vas Rel Jux Ort",
     "CursorSize": 0,
@@ -1675,12 +2151,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2.5,
+    "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 691,
+    "ID": 121,
     "Name": "Hail Storm",
     "PowerWords": "Kal Des Ylem",
     "CursorSize": 0,
@@ -1689,12 +2169,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2.5,
+    "CastTime": 2,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 692,
+    "ID": 122,
     "Name": "Nether Cyclone",
     "PowerWords": "Grav Hur",
     "CursorSize": 1,
@@ -1703,12 +2187,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2.75,
+    "CastTime": 2.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 693,
+    "ID": 123,
     "Name": "Rising Colossus",
     "PowerWords": "Kal Vas Xen Corp Ylem",
     "CursorSize": 1,
@@ -1717,12 +2205,16 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2.75,
+    "CastTime": 2.25,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 1.5,
+    "School": "Mysticism",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6
   },
   {
-    "ID": 701,
+    "ID": 124,
     "Name": "Inspire",
     "PowerWords": "Uus Por",
     "CursorSize": 0,
@@ -1733,10 +2225,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 702,
+    "ID": 125,
     "Name": "Invigorate",
     "PowerWords": "An Zu",
     "CursorSize": 0,
@@ -1747,10 +2243,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 703,
+    "ID": 126,
     "Name": "Resilience",
     "PowerWords": "Kal Mani Tym",
     "CursorSize": 0,
@@ -1761,10 +2261,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 704,
+    "ID": 127,
     "Name": "Perseverance",
     "PowerWords": "Uus Jux Sanct",
     "CursorSize": 0,
@@ -1775,10 +2279,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 705,
+    "ID": 128,
     "Name": "Tribulation",
     "PowerWords": "In Jux Hur Rel",
     "CursorSize": 0,
@@ -1789,10 +2297,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 706,
+    "ID": 129,
     "Name": "Despair",
     "PowerWords": "Kal Des Mani Tym",
     "CursorSize": 0,
@@ -1803,10 +2315,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 707,
+    "ID": 130,
     "Name": "Death Ray",
     "PowerWords": "In Grav Corp",
     "CursorSize": 0,
@@ -1817,10 +2333,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 708,
+    "ID": 131,
     "Name": "Ethereal Burst",
     "PowerWords": "Uus Ort Grav",
     "CursorSize": 0,
@@ -1831,10 +2351,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 709,
+    "ID": 132,
     "Name": "Nether Blast",
     "PowerWords": "In Vas Xen Por",
     "CursorSize": 0,
@@ -1845,10 +2369,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 710,
+    "ID": 133,
     "Name": "Mystic Weapon",
     "PowerWords": "Vas Ylem Wis",
     "CursorSize": 0,
@@ -1859,10 +2387,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 711,
+    "ID": 134,
     "Name": "Command Undead",
     "PowerWords": "In Corp Xen Por",
     "CursorSize": 0,
@@ -1873,10 +2405,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 712,
+    "ID": 135,
     "Name": "Conduit",
     "PowerWords": "Uus Corp Grav",
     "CursorSize": 0,
@@ -1887,10 +2423,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 713,
+    "ID": 136,
     "Name": "Mana Shield",
     "PowerWords": "Faerkulggen",
     "CursorSize": 0,
@@ -1901,10 +2441,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 714,
+    "ID": 137,
     "Name": "Summon Reaper",
     "PowerWords": "Lartarisstree",
     "CursorSize": 0,
@@ -1915,10 +2459,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 715,
+    "ID": 138,
     "Name": "Honorable Execution",
     "PowerWords": "",
     "CursorSize": 0,
@@ -1929,10 +2477,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 716,
+    "ID": 139,
     "Name": "Counter Attack",
     "PowerWords": "",
     "CursorSize": 0,
@@ -1943,10 +2495,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 717,
+    "ID": 140,
     "Name": "Lightning Strike",
     "PowerWords": "",
     "CursorSize": 0,
@@ -1957,10 +2513,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 718,
+    "ID": 141,
     "Name": "Confidence",
     "PowerWords": "",
     "CursorSize": 0,
@@ -1971,10 +2531,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 719,
+    "ID": 142,
     "Name": "Evasion",
     "PowerWords": "",
     "CursorSize": 0,
@@ -1985,10 +2549,14 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   },
   {
-    "ID": 720,
+    "ID": 143,
     "Name": "Momentum Strike",
     "PowerWords": "",
     "CursorSize": 0,
@@ -1999,6 +2567,10 @@
     "IsLinear": false,
     "CastTime": 0,
     "ShowCastRangeDuringCasting": false,
-    "FreezeCharacterWhileCasting": false
+    "FreezeCharacterWhileCasting": false,
+    "RecoveryTime": 0,
+    "School": "Unknown",
+    "MaxFasterCasting": 0,
+    "MaxFasterCastRecovery": 0
   }
 ]

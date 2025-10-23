@@ -1,0 +1,18 @@
+{
+  "ID": 104,
+  "Name": "Curse Weapon",
+  "PowerWords": "An Sanct Gra Char",
+  "CursorSize": 0,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 0.5,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.5,
+  "School": "Necromancy",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 6
+}

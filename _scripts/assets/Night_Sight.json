@@ -1,0 +1,18 @@
+{
+  "ID": 6,
+  "Name": "Night Sight",
+  "PowerWords": "In Lor",
+  "CursorSize": 0,
+  "CastRange": 12,
+  "Hue": 57,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 0.5,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.5,
+  "School": "Magery",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 5
+}

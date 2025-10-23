@@ -1,0 +1,18 @@
+{
+  "ID": 117,
+  "Name": "Exorcism",
+  "PowerWords": "Ort Corp Grav",
+  "CursorSize": 1,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 1.75,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.5,
+  "School": "Necromancy",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 6
+}

@@ -1,0 +1,18 @@
+{
+  "ID": 609,
+  "Name": "Reaper Form",
+  "PowerWords": "Tarisstree",
+  "CursorSize": 0,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 2.5,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.5,
+  "School": "Spellweaving",
+  "MaxFasterCasting": 4,
+  "MaxFasterCastRecovery": 6
+}

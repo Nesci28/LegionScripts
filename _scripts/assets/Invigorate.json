@@ -1,0 +1,18 @@
+{
+  "ID": 702,
+  "Name": "Invigorate",
+  "PowerWords": "An Zu",
+  "CursorSize": 0,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 0,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 0,
+  "School": "Unknown",
+  "MaxFasterCasting": 0,
+  "MaxFasterCastRecovery": 0
+}

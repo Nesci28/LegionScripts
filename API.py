@@ -329,6 +329,7 @@ class PyMobile:
     Mana: int = None
     IsRenamable: bool = None
     IsHuman: bool = None
+    Backpack: PyItem = None
     __class__: str = None
 
 class PyMulti:
@@ -392,6 +393,8 @@ class PyProfile:
     FavoriteBagSerial: int = None
     MoveItemDelay: int = None
     AutoLootEnabled: bool = None
+
+class PyScrollArea:
 
 class PyStatic:
     IsImpassible: bool = None
@@ -768,7 +771,7 @@ def Dress(name: str) -> None:
     """
     pass
 
-def GetAvailableDressOutfits() -> Any:
+def GetAvailableDressOutfits() -> list:
     """
      Get all available dress configurations.
      Example:
@@ -1001,7 +1004,7 @@ def FindLayer(layer: str, serial: int = 1337) -> PyItem:
     """
     pass
 
-def GetItemsOnGround(distance: int = int.MaxValue, graphic: int = 1337) -> Any:
+def GetItemsOnGround(distance: int = int.MaxValue, graphic: int = 1337) -> list:
     """
      Get all items on the ground within specified range.
      Example:
@@ -1140,7 +1143,7 @@ def CancelPathfinding() -> None:
     """
     pass
 
-def GetPath(x: int, y: int, z: int = 1337, distance: int = 1) -> Any:
+def GetPath(x: int, y: int, z: int = 1337, distance: int = 1) -> list:
     """
      Attempt to build a path to a location.  This will fail with large distances.
      Example:
@@ -1526,6 +1529,29 @@ def CloseGump(ID: int = 1337) -> None:
     """
     pass
 
+def ConfigNextGump(serial: int | None = None, x: int | None = None, y: int | None = None, isVisible: bool | None = None, autoClose: bool | None = None, autoRespond: bool | None = None, autoRespondButton: int | None = None) -> None:
+    """
+     Configure how the next gump should be handled.
+     Example:
+     ```py
+     # Position gump at coordinates
+     API.ConfigNextGump(x=100, y=200)
+    
+     # Auto-close any gump
+     API.ConfigNextGump(autoClose=True)
+    
+     # Auto-respond to specific gump
+     API.ConfigNextGump(serial=0x12345678, autoRespond=True, autoRespondButton=1)
+    
+     # Clear configuration
+     API.ConfigNextGump()
+    
+     Note: This is only applied once. You cannot stack multiple configs. This is reset after successfully applied and only applies to server-sent gumps.
+     ```
+    
+    """
+    pass
+
 def GumpContains(text: str, ID: int = 1337) -> bool:
     """
      Check if a gump contains a specific text.
@@ -1559,7 +1585,7 @@ def GetGump(ID: int = 1337) -> PyBaseGump:
     """
     pass
 
-def GetAllGumps() -> Any:
+def GetAllGumps() -> list:
     """
      Gets all currently open server-side gumps.
     
@@ -1652,7 +1678,7 @@ def InJournalAny(msgs: list[str], clearMatches: bool = False) -> bool:
     """
     pass
 
-def GetJournalEntries(seconds: float, matchingText: str = "") -> Any:
+def GetJournalEntries(seconds: float, matchingText: str = "") -> list:
     """
      Get all the journal entires in the last X seconds.
      matchingText supports regex with $ prepended.
@@ -1939,7 +1965,7 @@ def RemoveFriend(serial: int) -> bool:
     """
     pass
 
-def GetAllFriends() -> Any:
+def GetAllFriends() -> list:
     """
      Get all friends as an array of serials.
      Example:
@@ -2168,7 +2194,7 @@ def CreateGumpSimpleProgressBar(width: int, height: int, backgroundColor: str = 
     """
     pass
 
-def CreateGumpScrollArea(x: int, y: int, width: int, height: int) -> PyBaseControl:
+def CreateGumpScrollArea(x: int, y: int, width: int, height: int) -> PyScrollArea:
     """
      Create a scrolling area, add and position controls to it directly.
      Example:

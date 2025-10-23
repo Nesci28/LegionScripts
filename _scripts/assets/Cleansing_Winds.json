@@ -1,0 +1,18 @@
+{
+  "ID": 688,
+  "Name": "Cleansing Winds",
+  "PowerWords": "In Vas Mani Hur",
+  "CursorSize": 0,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 1.75,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.5,
+  "School": "Mysticism",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 6
+}

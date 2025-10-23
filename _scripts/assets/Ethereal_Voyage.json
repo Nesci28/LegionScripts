@@ -1,0 +1,18 @@
+{
+  "ID": 613,
+  "Name": "Ethereal Voyage",
+  "PowerWords": "Orlavdra",
+  "CursorSize": 0,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 3.5,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.5,
+  "School": "Spellweaving",
+  "MaxFasterCasting": 4,
+  "MaxFasterCastRecovery": 6
+}

@@ -1,0 +1,18 @@
+{
+  "ID": 25,
+  "Name": "Arch Cure",
+  "PowerWords": "Vas An Nox",
+  "CursorSize": 3,
+  "CastRange": 10,
+  "Hue": 57,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 1.25,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.5,
+  "School": "Magery",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 5
+}

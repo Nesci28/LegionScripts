@@ -1,0 +1,18 @@
+{
+  "ID": 63,
+  "Name": "Fire Elemental",
+  "PowerWords": "Kal Vas Xen Flam",
+  "CursorSize": 0,
+  "CastRange": 1,
+  "Hue": 47,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 2.25,
+  "ShowCastRangeDuringCasting": true,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.5,
+  "School": "Magery",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 5
+}

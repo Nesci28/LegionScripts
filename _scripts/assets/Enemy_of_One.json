@@ -1,0 +1,18 @@
+{
+  "ID": 206,
+  "Name": "Enemy of One",
+  "PowerWords": "Forul Solum",
+  "CursorSize": 0,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 1.5,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.75,
+  "School": "Chivalry",
+  "MaxFasterCasting": 4,
+  "MaxFasterCastRecovery": 6
+}

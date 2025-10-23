@@ -1,0 +1,18 @@
+{
+  "ID": 693,
+  "Name": "Rising Colossus",
+  "PowerWords": "Kal Vas Xen Corp Ylem",
+  "CursorSize": 1,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 2.25,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.5,
+  "School": "Mysticism",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 6
+}

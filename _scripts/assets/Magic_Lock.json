@@ -1,0 +1,18 @@
+{
+  "ID": 19,
+  "Name": "Magic Lock",
+  "PowerWords": "An Por",
+  "CursorSize": 1,
+  "CastRange": 10,
+  "Hue": 47,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 1,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.5,
+  "School": "Magery",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 5
+}

@@ -1,0 +1,18 @@
+{
+  "ID": 205,
+  "Name": "Divine Fury",
+  "PowerWords": "Divinum Furis",
+  "CursorSize": 0,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 2,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "RecoveryTime": 1.75,
+  "School": "Chivalry",
+  "MaxFasterCasting": 4,
+  "MaxFasterCastRecovery": 6
+}
