@@ -13,6 +13,7 @@
   "FreezeCharacterWhileCasting": false,
   "RecoveryTime": 0,
   "School": "Unknown",
-  "MaxFasterCasting": 0,
-  "MaxFasterCastRecovery": 0
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 6,
+  "CapChivalryFasterCasting": null
 }

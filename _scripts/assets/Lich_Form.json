@@ -8,11 +8,12 @@
   "CursorHue": 10,
   "MaxDuration": 10,
   "IsLinear": false,
-  "CastTime": 2,
+  "CastTime": 1.75,
   "ShowCastRangeDuringCasting": false,
   "FreezeCharacterWhileCasting": false,
-  "RecoveryTime": 0,
-  "School": "Unknown",
-  "MaxFasterCasting": 0,
-  "MaxFasterCastRecovery": 0
+  "RecoveryTime": 1.5,
+  "School": "Necromancy",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 6,
+  "CapChivalryFasterCasting": null
 }

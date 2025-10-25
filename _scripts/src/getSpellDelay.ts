@@ -41,7 +41,7 @@ const CASTING_SPEEDS: Record<School, { FC: number; FCR: number }> = {
   Ninjitsu: { FC: 4, FCR: 6 },
   Chivalry: { FC: 4, FCR: 6 },
   Spellweaving: { FC: 4, FCR: 6 },
-  Unknown: { FC: 0, FCR: 0 },
+  Unknown: { FC: 2, FCR: 6 },
 };
 
 async function scrap(
@@ -54,6 +54,7 @@ async function scrap(
       | "School"
       | "MaxFasterCasting"
       | "MaxFasterCastRecovery"
+      | "CapChivalryFasterCasting"
     >
   | undefined
 > {
@@ -81,6 +82,7 @@ async function scrap(
     School: school,
     MaxFasterCasting: CASTING_SPEEDS[school].FC,
     MaxFasterCastRecovery: CASTING_SPEEDS[school].FCR,
+    CapChivalryFasterCasting: school === "Chivalry" || null,
   };
 }
 
@@ -88,7 +90,7 @@ async function createJson(
   spell: Spell,
   pickedExtendedSpell: Pick<
     ExtendedSpell,
-    "RecoveryTime" | "School" | "MaxFasterCasting" | "MaxFasterCastRecovery"
+    "RecoveryTime" | "School" | "MaxFasterCasting" | "MaxFasterCastRecovery" | "CapChivalryFasterCasting"
   >,
   jsonPath: string,
 ): Promise<void> {
@@ -98,8 +100,6 @@ async function createJson(
   };
   const isValid = assertExtendedSpell(extendedSpell);
   if (!isValid) {
-    // biome-ignore lint/suspicious/noConsole: <explanation>
-    console.log("extendedSpell :>> ", extendedSpell);
     throw new Error(`CreateJson Error: ${spell.Name}`);
   }
   const json = JSON.stringify(extendedSpell, null, 2);
@@ -137,6 +137,7 @@ async function createIndividualJson(spells: Spell[]): Promise<void> {
           School: "Chivalry",
           MaxFasterCasting: +CASTING_SPEEDS.Chivalry.FC,
           MaxFasterCastRecovery: +CASTING_SPEEDS.Chivalry.FCR,
+          CapChivalryFasterCasting: true,
         },
         jsonPath,
       );
@@ -190,6 +191,7 @@ async function createIndividualJson(spells: Spell[]): Promise<void> {
         School: "Unknown",
         MaxFasterCasting: +CASTING_SPEEDS.Unknown.FC,
         MaxFasterCastRecovery: +CASTING_SPEEDS.Unknown.FCR,
+        CapChivalryFasterCasting: null,
       },
       jsonPath,
     );

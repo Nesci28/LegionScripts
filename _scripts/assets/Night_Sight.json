@@ -14,5 +14,6 @@
   "RecoveryTime": 1.5,
   "School": "Magery",
   "MaxFasterCasting": 2,
-  "MaxFasterCastRecovery": 5
+  "MaxFasterCastRecovery": 5,
+  "CapChivalryFasterCasting": null
 }

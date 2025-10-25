@@ -15,7 +15,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 2,
@@ -33,7 +34,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 3,
@@ -51,7 +53,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 4,
@@ -69,7 +72,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 5,
@@ -87,7 +91,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 6,
@@ -105,7 +110,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 7,
@@ -123,7 +129,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 8,
@@ -141,7 +148,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 9,
@@ -159,7 +167,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 10,
@@ -177,7 +186,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 11,
@@ -195,7 +205,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 12,
@@ -213,7 +224,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 13,
@@ -231,7 +243,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 14,
@@ -249,7 +262,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 15,
@@ -267,7 +281,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 16,
@@ -285,7 +300,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 17,
@@ -303,7 +319,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 18,
@@ -321,7 +338,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 19,
@@ -339,7 +357,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 20,
@@ -357,7 +376,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 21,
@@ -375,7 +395,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 22,
@@ -393,7 +414,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 23,
@@ -411,7 +433,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 24,
@@ -429,7 +452,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 25,
@@ -447,7 +471,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 26,
@@ -465,7 +490,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 27,
@@ -483,7 +509,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 28,
@@ -501,7 +528,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 29,
@@ -519,7 +547,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 30,
@@ -537,7 +566,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 31,
@@ -555,7 +585,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 32,
@@ -573,7 +604,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 33,
@@ -591,7 +623,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 34,
@@ -609,7 +642,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 35,
@@ -627,7 +661,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 36,
@@ -645,7 +680,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 37,
@@ -663,7 +699,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 38,
@@ -681,7 +718,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 39,
@@ -699,7 +737,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 40,
@@ -717,7 +756,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 41,
@@ -735,7 +775,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 42,
@@ -753,7 +794,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 43,
@@ -771,7 +813,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 44,
@@ -789,7 +832,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 45,
@@ -807,7 +851,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 46,
@@ -825,7 +870,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 47,
@@ -843,7 +889,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 48,
@@ -861,7 +908,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 49,
@@ -879,7 +927,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 50,
@@ -897,7 +946,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 51,
@@ -915,7 +965,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 52,
@@ -933,7 +984,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 53,
@@ -951,7 +1003,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 54,
@@ -969,7 +1022,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 55,
@@ -987,7 +1041,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 56,
@@ -1005,7 +1060,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 57,
@@ -1023,7 +1079,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 58,
@@ -1041,7 +1098,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 59,
@@ -1059,7 +1117,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 60,
@@ -1077,7 +1136,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 61,
@@ -1095,7 +1155,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 62,
@@ -1113,7 +1174,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 63,
@@ -1131,7 +1193,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 64,
@@ -1149,7 +1212,8 @@
     "RecoveryTime": 1.5,
     "School": "Magery",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 5
+    "MaxFasterCastRecovery": 5,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 65,
@@ -1167,7 +1231,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 66,
@@ -1185,7 +1250,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 67,
@@ -1203,7 +1269,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 68,
@@ -1221,7 +1288,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 69,
@@ -1239,7 +1307,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 70,
@@ -1257,7 +1326,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 71,
@@ -1269,13 +1339,14 @@
     "CursorHue": 10,
     "MaxDuration": 10,
     "IsLinear": false,
-    "CastTime": 2,
+    "CastTime": 1.75,
     "ShowCastRangeDuringCasting": false,
     "FreezeCharacterWhileCasting": false,
-    "RecoveryTime": 0,
-    "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "RecoveryTime": 1.5,
+    "School": "Necromancy",
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 72,
@@ -1293,7 +1364,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 73,
@@ -1311,7 +1383,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 74,
@@ -1329,7 +1402,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 75,
@@ -1347,7 +1421,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 76,
@@ -1365,7 +1440,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 77,
@@ -1383,7 +1459,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 78,
@@ -1401,7 +1478,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 79,
@@ -1419,7 +1497,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 80,
@@ -1437,7 +1516,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 81,
@@ -1455,7 +1535,8 @@
     "RecoveryTime": 1.5,
     "School": "Necromancy",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 82,
@@ -1473,7 +1554,8 @@
     "RecoveryTime": 1.75,
     "School": "Chivalry",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": true
   },
   {
     "ID": 83,
@@ -1491,7 +1573,8 @@
     "RecoveryTime": 1.75,
     "School": "Chivalry",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": true
   },
   {
     "ID": 84,
@@ -1509,7 +1592,8 @@
     "RecoveryTime": 1.75,
     "School": "Chivalry",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": true
   },
   {
     "ID": 85,
@@ -1527,7 +1611,8 @@
     "RecoveryTime": 1.75,
     "School": "Chivalry",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": true
   },
   {
     "ID": 86,
@@ -1545,7 +1630,8 @@
     "RecoveryTime": 1.75,
     "School": "Chivalry",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": true
   },
   {
     "ID": 87,
@@ -1563,7 +1649,8 @@
     "RecoveryTime": 1.75,
     "School": "Chivalry",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": true
   },
   {
     "ID": 88,
@@ -1581,7 +1668,8 @@
     "RecoveryTime": 1.75,
     "School": "Chivalry",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": true
   },
   {
     "ID": 89,
@@ -1599,7 +1687,8 @@
     "RecoveryTime": 1.75,
     "School": "Chivalry",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": true
   },
   {
     "ID": 90,
@@ -1617,7 +1706,8 @@
     "RecoveryTime": 1.75,
     "School": "Chivalry",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": true
   },
   {
     "ID": 91,
@@ -1635,7 +1725,8 @@
     "RecoveryTime": 1.75,
     "School": "Chivalry",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": true
   },
   {
     "ID": 92,
@@ -1653,7 +1744,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 93,
@@ -1671,7 +1763,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 94,
@@ -1689,7 +1782,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 95,
@@ -1706,8 +1800,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 96,
@@ -1725,7 +1820,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 97,
@@ -1743,7 +1839,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 98,
@@ -1761,7 +1858,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 99,
@@ -1779,7 +1877,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 100,
@@ -1797,7 +1896,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 101,
@@ -1815,7 +1915,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 102,
@@ -1833,7 +1934,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 103,
@@ -1851,7 +1953,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 104,
@@ -1869,7 +1972,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 105,
@@ -1887,7 +1991,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 106,
@@ -1905,7 +2010,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 107,
@@ -1923,7 +2029,8 @@
     "RecoveryTime": 1.5,
     "School": "Spellweaving",
     "MaxFasterCasting": 4,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 108,
@@ -1941,7 +2048,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 109,
@@ -1959,7 +2067,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 110,
@@ -1977,7 +2086,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 111,
@@ -1995,7 +2105,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 112,
@@ -2013,7 +2124,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 113,
@@ -2031,7 +2143,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 114,
@@ -2049,7 +2162,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 115,
@@ -2067,7 +2181,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 116,
@@ -2085,7 +2200,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 117,
@@ -2103,7 +2219,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 118,
@@ -2121,7 +2238,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 119,
@@ -2139,7 +2257,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 120,
@@ -2157,7 +2276,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 121,
@@ -2175,7 +2295,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 122,
@@ -2193,7 +2314,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 123,
@@ -2211,7 +2333,8 @@
     "RecoveryTime": 1.5,
     "School": "Mysticism",
     "MaxFasterCasting": 2,
-    "MaxFasterCastRecovery": 6
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 124,
@@ -2228,8 +2351,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 125,
@@ -2246,8 +2370,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 126,
@@ -2264,8 +2389,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 127,
@@ -2282,8 +2408,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 128,
@@ -2300,8 +2427,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 129,
@@ -2318,8 +2446,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 130,
@@ -2336,8 +2465,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 131,
@@ -2354,8 +2484,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 132,
@@ -2372,8 +2503,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 133,
@@ -2390,8 +2522,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 134,
@@ -2408,8 +2541,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 135,
@@ -2426,8 +2560,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 136,
@@ -2444,8 +2579,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 137,
@@ -2462,8 +2598,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 138,
@@ -2480,8 +2617,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 139,
@@ -2498,8 +2636,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 140,
@@ -2516,8 +2655,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 141,
@@ -2534,8 +2674,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 142,
@@ -2552,8 +2693,9 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   },
   {
     "ID": 143,
@@ -2570,7 +2712,8 @@
     "FreezeCharacterWhileCasting": false,
     "RecoveryTime": 0,
     "School": "Unknown",
-    "MaxFasterCasting": 0,
-    "MaxFasterCastRecovery": 0
+    "MaxFasterCasting": 2,
+    "MaxFasterCastRecovery": 6,
+    "CapChivalryFasterCasting": null
   }
 ]

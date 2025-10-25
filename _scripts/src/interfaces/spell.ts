@@ -19,6 +19,7 @@ export interface ExtendedSpell extends Spell {
   School: School;
   MaxFasterCasting: number;
   MaxFasterCastRecovery: number;
+  CapChivalryFasterCasting: boolean | null;
 }
 
 export type School =

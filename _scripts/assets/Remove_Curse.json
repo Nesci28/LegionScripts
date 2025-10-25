@@ -14,5 +14,6 @@
   "RecoveryTime": 1.75,
   "School": "Chivalry",
   "MaxFasterCasting": 4,
-  "MaxFasterCastRecovery": 6
+  "MaxFasterCastRecovery": 6,
+  "CapChivalryFasterCasting": true
 }

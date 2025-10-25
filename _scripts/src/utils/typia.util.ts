@@ -99,7 +99,7 @@ export function jsonAssertSpell(str: string): Spell[] | undefined {
 }
 export function jsonAssertExtendedSpell(str: string): ExtendedSpell | undefined {
     try {
-        const res = (() => { const _io0 = (input: any): boolean => "number" === typeof input.RecoveryTime && ("Magery" === input.School || "Necromancy" === input.School || "Mysticism" === input.School || "Ninjitsu" === input.School || "Chivalry" === input.School || "Spellweaving" === input.School || "Unknown" === input.School) && "number" === typeof input.MaxFasterCasting && "number" === typeof input.MaxFasterCastRecovery && "number" === typeof input.ID && "string" === typeof input.Name && "string" === typeof input.PowerWords && "number" === typeof input.CursorSize && "number" === typeof input.CastRange && "number" === typeof input.Hue && "number" === typeof input.CursorHue && "number" === typeof input.MaxDuration && "boolean" === typeof input.IsLinear && "number" === typeof input.CastTime && "boolean" === typeof input.ShowCastRangeDuringCasting && "boolean" === typeof input.FreezeCharacterWhileCasting; const _ao0 = (input: any, _path: string, _exceptionable: boolean = true): boolean => ("number" === typeof input.RecoveryTime || __typia_transform__assertGuard._assertGuard(_exceptionable, {
+        const res = (() => { const _io0 = (input: any): boolean => "number" === typeof input.RecoveryTime && ("Magery" === input.School || "Necromancy" === input.School || "Mysticism" === input.School || "Ninjitsu" === input.School || "Chivalry" === input.School || "Spellweaving" === input.School || "Unknown" === input.School) && "number" === typeof input.MaxFasterCasting && "number" === typeof input.MaxFasterCastRecovery && (null === input.CapChivalryFasterCasting || "boolean" === typeof input.CapChivalryFasterCasting) && "number" === typeof input.ID && "string" === typeof input.Name && "string" === typeof input.PowerWords && "number" === typeof input.CursorSize && "number" === typeof input.CastRange && "number" === typeof input.Hue && "number" === typeof input.CursorHue && "number" === typeof input.MaxDuration && "boolean" === typeof input.IsLinear && "number" === typeof input.CastTime && "boolean" === typeof input.ShowCastRangeDuringCasting && "boolean" === typeof input.FreezeCharacterWhileCasting; const _ao0 = (input: any, _path: string, _exceptionable: boolean = true): boolean => ("number" === typeof input.RecoveryTime || __typia_transform__assertGuard._assertGuard(_exceptionable, {
             method: "assertParse",
             path: _path + ".RecoveryTime",
             expected: "number",
@@ -119,6 +119,11 @@ export function jsonAssertExtendedSpell(str: string): ExtendedSpell | undefined 
             path: _path + ".MaxFasterCastRecovery",
             expected: "number",
             value: input.MaxFasterCastRecovery
+        }, _errorFactory)) && (null === input.CapChivalryFasterCasting || "boolean" === typeof input.CapChivalryFasterCasting || __typia_transform__assertGuard._assertGuard(_exceptionable, {
+            method: "assertParse",
+            path: _path + ".CapChivalryFasterCasting",
+            expected: "(boolean | null)",
+            value: input.CapChivalryFasterCasting
         }, _errorFactory)) && ("number" === typeof input.ID || __typia_transform__assertGuard._assertGuard(_exceptionable, {
             method: "assertParse",
             path: _path + ".ID",
@@ -224,7 +229,7 @@ export function assertSchool(str: string): School | undefined {
 }
 export function assertExtendedSpell(extendedSpell: unknown): ExtendedSpell | undefined {
     try {
-        const res = (() => { const _io0 = (input: any): boolean => "number" === typeof input.RecoveryTime && ("Magery" === input.School || "Necromancy" === input.School || "Mysticism" === input.School || "Ninjitsu" === input.School || "Chivalry" === input.School || "Spellweaving" === input.School || "Unknown" === input.School) && "number" === typeof input.MaxFasterCasting && "number" === typeof input.MaxFasterCastRecovery && "number" === typeof input.ID && "string" === typeof input.Name && "string" === typeof input.PowerWords && "number" === typeof input.CursorSize && "number" === typeof input.CastRange && "number" === typeof input.Hue && "number" === typeof input.CursorHue && "number" === typeof input.MaxDuration && "boolean" === typeof input.IsLinear && "number" === typeof input.CastTime && "boolean" === typeof input.ShowCastRangeDuringCasting && "boolean" === typeof input.FreezeCharacterWhileCasting; const _ao0 = (input: any, _path: string, _exceptionable: boolean = true): boolean => ("number" === typeof input.RecoveryTime || __typia_transform__assertGuard._assertGuard(_exceptionable, {
+        const res = (() => { const _io0 = (input: any): boolean => "number" === typeof input.RecoveryTime && ("Magery" === input.School || "Necromancy" === input.School || "Mysticism" === input.School || "Ninjitsu" === input.School || "Chivalry" === input.School || "Spellweaving" === input.School || "Unknown" === input.School) && "number" === typeof input.MaxFasterCasting && "number" === typeof input.MaxFasterCastRecovery && (null === input.CapChivalryFasterCasting || "boolean" === typeof input.CapChivalryFasterCasting) && "number" === typeof input.ID && "string" === typeof input.Name && "string" === typeof input.PowerWords && "number" === typeof input.CursorSize && "number" === typeof input.CastRange && "number" === typeof input.Hue && "number" === typeof input.CursorHue && "number" === typeof input.MaxDuration && "boolean" === typeof input.IsLinear && "number" === typeof input.CastTime && "boolean" === typeof input.ShowCastRangeDuringCasting && "boolean" === typeof input.FreezeCharacterWhileCasting; const _ao0 = (input: any, _path: string, _exceptionable: boolean = true): boolean => ("number" === typeof input.RecoveryTime || __typia_transform__assertGuard._assertGuard(_exceptionable, {
             method: "assert",
             path: _path + ".RecoveryTime",
             expected: "number",
@@ -244,6 +249,11 @@ export function assertExtendedSpell(extendedSpell: unknown): ExtendedSpell | und
             path: _path + ".MaxFasterCastRecovery",
             expected: "number",
             value: input.MaxFasterCastRecovery
+        }, _errorFactory)) && (null === input.CapChivalryFasterCasting || "boolean" === typeof input.CapChivalryFasterCasting || __typia_transform__assertGuard._assertGuard(_exceptionable, {
+            method: "assert",
+            path: _path + ".CapChivalryFasterCasting",
+            expected: "(boolean | null)",
+            value: input.CapChivalryFasterCasting
         }, _errorFactory)) && ("number" === typeof input.ID || __typia_transform__assertGuard._assertGuard(_exceptionable, {
             method: "assert",
             path: _path + ".ID",

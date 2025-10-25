@@ -14,5 +14,6 @@
   "RecoveryTime": 1.5,
   "School": "Spellweaving",
   "MaxFasterCasting": 4,
-  "MaxFasterCastRecovery": 6
+  "MaxFasterCastRecovery": 6,
+  "CapChivalryFasterCasting": null
 }
