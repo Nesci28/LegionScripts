@@ -1,0 +1,20 @@
+{
+  "ID": 615,
+  "Name": "Gift of Life",
+  "PowerWords": "Illorae",
+  "CursorSize": 1,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 4,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "ExpectTargetCursor": true,
+  "RecoveryTime": 1.5,
+  "School": "Spellweaving",
+  "MaxFasterCasting": 4,
+  "MaxFasterCastRecovery": 6,
+  "CapChivalryFasterCasting": null
+}

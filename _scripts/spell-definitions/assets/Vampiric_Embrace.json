@@ -1,0 +1,20 @@
+{
+  "ID": 113,
+  "Name": "Vampiric Embrace",
+  "PowerWords": "Rel Xen An Sanct",
+  "CursorSize": 0,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 1.75,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "ExpectTargetCursor": false,
+  "RecoveryTime": 1.5,
+  "School": "Necromancy",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 6,
+  "CapChivalryFasterCasting": null
+}

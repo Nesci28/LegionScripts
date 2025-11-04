@@ -23,6 +23,7 @@ class AntiIdle:
         self._running = True
         self.gump = None
 
+        self._spell = self._getSpell()
         self._magic = Magic()
 
     def main(self):
@@ -45,8 +46,15 @@ class AntiIdle:
         if Timer.exists(60, "AntiIdle", 18):
             return
         API.PreTarget(API.Player.Serial, "beneficial")
-        self._magic.cast("heal")
+        self._magic.cast(self._spell)
         Timer.create(60, "AntiIdle", 18)
+
+    def _getSpell(self):
+        skills = {s: API.GetSkill(s).Value for s in ["Magery", "Chivalry", "Spellweaving", "Spirit Speak"]}
+        if skills["Magery"] > 0:
+            return "Heal"
+        if skills["Chivalry"] > 0:
+            return "Close Wounds"
 
     def _showGump(self):
         pass

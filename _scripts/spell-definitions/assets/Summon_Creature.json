@@ -1,0 +1,20 @@
+{
+  "ID": 40,
+  "Name": "Summon Creature",
+  "PowerWords": "Kal Xen",
+  "CursorSize": 0,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 6,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "ExpectTargetCursor": false,
+  "RecoveryTime": 1.5,
+  "School": "Magery",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 5,
+  "CapChivalryFasterCasting": null
+}

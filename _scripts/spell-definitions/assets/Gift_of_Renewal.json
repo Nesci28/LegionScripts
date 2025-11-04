@@ -1,0 +1,20 @@
+{
+  "ID": 602,
+  "Name": "Gift of Renewal",
+  "PowerWords": "Olorisstra",
+  "CursorSize": 1,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 3,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "ExpectTargetCursor": false,
+  "RecoveryTime": 1.5,
+  "School": "Spellweaving",
+  "MaxFasterCasting": 4,
+  "MaxFasterCastRecovery": 6,
+  "CapChivalryFasterCasting": null
+}

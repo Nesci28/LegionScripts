@@ -1,0 +1,20 @@
+{
+  "ID": 608,
+  "Name": "Summon Fiend",
+  "PowerWords": "Nylisstra",
+  "CursorSize": 1,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 2,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "ExpectTargetCursor": false,
+  "RecoveryTime": 1.5,
+  "School": "Spellweaving",
+  "MaxFasterCasting": 4,
+  "MaxFasterCastRecovery": 6,
+  "CapChivalryFasterCasting": null
+}

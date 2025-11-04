@@ -1,0 +1,20 @@
+{
+  "ID": 22,
+  "Name": "Teleport",
+  "PowerWords": "Rel Por",
+  "CursorSize": 1,
+  "CastRange": 11,
+  "Hue": 47,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 1,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "ExpectTargetCursor": true,
+  "RecoveryTime": 1.5,
+  "School": "Magery",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 5,
+  "CapChivalryFasterCasting": null
+}

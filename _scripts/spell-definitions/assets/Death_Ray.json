@@ -1,0 +1,20 @@
+{
+  "ID": 707,
+  "Name": "Death Ray",
+  "PowerWords": "In Grav Corp",
+  "CursorSize": 0,
+  "CastRange": 0,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 0,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "ExpectTargetCursor": true,
+  "RecoveryTime": 0,
+  "School": "Unknown",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 6,
+  "CapChivalryFasterCasting": null
+}

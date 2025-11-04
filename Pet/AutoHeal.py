@@ -37,8 +37,10 @@ def castAtTarget(spell, level, targetSerial, poisonCheck=0):
         return False
     if poisonCheck == -1 and mob.IsPoisoned:
         return False
-    API.PreTarget(targetSerial, "beneficial")
-    magic.cast(spell)
+    # API.PreTarget(targetSerial, "beneficial")
+    API.CastSpell(spell)
+    API.WaitForTarget()
+    API.Target(targetSerial)
     return True
 
 # -- HP Percent Helper --
@@ -118,7 +120,7 @@ findMyPets()
 API.HeadMsg("Heal Pets Ready!", API.Player)
 
 # -- Main Loop --
-while True:
+while not API.StopRequested:
     if not API.Player.IsDead:
         while petSerials:
             rebuildPetList()

@@ -41,14 +41,11 @@ from Error import Error
 from Craft import Craft
 from Item import Item
 
+from bod_skills import bodSkillsStr
+from crafting_infos import craftingInfosStr
 
 class BodBot:
     def __init__(self):
-        bodSkillsJson = open(LegionPath.createPath("_Jsons\\bod-skills.json"))
-        bodSkillsStr = json.load(bodSkillsJson)
-        craftingInfosJson = open(LegionPath.createPath("_Jsons\\crafting-infos.json"))
-        craftingInfosStr = json.load(craftingInfosJson)
-
         self._running = True
         self.gump = None
         self.scrollArea = None
@@ -300,16 +297,21 @@ class BodBot:
             self.gump.setStatus(f"Turn In... {counter}/{len(filledBods)}")
             filledBod = filledBods.pop()
             Util.moveItem(filledBod.Serial, self.npcSerial)
-            isStillInBackpack = API.FindItem(filledBod.Serial)
-            if isStillInBackpack.Serial != 0:
-                filledBods = self._getFilledBods()
-                continue
-            while not API.HasGump(455):
+            # isStillInBackpack = API.FindItem(filledBod.Serial)
+            # API.SysMsg(str(isStillInBackpack))
+            # if isStillInBackpack.Serial != 0:
+            #     filledBods = self._getFilledBods()
+            #     continue
+            count = 0
+            while not API.HasGump(455) and count < 5:
                 API.ContextMenu(self.npcSerial, 403)
                 API.Pause(0.1)
-            API.ReplyGump(1, 455)
+                count += 1
+                API.SysMsg(str(count))
+            if API.HasGump(455):
+                API.ReplyGump(1, 455)
             filledBods = self._getFilledBods()
-            API.Pause(5)
+            API.Pause(2)
         self.gump.setStatus("Ready")
 
     def _fill(self):

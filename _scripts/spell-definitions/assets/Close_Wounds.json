@@ -1,0 +1,20 @@
+{
+  "ID": 202,
+  "Name": "Close Wounds",
+  "PowerWords": "Obsu Vulni",
+  "CursorSize": 1,
+  "CastRange": 2,
+  "Hue": 32,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 2.5,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "ExpectTargetCursor": true,
+  "RecoveryTime": 1.75,
+  "School": "Chivalry",
+  "MaxFasterCasting": 4,
+  "MaxFasterCastRecovery": 6,
+  "CapChivalryFasterCasting": true
+}

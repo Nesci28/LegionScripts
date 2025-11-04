@@ -1,0 +1,20 @@
+{
+  "ID": 29,
+  "Name": "Greater Heal",
+  "PowerWords": "In Vas Mani",
+  "CursorSize": 1,
+  "CastRange": 10,
+  "Hue": 57,
+  "CursorHue": 10,
+  "MaxDuration": 10,
+  "IsLinear": false,
+  "CastTime": 1.25,
+  "ShowCastRangeDuringCasting": false,
+  "FreezeCharacterWhileCasting": false,
+  "ExpectTargetCursor": true,
+  "RecoveryTime": 1.5,
+  "School": "Magery",
+  "MaxFasterCasting": 2,
+  "MaxFasterCastRecovery": 5,
+  "CapChivalryFasterCasting": null
+}

@@ -57,8 +57,8 @@ class Bod:
                     value = int(parts[1])
                     comparisonResults.append(value == amountToFill)
             isDone = all(comparisonResults)
-        if isDone and isColoring:
-            item.Hue = 33
+        # if isDone and isColoring:
+        #     item.Hue = 33
         return isDone
     
     @staticmethod
@@ -89,8 +89,8 @@ class Bod:
         isExceptional = values["isExceptional"]
         amountToFill = values["amountToFill"]
         isDone = isExceptional == True and amountToFill == 20
-        if isDone:
-            item.Hue = 45
+        # if isDone:
+        #     item.Hue = 45
         return isDone
 
     @staticmethod
@@ -247,7 +247,7 @@ class Bod:
                 "A Craft Class and craftingInfo must be defined to fill a bod", 33
             )
             API.Stop()
-        self.item.Hue = 18
+        # self.item.Hue = 18
         while not Bod.hasEnoughItem(self.item, self.count):
             isValidItem = self.craft.craft(
                 self.isExceptional,

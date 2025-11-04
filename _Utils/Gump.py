@@ -18,9 +18,7 @@ from Util import Util
 from Math import Math
 from Color import Color
 
-with open(LegionPath.createPath("_Jsons\\button-types.json")) as f:
-    buttonTypesStr = json.load(f)
-
+from button_types import buttonTypesStr
 
 class Gump:
     buttonTypes = Math.convertToHex(buttonTypesStr)

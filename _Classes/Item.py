@@ -18,7 +18,10 @@ class Item:
 
     def recall(self, index):
         if self.isRunebook:
-            pass
+            while not API.HasGump(89):
+                API.UseObject(self.item.Serial)
+                API.WaitForGump(89)
+            API.ReplyGump(75 + index, 89)
         if self.isAtlas:
             while not API.HasGump(498):
                 API.UseObject(self.item.Serial)

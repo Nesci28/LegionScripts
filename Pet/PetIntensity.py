@@ -398,8 +398,10 @@ class PetIntensity:
         if not pet:
             return
 
-        API.PreTarget(pet.Serial)
+        # API.PreTarget(pet.Serial)
         API.UseSkill("Animal Lore")
+        API.WaitForTarget()
+        API.Target(pet.Serial)
         while not API.GetGump(self.loreGumpId):
             API.Pause(0.1)
         gump = API.GetGump(self.loreGumpId)
