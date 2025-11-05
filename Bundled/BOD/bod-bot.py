@@ -1,7 +1,6 @@
 #=========== Consolidated Imports ============#
 from decimal import Decimal
 import API
-import Debug
 import System
 import datetime
 import hashlib
@@ -3799,7 +3798,7 @@ craftingInfosStr = {
     "Tailoring": {
         "tool": {"graphic": "0x0F9D", "buttonId": 14},
         "materialHues": {
-            "cloth": {"hue": "0x0000", "buttonId": null},
+            "cloth": {"hue": "0x0000", "buttonId": None},
             "normal leather": {"hue": "0x0000", "buttonId": 5000},
             "spined leather": {"hue": "0x08AC", "buttonId": 5001},
             "horned leather": {"hue": "0x0845", "buttonId": 5002},

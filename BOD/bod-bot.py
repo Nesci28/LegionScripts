@@ -1,7 +1,6 @@
 import API
 import importlib
 import traceback
-import json
 from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
@@ -16,7 +15,6 @@ import Python
 import Error
 import Craft
 import Item
-import Debug
 
 importlib.reload(Bod)
 importlib.reload(Gump)
@@ -28,7 +26,6 @@ importlib.reload(Python)
 importlib.reload(Error)
 importlib.reload(Craft)
 importlib.reload(Item)
-importlib.reload(Debug)
 
 from Bod import Bod
 from Gump import Gump

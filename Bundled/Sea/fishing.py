@@ -1,10 +1,8 @@
 #=========== Consolidated Imports ============#
-from Debug import debug
 from base64 import b64encode
 from collections import OrderedDict
 from decimal import Decimal
 import API
-import Debug
 import System
 import datetime
 import importlib
@@ -3025,18 +3023,15 @@ class Fishing:
         self.statsFile = f"{playerName}_fishing_stats.json"
         self._loadStats()
 
-    @debug
     def main(self):
         self._equipFishingPole()
         self._showGump()
 
-    @debug
     def tick(self):
         self._updateStatLabels()
         self._saveStats()
         self._step()
 
-    @debug
     def _loadStats(self):
         saved = {}
         if os.path.exists(self.statsFile):
@@ -3049,7 +3044,6 @@ class Fishing:
         if not os.path.exists(self.statsFile):
             self._saveStats()
 
-    @debug
     def _saveStats(self):
         data = {}
         for key, val in self.stats.items():
@@ -3059,7 +3053,6 @@ class Fishing:
         with open(self.statsFile, "w") as f:
             json.dump(data, f)
 
-    @debug
     def _step(self):
         if self.subStep == 2:
             for _ in range(12):
@@ -3096,7 +3089,6 @@ class Fishing:
                 self.subStep = 0
                 return
 
-    @debug
     def _showGump(self):
         tabTotalX = self.gumpWidth - 80
         tabSessionX = self.gumpWidth - 160
@@ -3129,7 +3121,6 @@ class Fishing:
 
         self.gump.create()
 
-    @debug
     def _updateStatLabels(self):
         API.SysMsg("UPDATE STAT LABELS")
         for name, countLabel, type in self.statLabels:
@@ -3140,7 +3131,6 @@ class Fishing:
             # countLabel.Text = str(count)
             API.SysMsg("UPDATE STAT LABELS - DONE")
 
-    @debug
     def _onClose(self):
         if not self._running:
             return
@@ -3152,7 +3142,6 @@ class Fishing:
             self.gump = None
         API.Stop()
 
-    @debug
     def _cast(self, spellName, targetSerial=None):
         API.ClearJournal()
         API.CancelTarget()
@@ -3174,7 +3163,6 @@ class Fishing:
             return
         API.SysMsg(f"Failed to cast {spellName} after {retries} attempts", 33)
 
-    @debug
     def _fightEnemy(self):
         enemies = Util.scanEnemies()
         if len(enemies) > 0:
@@ -3184,7 +3172,6 @@ class Fishing:
         self._lootCorpses()
         self._autoHeal(0, 0)
 
-    @debug
     def _lootCorpses(self):
         corpses = Util.findCorpses()
         if len(corpses) == 0:
@@ -3214,7 +3201,6 @@ class Fishing:
             self._openSoses()
             self.lootedCorpseSerials.append(corpseSerial)
 
-    @debug
     def _openSoses(self):
         startingSosCount = len(Util.findTypeAll(API.Backpack, 5358, 0))
         startingAncientSosCount = len(Util.findTypeAll(API.Backpack, 5358, 1153))
@@ -3233,7 +3219,6 @@ class Fishing:
                 self.loots["ancientSos"]["session"] += 1
                 startingAncientSosCount += 1
 
-    @debug
     def _autoHeal(self, offsetGreaterHeal=40, offsetHeal=20):
         while API.BuffExists("Poisoned"):
             self._cast("Cure", API.Player.Serial)
@@ -3245,7 +3230,6 @@ class Fishing:
                 self._cast("Heal", API.Player.Serial)
             hpMissing = API.Player.HitsMax - API.Player.Hits
 
-    @debug
     def _killEnemy(self, enemy):
         while API.FindMobile(enemy.Serial):
             now = time.time()
@@ -3255,13 +3239,11 @@ class Fishing:
             self._autoHeal()
             self._cast("Energy Bolt", enemy.Serial)
 
-    @debug
     def _peace(self, enemy):
         if Util.getSkillInfo("Peacemaking")["value"] < 100:
             return
         self.peacemaking.use(enemy.Serial)
 
-    @debug
     def _dropBoots(self):
         goat = self._findGoat()
         for shoeId in Fishing.shoeIds:
@@ -3269,14 +3251,12 @@ class Fishing:
             for shoe in shoes:
                 Util.moveItem(shoe.Serial, goat.Serial)
 
-    @debug
     def _eatSpecialFish(self):
         specialFishes = Util.findTypeAll(API.Backpack, 0x0DD6)
         for specialFish in specialFishes:
             API.UseObject(specialFish.Serial)
             API.Pause(1)
 
-    @debug
     def _cutAndDropFish(self):
         weightDiff = API.Player.WeightMax - API.Player.Weight
         if weightDiff > 35:
@@ -3301,7 +3281,6 @@ class Fishing:
             for bigFish in bigFishes:
                 Util.moveItemOffset(bigFish.Serial, -1, 1)
 
-    @debug
     def _validate(self):
         hasMagery = Util.getSkillInfo("Magery")["value"] > 0
         if not hasMagery:
@@ -3310,7 +3289,6 @@ class Fishing:
             self.magic.cast("Protection")
         self._findGoat()
 
-    @debug
     def _findGoat(self):
         pets = API.GetAllMobiles()
         for pet in pets:
@@ -3321,7 +3299,6 @@ class Fishing:
                 return pet
         Util.error("Missing goat")
 
-    @debug
     def _fish(self, xOffset, yOffset):
         self.gump.setStatus("Fishing...")
         API.ClearJournal()
@@ -3334,7 +3311,6 @@ class Fishing:
         actions = self._scanJournal()
         return actions
 
-    @debug
     def _scanJournal(self):
         while True:
             res = []
@@ -3443,7 +3419,6 @@ class Fishing:
                 return res
             API.Pause(0.5)
 
-    @debug
     def _findItem(self, itemId):
         API.ClearLeftHand()
         API.ClearRightHand()
@@ -3454,16 +3429,13 @@ class Fishing:
             API.Stop()
         return fishingPole.Serial
 
-    @debug
     def _equipFishingPole(self):
         API.EquipItem(self.fishingPoleSerial)
         API.Pause(0.25)
 
-    @debug
     def _isRunning(self):
         return self._running
 
-    @debug
     def _sendHourlyStats(self):
         lines = ["📊 Fishing Stats (Last Hour)"]
         for key, data in self.stats.items():

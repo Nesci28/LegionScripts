@@ -9,21 +9,18 @@ from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
 
-import Debug
 import Error
 import Util
 import Math
 import Gump
 import Item
 
-importlib.reload(Debug)
 importlib.reload(Error)
 importlib.reload(Util)
 importlib.reload(Math)
 importlib.reload(Gump)
 importlib.reload(Item)
 
-from Debug import debug
 from Error import Error
 from Util import Util
 from Math import Math
