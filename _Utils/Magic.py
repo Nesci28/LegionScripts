@@ -9,6 +9,8 @@ import Util
 
 importlib.reload(Util)
 
+from Util import Util
+
 with open(LegionPath.createPath("_Jsons\\spell-def-magic.json")) as f:
     SPELLS = json.load(f)
 
@@ -87,7 +89,7 @@ class Magic:
             castStart = self._now()
             retry = False
             while self._now() - castStart < spellDef["castTime"]:
-                if spellDef["hasTarget"] and Util.Util.isTargeting():
+                if spellDef["hasTarget"] and Util.isTargeting():
                     return True
                 if self._checkNoSpell():
                     API.SysMsg(f"You do not have that spell: {spellName}", 33)
@@ -105,7 +107,7 @@ class Magic:
                     retry = True
                     break
                 API.Pause(0.05)
-            if spellDef["hasTarget"] and Util.Util.isTargeting():
+            if spellDef["hasTarget"] and Util.isTargeting():
                 return True
             if not retry:
                 return True

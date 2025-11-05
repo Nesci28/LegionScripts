@@ -7,13 +7,15 @@ import Util
 
 importlib.reload(Util)
 
+from Util import Util
+
 
 class ArmsLore:
     def __init__(self, skillCap=API.GetSkill("Arms Lore").Cap):
         self.skillCap = skillCap
-        self.weapon = Util.Util.findItemWithProps(
+        self.weapon = Util.findItemWithProps(
             ["One-handed Weapon"]
-        ) or Util.Util.findItemWithProps(["Two-handed Weapon"])
+        ) or Util.findItemWithProps(["Two-handed Weapon"])
         if not self.weapon:
             API.SysMsg("Need a weapon in inventory", 33)
             API.Stop()

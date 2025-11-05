@@ -1,16 +1,114 @@
+#=========== Consolidated Imports ============#
 from decimal import Decimal
-import re
-import importlib
-from LegionPath import LegionPath
+import API
 import System
+import importlib
+import os
+import re
+import sys
 
-LegionPath.addSubdirs()
 
-import Math
+#=========== Start of LegionPath.py ============#
 
-importlib.reload(Math)
+class LegionPath:
+    @staticmethod
+    def createPath(path):
+        path = f"{LegionPath.getLegionPath()}/{path}"
+        return path
 
-from Math import Math
+    @staticmethod
+    def getLegionPath():
+        base = sys.prefix
+        if base.lower().endswith("ironpython.dll"):
+            base = os.path.dirname(base)
+
+        legion_path = os.path.join(base, "LegionScripts")
+        return legion_path
+
+    @staticmethod
+    def addSubdirs():
+        legion_path = LegionPath.getLegionPath()
+
+        if not os.path.isdir(legion_path):
+            return
+
+        for name in os.listdir(legion_path):
+            subdir = os.path.join(legion_path, name)
+            if os.path.isdir(subdir) and name.startswith("_"):
+                if subdir not in sys.path:
+                    sys.path.append(subdir)
+#=========== End of LegionPath.py ============#
+
+#=========== Start of _Utils\Math.py ============#
+
+class Math:
+    centerX = 1323
+    mapWidth = 5120
+    centerY = 1624
+    mapHeight = 4096
+    
+    @staticmethod
+    def truncateDecimal(n1, d=1):
+        n = str(n1)
+        return n if "." not in n else n[: n.find(".") + d + 1]
+    
+    @staticmethod
+    def distanceBetween(m1, m2):
+        if not m1 or not m2:
+            return 999
+        return max(abs(m1.X - m2.X), abs(m1.Y - m2.Y))
+
+    @staticmethod
+    def convertToHex(obj):
+        if isinstance(obj, dict):
+            return {k: Math.convertToHex(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [Math.convertToHex(elem) for elem in obj]
+        elif isinstance(obj, str) and re.fullmatch(r"0x[0-9a-fA-F]+", obj):
+            return int(obj, 16)
+        return obj
+    
+    @staticmethod
+    def tilesToLatLon(x, y):
+        degLon = (x - Math.centerX) * 360.0 / Math.mapWidth
+        degLat = (y - Math.centerY) * 360.0 / Math.mapHeight
+
+        if degLon > 180:
+            degLon = 360 - degLon
+            lonDir = "W"
+        else:
+            lonDir = "E"
+
+        if degLat > 180:
+            degLat = 360 - degLat
+            latDir = "N"
+        else:
+            latDir = "S"
+
+        lat = (int(degLat), (degLat - int(degLat)) * 60, latDir)
+        lon = (int(degLon), (degLon - int(degLon)) * 60, lonDir)
+        return lat, lon
+
+    @staticmethod
+    def latLonToTiles(degLat, minLat, latDir, degLon, minLon, lonDir):
+        totalLat = degLat + minLat / 60
+        if latDir == "N":
+            totalLat = 360 - totalLat
+
+        totalLon = degLon + minLon / 60
+        if lonDir == "W":
+            totalLon = 360 - totalLon
+
+        y = totalLat * Math.mapHeight / 360 + Math.centerY
+        x = totalLon * Math.mapWidth / 360 + Math.centerX
+        return int(x % Math.mapWidth), int(y % Math.mapHeight)
+#=========== End of _Utils\Math.py ============#
+
+#=========== Start of _Utils\Util.py ============#
+
+
+
+
 
 class Util:
     skillNames = [
@@ -373,3 +471,129 @@ class Util:
                 else:
                     result = {"items": None, "stones": None}
                 return result
+#=========== End of _Utils\Util.py ============#
+
+#=========== Start of .\Farm\butcher.py ============#
+
+
+
+
+
+# ========== Configurable Toggles ==========
+isDestroyingCorpse = False
+takeLeather = True
+takeMeat = False
+takeFeathers = False
+takeWool = False
+takeScales = True
+takeBlood = True
+
+# ========== Item IDs ==========
+leather = 0x1081
+hide = 0x1078
+meat = 0x09F1
+rotwormMeat = 0x2DB9
+pultry = 0x09B9
+feathers = 0x1BD1
+wool = 0x0DF8
+lambLeg = 0x1609
+dragonScale = 0x26B4
+dragonBlood = 0x4077
+
+daggerIds = [
+    0x2D2C,  # Harvester's Blade
+    0x0F52,  # Dagger
+    0x0EC4,  # Skinning Knife
+    0x0EC3,  # Butcher's Cleaver
+    0x13F6,  # Butcher's Knife
+    0x13B6   # Butcher's Knife
+]
+
+def getItemName(serial):
+    info = API.ItemNameAndProps(serial, True)
+    return info[0] if info else ""
+
+def findDagger():
+    for dag in daggerIds:
+        found = API.FindType(dag, API.Backpack)
+        if found:
+            return found
+
+    rightHand = API.FindLayer("RightHand")
+    leftHand = API.FindLayer("LeftHand")
+    if rightHand and rightHand.Graphic in daggerIds:
+        return rightHand
+    if leftHand and leftHand.Graphic in daggerIds:
+        return leftHand
+
+    API.SysMsg("Unable to locate preset dagger", 201)
+    return None
+
+def lootItems(container, graphic, nameFilter=None):
+    for item in API.ItemsInContainer(container):
+        if item.Graphic == graphic and (nameFilter is None or nameFilter in item.Name):
+            API.MoveItem(item.Serial, API.Backpack, item.Amount)
+            API.Pause(0.1)
+
+def dumpItems(corpse, graphic, nameFilter=None):
+    for item in API.ItemsInContainer(API.Backpack):
+        if item.Graphic == graphic and (nameFilter is None or nameFilter in item.Name):
+            API.MoveItem(item.Serial, corpse, item.Amount)
+            API.Pause(0.2)
+
+def runButcher():
+    dagger = findDagger()
+    if not dagger:
+        return
+
+    isHarvestersBlade = getItemName(dagger.Serial) == "Harvester's Blade"
+
+    while True:
+        API.Pause(1)
+        corpse = API.NearestCorpse(1)
+        if not corpse or corpse.Serial == 0:
+            continue
+
+        Util.useObjectWithTarget(dagger.Serial)
+        API.Target(corpse.Serial)
+
+        if not isHarvestersBlade:
+            if takeFeathers:
+                lootItems(corpse.Serial, feathers)
+            if takeMeat:
+                lootItems(corpse.Serial, meat)
+                lootItems(corpse.Serial, rotwormMeat)
+                lootItems(corpse.Serial, pultry)
+                lootItems(corpse.Serial, lambLeg)
+            if takeLeather:
+                lootItems(corpse.Serial, hide)
+            if takeWool:
+                lootItems(corpse.Serial, wool)
+            if takeScales:
+                lootItems(corpse.Serial, dragonScale)
+            if takeBlood:
+                lootItems(corpse.Serial, dragonBlood, "Dragon's Blood")
+        else:
+            if not takeFeathers:
+                dumpItems(corpse.Serial, feathers)
+            if not takeLeather:
+                dumpItems(corpse.Serial, leather)
+            if not takeMeat:
+                dumpItems(corpse.Serial, meat)
+                dumpItems(corpse.Serial, pultry)
+                dumpItems(corpse.Serial, lambLeg)
+                dumpItems(corpse.Serial, rotwormMeat)
+            if not takeWool:
+                dumpItems(corpse.Serial, wool)
+            if not takeScales:
+                dumpItems(corpse.Serial, dragonScale)
+            if not takeBlood:
+                dumpItems(corpse.Serial, dragonBlood, "Dragon's Blood")
+
+        if isDestroyingCorpse:
+            corpse.Destroy()
+        API.IgnoreObject(corpse.Serial)
+
+runButcher()
+#=========== End of .\Farm\butcher.py ============#
+

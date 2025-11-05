@@ -4,20 +4,17 @@ from LegionPath import LegionPath
 LegionPath.addSubdirs()
 
 import _Caster
-import Util
-import Magic
 
-importlib.reload(Util)
-importlib.reload(Magic)
 importlib.reload(_Caster)
 
 from _Caster import Caster
+
 
 class SpiritSpeak(Caster):
     @staticmethod
     def validate(skillCap):
         return []
-    
+
     def __init__(
         self,
         skillCap,

@@ -5,14 +5,15 @@ LegionPath.addSubdirs()
 
 import _Caster
 import Util
-import Math
 import Magic
 
 importlib.reload(_Caster)
 importlib.reload(Util)
-importlib.reload(Math)
+importlib.reload(Magic)
 
 from _Caster import Caster
+from Util import Util
+from Magic import Magic
 
 
 class Spellweaving(Caster):
@@ -58,7 +59,7 @@ class Spellweaving(Caster):
     @staticmethod
     def validate(skillCap):
         errors = []
-        magic = Magic.Magic()
+        magic = Magic()
         API.ClearJournal()
         magic.cast("Arcane Circle")
         hasDoneArcanistQuest = API.InJournalAny(
@@ -71,10 +72,10 @@ class Spellweaving(Caster):
         hasSpellValidation = Caster.validate(skillCap, Spellweaving.spells)
         if not hasSpellValidation:
             errors.append("Spellweaving - Missing spells.")
-        hasOneHandedWeapon = bool(Util.Util.findItemWithProps(
+        hasOneHandedWeapon = bool(Util.findItemWithProps(
             ["One-handed Weapon"]
         ))
-        hasTwoHandedWeapon = bool(Util.Util.findItemWithProps(["Two-handed Weapon"]))
+        hasTwoHandedWeapon = bool(Util.findItemWithProps(["Two-handed Weapon"]))
         hasWeapon = hasOneHandedWeapon or hasTwoHandedWeapon
         if not hasWeapon:
             errors.append("Spellweaving - Missing weapon.")

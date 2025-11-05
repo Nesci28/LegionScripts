@@ -6,8 +6,8 @@ LegionPath.addSubdirs()
 import _Music
 import Util
 
-importlib.reload(Util)
 importlib.reload(_Music)
+importlib.reload(Util)
 
 from _Music import Music
 from Util import Util

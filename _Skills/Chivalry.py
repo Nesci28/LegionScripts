@@ -5,14 +5,13 @@ LegionPath.addSubdirs()
 
 import _Caster
 import Util
-import Math
 
 importlib.reload(_Caster)
 from _Caster import Caster
 
 importlib.reload(Util)
-importlib.reload(Math)
 
+from Util import Util
 
 class Chivalry(Caster):
     spells = [
@@ -54,10 +53,10 @@ class Chivalry(Caster):
         hasSpellValidation = Caster.validate(skillCap, Chivalry.spells)
         if not hasSpellValidation:
             errors.append("Chivalry - Missing spells.")
-        hasOneHandedWeapon = bool(Util.Util.findItemWithProps(
+        hasOneHandedWeapon = bool(Util.findItemWithProps(
             ["One-handed Weapon"]
         ))
-        hasTwoHandedWeapon = bool(Util.Util.findItemWithProps(["Two-handed Weapon"]))
+        hasTwoHandedWeapon = bool(Util.findItemWithProps(["Two-handed Weapon"]))
         hasWeapon = hasOneHandedWeapon or hasTwoHandedWeapon
         if not hasWeapon:
             errors.append("Chivalry - Missing weapon.")
@@ -75,18 +74,18 @@ class Chivalry(Caster):
             "Chivalry", skillCap, label, skillLevelLabel, spellLabel, runningLabel
         )
         self.spells = Chivalry.spells
-        oneHandedWeapon = Util.Util.findItemWithProps(
+        oneHandedWeapon = Util.findItemWithProps(
             ["One-handed Weapon"]
         )
         if oneHandedWeapon:
             self.weapon = oneHandedWeapon
-        twoHandedWeapon = Util.Util.findItemWithProps(["Two-handed Weapon"])
+        twoHandedWeapon = Util.findItemWithProps(["Two-handed Weapon"])
         if not oneHandedWeapon and twoHandedWeapon:
             self.weapon = twoHandedWeapon
 
     def _preCast(self, skillInfo, spellName, nextSpell):
         super()._preCast(skillInfo, spellName, nextSpell)
-        isWearingWeapon = Util.Util.isWearingWeapon()
+        isWearingWeapon = Util.isWearingWeapon()
         if not isWearingWeapon:
             API.EquipItem(self.weapon.Serial)
 

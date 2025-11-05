@@ -13,6 +13,10 @@ importlib.reload(Magic)
 importlib.reload(Util)
 importlib.reload(Math)
 
+from Magic import Magic
+from Util import Util
+from Math import Math
+
 
 class Caster:
     @staticmethod
@@ -23,7 +27,7 @@ class Caster:
             if skillCap >= skill:
                 spellNames.append(spell["spell"])
 
-        magic = Magic.Magic()
+        magic = Magic()
         for spellName in spellNames:
             hasSpell = magic.hasSpell(spellName)
             if not hasSpell:
@@ -45,14 +49,14 @@ class Caster:
         self.skillLevelLabel = skillLevelLabel
         self.spellLabel = spellLabel
         self.runningLabel = runningLabel
-        self.magic = Magic.Magic()
+        self.magic = Magic()
         self.spells = []
 
     def train(self, calculareSkillLabels):
-        skillInfo = Util.Util.getSkillInfo(self.skillName)
+        skillInfo = Util.getSkillInfo(self.skillName)
         while skillInfo["value"] < self.skillCap:
             self._trainer(skillInfo, self.spells)
-            skillInfo = Util.Util.getSkillInfo(self.skillName)
+            skillInfo = Util.getSkillInfo(self.skillName)
             calculareSkillLabels()
 
     def _trainer(self, skillInfo, spells):
@@ -61,7 +65,7 @@ class Caster:
             self.label.Hue = 88
         if self.skillLevelLabel:
             self.skillLevelLabel.Hue = 88
-            self.skillLevelLabel.Text = Math.Math.truncateDecimal(skillLevel, 1)
+            self.skillLevelLabel.Text = Math.truncateDecimal(skillLevel, 1)
 
         self.magic.healCure(ceil(API.Player.HitsMax / 3) * 2, API.Player.HitsMax - 1)
 
@@ -74,7 +78,7 @@ class Caster:
         )
 
         self._preCast(skillInfo, spellName, nextSpell)
-        Magic.Magic.regenMana(manaCost)
+        Magic.regenMana(manaCost)
 
         startMana = API.Player.Mana
         startTime = time.time()
@@ -82,9 +86,9 @@ class Caster:
         self.magic.cast(spellName)
         self._target()
 
-        API.Pause(Magic.Magic.getFcrDelay())
+        API.Pause(Magic.getFcrDelay())
 
-        Magic.Magic.regenMana(manaCost)
+        Magic.regenMana(manaCost)
         self._checkIfGearBroken()
 
         regenDuration = time.time() - startTime
@@ -123,8 +127,8 @@ class Caster:
                 if self.spellLabel:
                     self.spellLabel.Text = spellName
 
-                castTime = Magic.Magic.getFcDelay(entry["castingTime"])
-                recoverTime = Magic.Magic.getFcrDelay()
+                castTime = Magic.getFcDelay(entry["castingTime"])
+                recoverTime = Magic.getFcrDelay()
                 totalPause = castTime + recoverTime
 
                 lmc = API.Player.LowerManaCost
@@ -148,7 +152,7 @@ class Caster:
         raise ValueError("No matching spell entry found for current skill level")
 
     def _checkIfGearBroken(self):
-        if Util.Util.checkIfGearBroken():
+        if Util.checkIfGearBroken():
             if self.label:
                 self.label.Hue = 33
             if self.skillLevelLabel:

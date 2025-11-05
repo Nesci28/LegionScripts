@@ -5,13 +5,12 @@ LegionPath.addSubdirs()
 
 import _Caster
 import Util
-import Math
 
 importlib.reload(_Caster)
-from _Caster import Caster
-
 importlib.reload(Util)
-importlib.reload(Math)
+
+from _Caster import Caster
+from Util import Util
 
 
 class Bushido(Caster):
@@ -53,7 +52,7 @@ class Bushido(Caster):
         hasCombatSkillOver75 = False
         combatSkillOver75 = None
         for combatSkill in Bushido.combatSkills:
-            values = Util.Util.getSkillInfo(combatSkill)
+            values = Util.getSkillInfo(combatSkill)
             if values["value"] > 75:
                 hasCombatSkillOver75 = True
                 combatSkillOver75 = combatSkill
@@ -63,11 +62,11 @@ class Bushido(Caster):
         oneHandedProps = ["One-handed Weapon"]
         if combatSkillOver75:
             oneHandedProps.append(combatSkillOver75)
-        hasOneHandedWeapon = bool(Util.Util.findItemWithProps(oneHandedProps))
+        hasOneHandedWeapon = bool(Util.findItemWithProps(oneHandedProps))
         twoHandedProps = ["Two-handed Weapon"]
         if combatSkillOver75:
             twoHandedProps.append(combatSkillOver75)
-        hasTwoHandedWeapon = bool(Util.Util.findItemWithProps(twoHandedProps))
+        hasTwoHandedWeapon = bool(Util.findItemWithProps(twoHandedProps))
         hasWeapon = hasOneHandedWeapon or hasTwoHandedWeapon
         if not hasWeapon:
             errors.append("Bushido - Missing weapon.")
@@ -85,16 +84,16 @@ class Bushido(Caster):
             "Bushido", skillCap, label, skillLevelLabel, spellLabel, runningLabel
         )
         self.spells = Bushido.spells
-        oneHandedWeapon = Util.Util.findItemWithProps(["One-handed Weapon"])
+        oneHandedWeapon = Util.findItemWithProps(["One-handed Weapon"])
         if oneHandedWeapon:
             self.weapon = oneHandedWeapon
-        twoHandedWeapon = Util.Util.findItemWithProps(["Two-handed Weapon"])
+        twoHandedWeapon = Util.findItemWithProps(["Two-handed Weapon"])
         if not oneHandedWeapon and twoHandedWeapon:
             self.weapon = twoHandedWeapon
 
     def _preCast(self, skillInfo, spellName, nextSpell):
         super()._preCast(skillInfo, spellName, nextSpell)
-        isWearingWeapon = Util.Util.isWearingWeapon()
+        isWearingWeapon = Util.isWearingWeapon()
         if not isWearingWeapon:
             API.EquipItem(self.weapon.Serial)
 

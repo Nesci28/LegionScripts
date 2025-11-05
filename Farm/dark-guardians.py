@@ -59,12 +59,10 @@ class DarkGuardians:
         return True
 
     def run(self):
-        isGearBroken = Util.checkIfGearBroken()
-        if isGearBroken:
-            self.runebookItem.recall(DarkGuardians.RUNE_TRASH_CAN_INDEX)
-            API.Stop()
+        self._checkGear()
         items = self._getItemsCount()
         if items >= 120:
+            self.lootedCorpseSerials.clear()
             self._goToOutside()
             self.runebookItem.recall(DarkGuardians.RUNE_TRASH_CAN_INDEX)
             self._trashMaps()
@@ -84,12 +82,21 @@ class DarkGuardians:
         self._attack()
         self._lootCorpses()
 
+    def _checkGear(self):
+        isGearBroken = Util.checkIfGearBroken()
+        if isGearBroken:
+            self._goToGuardians()
+            self.runebookItem.recall(DarkGuardians.RUNE_TRASH_CAN_INDEX)
+            API.Stop()
+
     def _trashMaps(self):
         self._updateStatus("Trashing maps")
         trash = API.FindType(DarkGuardians.TRASH_GRAPHIC, 4294967295, 2)
         if not trash:
             API.Stop()
         graphic = self.loots["map"]["graphic"]
+        backpack = API.FindItem(API.Backpack)
+        Util.openContainer(backpack)
         maps = Util.findTypeAll(API.Backpack, graphic)
         for map in maps:
             Util.moveItem(map.Serial, trash.Serial)
@@ -191,7 +198,8 @@ class DarkGuardians:
             except:
                 pass
             self.lootedCorpseSerials.append(corpseSerial)
-        if hasFoundItem:
+        items = self._getItemsCount()
+        if hasFoundItem and items < 120:
             self._updateStatus("Waiting after loot")
             API.Pause(45)
 

@@ -1,16 +1,179 @@
+#=========== Consolidated Imports ============#
 from decimal import Decimal
-import re
-import importlib
-from LegionPath import LegionPath
+import API
 import System
+import importlib
+import os
+import re
+import sys
 
-LegionPath.addSubdirs()
 
-import Math
+#=========== Start of _Utils\math.py ============#
 
-importlib.reload(Math)
+class Math:
+    centerX = 1323
+    mapWidth = 5120
+    centerY = 1624
+    mapHeight = 4096
+    
+    @staticmethod
+    def truncateDecimal(n1, d=1):
+        n = str(n1)
+        return n if "." not in n else n[: n.find(".") + d + 1]
+    
+    @staticmethod
+    def distanceBetween(m1, m2):
+        if not m1 or not m2:
+            return 999
+        return max(abs(m1.X - m2.X), abs(m1.Y - m2.Y))
 
-from Math import Math
+    @staticmethod
+    def convertToHex(obj):
+        if isinstance(obj, dict):
+            return {k: Math.convertToHex(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [Math.convertToHex(elem) for elem in obj]
+        elif isinstance(obj, str) and re.fullmatch(r"0x[0-9a-fA-F]+", obj):
+            return int(obj, 16)
+        return obj
+    
+    @staticmethod
+    def tilesToLatLon(x, y):
+        degLon = (x - Math.centerX) * 360.0 / Math.mapWidth
+        degLat = (y - Math.centerY) * 360.0 / Math.mapHeight
+
+        if degLon > 180:
+            degLon = 360 - degLon
+            lonDir = "W"
+        else:
+            lonDir = "E"
+
+        if degLat > 180:
+            degLat = 360 - degLat
+            latDir = "N"
+        else:
+            latDir = "S"
+
+        lat = (int(degLat), (degLat - int(degLat)) * 60, latDir)
+        lon = (int(degLon), (degLon - int(degLon)) * 60, lonDir)
+        return lat, lon
+
+    @staticmethod
+    def latLonToTiles(degLat, minLat, latDir, degLon, minLon, lonDir):
+        totalLat = degLat + minLat / 60
+        if latDir == "N":
+            totalLat = 360 - totalLat
+
+        totalLon = degLon + minLon / 60
+        if lonDir == "W":
+            totalLon = 360 - totalLon
+
+        y = totalLat * Math.mapHeight / 360 + Math.centerY
+        x = totalLon * Math.mapWidth / 360 + Math.centerX
+        return int(x % Math.mapWidth), int(y % Math.mapHeight)
+#=========== End of _Utils\math.py ============#
+
+#=========== Start of LegionPath.py ============#
+
+class LegionPath:
+    @staticmethod
+    def createPath(path):
+        path = f"{LegionPath.getLegionPath()}/{path}"
+        return path
+
+    @staticmethod
+    def getLegionPath():
+        base = sys.prefix
+        if base.lower().endswith("ironpython.dll"):
+            base = os.path.dirname(base)
+
+        legion_path = os.path.join(base, "LegionScripts")
+        return legion_path
+
+    @staticmethod
+    def addSubdirs():
+        legion_path = LegionPath.getLegionPath()
+
+        if not os.path.isdir(legion_path):
+            return
+
+        for name in os.listdir(legion_path):
+            subdir = os.path.join(legion_path, name)
+            if os.path.isdir(subdir) and name.startswith("_"):
+                if subdir not in sys.path:
+                    sys.path.append(subdir)
+#=========== End of LegionPath.py ============#
+
+#=========== Start of _Utils\Math.py ============#
+
+class Math:
+    centerX = 1323
+    mapWidth = 5120
+    centerY = 1624
+    mapHeight = 4096
+    
+    @staticmethod
+    def truncateDecimal(n1, d=1):
+        n = str(n1)
+        return n if "." not in n else n[: n.find(".") + d + 1]
+    
+    @staticmethod
+    def distanceBetween(m1, m2):
+        if not m1 or not m2:
+            return 999
+        return max(abs(m1.X - m2.X), abs(m1.Y - m2.Y))
+
+    @staticmethod
+    def convertToHex(obj):
+        if isinstance(obj, dict):
+            return {k: Math.convertToHex(v) for k, v in obj.items()}
+        elif isinstance(obj, list):
+            return [Math.convertToHex(elem) for elem in obj]
+        elif isinstance(obj, str) and re.fullmatch(r"0x[0-9a-fA-F]+", obj):
+            return int(obj, 16)
+        return obj
+    
+    @staticmethod
+    def tilesToLatLon(x, y):
+        degLon = (x - Math.centerX) * 360.0 / Math.mapWidth
+        degLat = (y - Math.centerY) * 360.0 / Math.mapHeight
+
+        if degLon > 180:
+            degLon = 360 - degLon
+            lonDir = "W"
+        else:
+            lonDir = "E"
+
+        if degLat > 180:
+            degLat = 360 - degLat
+            latDir = "N"
+        else:
+            latDir = "S"
+
+        lat = (int(degLat), (degLat - int(degLat)) * 60, latDir)
+        lon = (int(degLon), (degLon - int(degLon)) * 60, lonDir)
+        return lat, lon
+
+    @staticmethod
+    def latLonToTiles(degLat, minLat, latDir, degLon, minLon, lonDir):
+        totalLat = degLat + minLat / 60
+        if latDir == "N":
+            totalLat = 360 - totalLat
+
+        totalLon = degLon + minLon / 60
+        if lonDir == "W":
+            totalLon = 360 - totalLon
+
+        y = totalLat * Math.mapHeight / 360 + Math.centerY
+        x = totalLon * Math.mapWidth / 360 + Math.centerX
+        return int(x % Math.mapWidth), int(y % Math.mapHeight)
+#=========== End of _Utils\Math.py ============#
+
+#=========== Start of _Utils\Util.py ============#
+
+
+
+
 
 class Util:
     skillNames = [
@@ -373,3 +536,189 @@ class Util:
                 else:
                     result = {"items": None, "stones": None}
                 return result
+#=========== End of _Utils\Util.py ============#
+
+#=========== Start of .\Sea\high-seas.py ============#
+
+
+
+
+# --- Global Variables ---
+cannons = {
+    "forwardPort": {},
+    "amidshipsPort": {},
+    "forwardStarboard": {},
+    "amidshipsStarboard": {},
+}
+
+gumpIdConst = 888888
+
+
+def getCannonInfo(gumpId):
+    for info in cannons.values():
+        if info.get("gumpId") == gumpId:
+            return info
+    raise Exception("Cannon not found for gumpId")
+
+
+def getItemInBackpack(graphic):
+    return API.FindType(graphic, API.Backpack)
+
+
+def isCannonInState(gumpId, stateText):
+    info = getCannonInfo(gumpId)
+    if not API.HasGump(gumpId):
+        API.UseObject(info["item"].Serial)
+        API.Pause(1)
+    return API.GumpContains(stateText, gumpId)
+
+
+def waitForUniqueGump(item):
+    startGump = API.HasGump()
+    for _ in range(10):
+        API.UseObject(item.Serial)
+        API.Pause(1)
+        if API.HasGump() != startGump:
+            return API.HasGump()
+    raise Exception("Unable to open unique gump for item")
+
+
+# --- Main Logic ---
+def setup():
+    graphics = [0x4216, 0x4217, 0x4218, 0x4219]
+    items = []
+    for g in graphics:
+        items += API.FindTypeAll(g, 4294967295, 2)
+
+    if len(items) != 4:
+        raise Exception("Must be standing in the middle of 4 cannons.")
+
+    for item in items:
+        gumpId = waitForUniqueGump(item)
+        isForward = API.GumpContains("Forward")
+        isPort = API.GumpContains("Port")
+        position = "forward" if isForward else "amidships"
+        side = "Port" if isPort else "Starboard"
+        key = position + side
+        cannons[key] = {"item": item, "serial": item.Serial, "gumpId": gumpId}
+
+
+def reload():
+    for info in cannons.values():
+        for contained in API.ItemsInContainer(info["item"].Serial):
+            Util.Util.moveItem(contained, API.Backpack)
+
+    itemTypes = {"balls": 0x4224, "cords": 0x1420, "charges": 0xA2BE}
+    items = {k: getItemInBackpack(v) for k, v in itemTypes.items()}
+    counts = {k: floor(item.Amount / 4) for k, item in items.items()}
+
+    for info in cannons.values():
+        for kind in ["balls", "cords", "charges"]:
+            Util.Util.moveItem(items[kind], info["item"], counts[kind])
+
+
+def prep(gumpId):
+    if API.GumpContains("PREP", gumpId):
+        for _ in range(10):
+            API.ReplyGump(1, gumpId)
+            API.Pause(0.05)
+
+
+
+def prepAll(side):
+    for name, info in cannons.items():
+        if side == "all" or side.lower() in name.lower():
+            gumpId = info.get("gumpId")
+            if not isCannonInState(gumpId, "FIRE"):
+                prep(gumpId)
+    API.SysMsg("Done Prepping")
+
+
+def fireCannons(side):
+    if side == "port":
+        API.Msg("Fire Port Broadside")
+    elif side == "starboard":
+        API.Msg("Fire Starboard Broadside")
+    API.Pause(2)
+    prepAll(side)
+
+
+# --- Gump UI ---
+def sendGump():
+    width = 240
+    height = 120
+    g = API.CreateGump(True, True)
+    g.SetWidth(width)
+    g.SetHeight(height)
+    g.CenterXInViewPort()
+    g.CenterYInViewPort()
+
+    for x, y, w, h in [
+        (-5, -5, width, 5),
+        (-5, height - 10, width, 5),
+        (-5, -5, 5, height),
+        (width - 10, -5, 5, height),
+    ]:
+        border = API.CreateGumpColorBox(1, "#a86b32")
+        border.SetX(x)
+        border.SetY(y)
+        border.SetWidth(w)
+        border.SetHeight(h)
+        g.Add(border)
+
+    bg = API.CreateGumpColorBox(0.75, "#000000")
+    bg.SetWidth(width - 10)
+    bg.SetHeight(height - 10)
+    g.Add(bg)
+
+    buttonRows = [
+        [("Left", fireCannons, "port"), ("Right (NPC)", fireCannons, "starboard")],
+        [("Reload", reload, None), ("Prep", prepAll, "all")],
+    ]
+
+    yOffset = 10
+    buttons = []
+
+    for i, row in enumerate(buttonRows):
+        y = yOffset + (45 * i)
+        for j, (label, action, arg) in enumerate(row):
+            x = 20 + (75 * j)
+            btn = API.CreateGumpButton("", 996, 9722, 9721, 9721)
+            btn.SetX(x)
+            btn.SetY(y)
+            g.Add(btn)
+            buttons.append((btn, action, arg))
+
+            lbl = API.CreateGumpLabel(label)
+            lbl.SetX(x + 30)
+            lbl.SetY(y)
+            g.Add(lbl)
+
+    statusLabel = API.CreateGumpLabel("")
+    statusLabel.SetX(20)
+    statusLabel.SetY(height - 30)
+    g.Add(statusLabel)
+
+    API.AddGump(g)
+
+    while True:
+        API.Pause(0.1)
+        for btn, action, arg in buttons:
+            if btn.IsClicked:
+                statusLabel.Text = f"Running: {label}"
+                try:
+                    action(arg) if arg else action()
+                except Exception as e:
+                    API.SysMsg(f"Error: {str(e)}", 33)
+                statusLabel.Text = ""  # Clear after action
+
+
+# --- Entry Point ---
+def main():
+    setup()
+    sendGump()
+
+
+main()
+#=========== End of .\Sea\high-seas.py ============#
+

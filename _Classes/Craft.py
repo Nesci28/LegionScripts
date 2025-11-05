@@ -1,8 +1,13 @@
+import importlib
 from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
 
 import Util
+
+importlib.reload(Util)
+
+from Util import Util
 
 
 class Craft:
@@ -29,14 +34,14 @@ class Craft:
 
     def emptyResource(self):
         for resource in self.resources:
-            resourceInBackpack = Util.Util.findTypeWithSpecialHue(
+            resourceInBackpack = Util.findTypeWithSpecialHue(
                 resourceId=resource["graphic"],
                 container=API.Backpack,
                 minAmount=0,
                 resourceHue=resource["hue"],
             )
             if resourceInBackpack:
-                Util.Util.moveItem(resourceInBackpack.Serial, self.resourceChest.Serial)
+                Util.moveItem(resourceInBackpack.Serial, self.resourceChest.Serial)
 
     def _selectResource(self, material):
         buttonId = material["buttonId"]
@@ -67,14 +72,14 @@ class Craft:
         disposeMethod = bodSkillItem["disposeMethod"]
         if disposeMethod == "Trash":
             trash = API.FindType(0x0E77, 4294967295, 2)
-            trashContents = Util.Util.getContents(trash)
+            trashContents = Util.getContents(trash)
             while trashContents["items"] == 125:
                 API.Pause(1)
-                trashContents = Util.Util.getContents(trash)
-            Util.Util.moveItem(item.Serial, trash.Serial)
+                trashContents = Util.getContents(trash)
+            Util.moveItem(item.Serial, trash.Serial)
         if disposeMethod == "Salvage Bag":
             salvageBag = API.FindType(0x0E76, API.Backpack, hue=0x024E)
-            Util.Util.moveItem(item.Serial, salvageBag.Serial)
+            Util.moveItem(item.Serial, salvageBag.Serial)
             API.ContextMenu(salvageBag.Serial, 910)
 
     def _checkResources(self, bodSkillItem, resourceHue):
@@ -86,14 +91,14 @@ class Craft:
             if not resource["hasSpecialHue"]:
                 resourceHue = 0
             resourceAmount = 200
-            resourceInBackpack = Util.Util.findTypeWithSpecialHue(
+            resourceInBackpack = Util.findTypeWithSpecialHue(
                 resourceId,
                 API.Backpack,
                 resourceMinAmount,
                 resourceHue,
             )
             if not resourceInBackpack:
-                resourceInBackpack = Util.Util.findTypeWithSpecialHue(
+                resourceInBackpack = Util.findTypeWithSpecialHue(
                     resourceId,
                     API.Backpack,
                     0,
@@ -102,7 +107,7 @@ class Craft:
                 amountInBackpack = 0
                 if resourceInBackpack:
                     amountInBackpack = resourceInBackpack.Amount
-                resourceInChest = Util.Util.findTypeWithSpecialHue(
+                resourceInChest = Util.findTypeWithSpecialHue(
                     resourceId,
                     self.resourceChest,
                     resourceAmount,
@@ -111,14 +116,14 @@ class Craft:
                 if not resourceInChest:
                     API.SysMsg("Missing resources", 33)
                     API.Stop()
-                Util.Util.moveItem(
+                Util.moveItem(
                     resourceInChest, API.Backpack, resourceAmount - amountInBackpack
                 )
                 self.resources.append({"graphic": resourceId, "hue": resourceHue})
 
     def _openContainers(self):
-        Util.Util.openContainer(API.Backpack)
-        Util.Util.openContainer(self.resourceChest)
+        Util.openContainer(API.Backpack)
+        Util.openContainer(self.resourceChest)
 
     def _useTool(self):
         toolId = self.craftingInfo["tool"]["graphic"]
@@ -140,14 +145,14 @@ class Craft:
         toolId = self.craftingInfo["tool"]["graphic"]
         toolButtonId = self.craftingInfo["tool"]["buttonId"]
         self._checkToolsResource()
-        tinkerTools = len(Util.Util.findTypeAll(API.Backpack, 0x1EB9))
+        tinkerTools = len(Util.findTypeAll(API.Backpack, 0x1EB9))
         while tinkerTools < 3:
             self._craftTool(0x1EB9, 11)
-            tinkerTools = len(Util.Util.findTypeAll(API.Backpack, 0x1EB9))
-        tools = len(Util.Util.findTypeAll(API.Backpack, toolId))
+            tinkerTools = len(Util.findTypeAll(API.Backpack, 0x1EB9))
+        tools = len(Util.findTypeAll(API.Backpack, toolId))
         while tools < 3:
             self._craftTool(0x1EB9, toolButtonId)
-            tools = len(Util.Util.findTypeAll(API.Backpack, toolId))
+            tools = len(Util.findTypeAll(API.Backpack, toolId))
 
     def _craftTool(self, toolId, toolButtonId):
         self._openContainers()
@@ -186,6 +191,6 @@ class Craft:
             if not resourceInChest:
                 API.SysMsg("Missing resources", 33)
                 API.Stop()
-            Util.Util.moveItem(
+            Util.moveItem(
                 resourceInChest, API.Backpack, resourceAmount - amountInBackpack
             )

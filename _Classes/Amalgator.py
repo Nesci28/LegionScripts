@@ -1,13 +1,6 @@
-import importlib
-import sys
 from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
-
-import Util
-
-importlib.reload(Util)
-
 
 class Amalgator:
     @staticmethod

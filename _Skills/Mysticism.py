@@ -4,14 +4,10 @@ from LegionPath import LegionPath
 LegionPath.addSubdirs()
 
 import _Caster
-import Util
-import Math
 
 importlib.reload(_Caster)
-from _Caster import Caster
 
-importlib.reload(Util)
-importlib.reload(Math)
+from _Caster import Caster
 
 
 class Mysticism(Caster):

@@ -3,13 +3,11 @@ from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
 
-import Magic
 import Util
-import Math
 
-importlib.reload(Magic)
 importlib.reload(Util)
-importlib.reload(Math)
+
+from Util import Util
 
 
 class Music:
@@ -22,13 +20,12 @@ class Music:
         if len(instruments) == 0:
             errors.append("Music - Missing instruments")
         return errors
-    
+
     @staticmethod
     def _findInstruments():
         instruments = []
         for instrumentId in Music.instrumentIds:
-            items = Util.Util.findTypeAll(API.Backpack, instrumentId)
+            items = Util.findTypeAll(API.Backpack, instrumentId)
             if len(items) > 0:
                 instruments.extend(items)
         return instruments
-            

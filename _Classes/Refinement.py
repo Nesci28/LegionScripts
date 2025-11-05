@@ -1,11 +1,6 @@
-import importlib
 from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
-
-import Util
-
-importlib.reload(Util)
 
 
 class Refinement:
@@ -25,7 +20,12 @@ class Refinement:
         armorTypeStr = props[2]
         level = Refinement._getLevel(itemName)
         armorType = armorTypeStr.split(": ")[1]
-        return {"itemName": itemName, "type": type, "level": level, "armorType": armorType}
+        return {
+            "itemName": itemName,
+            "type": type,
+            "level": level,
+            "armorType": armorType,
+        }
 
     @staticmethod
     def _getLevel(name):
@@ -46,11 +46,10 @@ class Refinement:
     def __init__(self, item):
         self.item = item
         self._setup()
-        
+
     def _setup(self):
         values = Refinement._parse(self.item)
         self.itemName = values["itemName"]
         self.level = values["level"]
         self.armorType = values["armorType"]
         self.type = values["type"]
-
