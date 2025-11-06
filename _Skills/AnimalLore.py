@@ -37,8 +37,9 @@ class AnimalLore:
         API.WaitForTarget("any", 3)
         API.Target(self.pet.Serial)
         API.WaitForGump(475)
+        API.Pause(0.1)
         API.CloseGump(475)
-        API.Pause(2)
+        API.Pause(1.1)
 
     def train(self, calculareSkillLabels):
         value = API.GetSkill("Animal Lore").Value

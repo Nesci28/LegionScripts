@@ -2788,7 +2788,9 @@ SPELLS = [ {'castTime': 1, 'hasTarget': False, 'manaCost': 4, 'name': 'Create Fo
     'name': 'Lightning Strike'},
   {'castTime': 0, 'hasTarget': False, 'manaCost': 3, 'name': 'Confidence'},
   {'castTime': 0, 'hasTarget': False, 'manaCost': 3, 'name': 'Evasion'},
-  {'castTime': 0, 'hasTarget': False, 'manaCost': 3, 'name': 'Momentum Strike'}]
+  {'castTime': 0, 'hasTarget': False, 'manaCost': 3, 'name': 'Momentum Strike'},
+  {'castTime': 1, 'hasTarget': True, 'manaCost': 40, 'name': 'Combat Training'},
+  ]
 #=========== End of _Jsons\spell_def_magic.py ============#
 
 #=========== Start of _Utils\Magic.py ============#

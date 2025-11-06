@@ -20,6 +20,7 @@ import SpiritSpeak
 import Meditation
 import Musicianship
 import Peacemaking
+import AnimalTaming
 import AnimalLore
 
 importlib.reload(Gump)
@@ -36,6 +37,7 @@ importlib.reload(SpiritSpeak)
 importlib.reload(Meditation)
 importlib.reload(Musicianship)
 importlib.reload(Peacemaking)
+importlib.reload(AnimalTaming)
 importlib.reload(AnimalLore)
 
 from Gump import Gump
@@ -52,6 +54,7 @@ from SpiritSpeak import SpiritSpeak
 from Meditation import Meditation
 from Musicianship import Musicianship
 from Peacemaking import Peacemaking
+from AnimalTaming import AnimalTaming
 from AnimalLore import AnimalLore
 
 
@@ -142,6 +145,12 @@ class Trainer:
             },
         ],
         "Taming": [
+            {
+                "skillName": "Animal Taming",
+                "trainer": AnimalTaming,
+                "skillLabel": None,
+                "capLabel": None,
+            },
             {
                 "skillName": "Animal Lore",
                 "trainer": AnimalLore,
@@ -246,7 +255,7 @@ class Trainer:
                     except:
                         trainer = school["trainer"](skillCap)
                     self.gump.setStatus(f"Training {school['skillName']}...")
-                    trainer.train(lambda shcoolName=school["name"]: self.calculateSkillLabels(shcoolName))
+                    trainer.train(lambda schoolName=school["name"]: self.calculateSkillLabels(schoolName))
         except Exception as e:
             API.SysMsg(str(e))
             API.SysMsg(traceback.format_exc())

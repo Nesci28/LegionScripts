@@ -116,6 +116,22 @@ class PyBaseControl:
         """
         pass
 
+    def GetAlpha(self) -> "float":
+        """
+         Returns the control's Alpha value.
+         Used in python API
+        
+        """
+        pass
+
+    def SetAlpha(self, alpha: "float") -> None:
+        """
+         Sets the control's Alpha value.
+         Used in python API
+        
+        """
+        pass
+
     def Clear(self) -> None:
         """
          Clears all child controls from this control.
@@ -659,8 +675,16 @@ class PyItem(PyEntity):
     RootEntity = None
     __class__: str = None
     IsCorpse: bool = None
+    IsContainer: bool = None
     MatchingHighlightName: str = None
     MatchesHighlight: bool = None
+
+    def GetContainerGump(self) -> "PyBaseControl":
+        """
+         If this item is a container ( item.IsContainer ) and is open, this will return the grid container or container gump for it.
+        
+        """
+        pass
 
 class PyJournalEntry:
    ""

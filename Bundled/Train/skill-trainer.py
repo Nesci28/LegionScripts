@@ -2807,7 +2807,9 @@ SPELLS = [ {'castTime': 1, 'hasTarget': False, 'manaCost': 4, 'name': 'Create Fo
     'name': 'Lightning Strike'},
   {'castTime': 0, 'hasTarget': False, 'manaCost': 3, 'name': 'Confidence'},
   {'castTime': 0, 'hasTarget': False, 'manaCost': 3, 'name': 'Evasion'},
-  {'castTime': 0, 'hasTarget': False, 'manaCost': 3, 'name': 'Momentum Strike'}]
+  {'castTime': 0, 'hasTarget': False, 'manaCost': 3, 'name': 'Momentum Strike'},
+  {'castTime': 1, 'hasTarget': True, 'manaCost': 40, 'name': 'Combat Training'},
+  ]
 #=========== End of _Jsons\spell_def_magic.py ============#
 
 #=========== Start of _Utils\Magic.py ============#
@@ -3905,6 +3907,62 @@ class Peacemaking(Music):
         API.CreateCooldownBar(6, "Peacemaking cooldown", 906)
 #=========== End of _Skills\Peacemaking.py ============#
 
+#=========== Start of _Skills\AnimalTaming.py ============#
+
+
+
+
+
+
+class AnimalTaming(Caster):
+    spells = [
+        {
+            "skill": 120,
+            "spell": "Combat Training",
+            "manaCost": 40,
+            "castingTime": 1,
+        }
+    ]
+
+    @staticmethod
+    def validate(skillCap):
+        errors = []
+        hasSpellValidation = Caster.validate(skillCap, AnimalTaming.spells)
+        if not hasSpellValidation:
+            errors.append("Animal Taming - Missing spells.")
+        skillValue = API.GetSkill("Animal Taming").Value
+        if skillValue < 90:
+            errors.append("Animal Taming - Should be higher then 90.")
+        hasPet = AnimalTaming._findMyPets()
+        if not hasPet:
+            errors.append("Animal Taming - Missing pet.")
+        return errors
+
+    @staticmethod
+    def _findMyPets():
+        for mob in API.GetAllMobiles():
+            if mob.IsRenamable and not mob.IsHuman:
+                return mob
+        return None
+
+    def __init__(
+        self,
+        skillCap,
+        label=None,
+        skillLevelLabel=None,
+        spellLabel=None,
+        runningLabel=None,
+    ):
+        super().__init__(
+            "Animal Taming", skillCap, label, skillLevelLabel, spellLabel, runningLabel
+        )
+        self.spells = AnimalTaming.spells
+        self.pet = AnimalTaming._findMyPets()
+
+    def _target(self):
+        API.Target(self.pet.Serial)
+#=========== End of _Skills\AnimalTaming.py ============#
+
 #=========== Start of _Skills\AnimalLore.py ============#
 
 
@@ -3938,8 +3996,9 @@ class AnimalLore:
         API.WaitForTarget("any", 3)
         API.Target(self.pet.Serial)
         API.WaitForGump(475)
+        API.Pause(0.1)
         API.CloseGump(475)
-        API.Pause(2)
+        API.Pause(1.1)
 
     def train(self, calculareSkillLabels):
         value = API.GetSkill("Animal Lore").Value
@@ -4046,6 +4105,12 @@ class Trainer:
         ],
         "Taming": [
             {
+                "skillName": "Animal Taming",
+                "trainer": AnimalTaming,
+                "skillLabel": None,
+                "capLabel": None,
+            },
+            {
                 "skillName": "Animal Lore",
                 "trainer": AnimalLore,
                 "skillLabel": None,
@@ -4149,7 +4214,7 @@ class Trainer:
                     except:
                         trainer = school["trainer"](skillCap)
                     self.gump.setStatus(f"Training {school['skillName']}...")
-                    trainer.train(lambda shcoolName=school["name"]: self.calculateSkillLabels(shcoolName))
+                    trainer.train(lambda schoolName=school["name"]: self.calculateSkillLabels(schoolName))
         except Exception as e:
             API.SysMsg(str(e))
             API.SysMsg(traceback.format_exc())
