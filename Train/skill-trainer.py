@@ -20,6 +20,7 @@ import SpiritSpeak
 import Meditation
 import Musicianship
 import Peacemaking
+import AnimalLore
 
 importlib.reload(Gump)
 importlib.reload(Util)
@@ -35,6 +36,7 @@ importlib.reload(SpiritSpeak)
 importlib.reload(Meditation)
 importlib.reload(Musicianship)
 importlib.reload(Peacemaking)
+importlib.reload(AnimalLore)
 
 from Gump import Gump
 from Util import Util
@@ -50,6 +52,7 @@ from SpiritSpeak import SpiritSpeak
 from Meditation import Meditation
 from Musicianship import Musicianship
 from Peacemaking import Peacemaking
+from AnimalLore import AnimalLore
 
 
 class Trainer:
@@ -134,6 +137,14 @@ class Trainer:
             {
                 "skillName": "Stealth",
                 "trainer": None,
+                "skillLabel": None,
+                "capLabel": None,
+            },
+        ],
+        "Taming": [
+            {
+                "skillName": "Animal Lore",
+                "trainer": AnimalLore,
                 "skillLabel": None,
                 "capLabel": None,
             },
@@ -229,7 +240,11 @@ class Trainer:
             else:
                 for school, box, lbl, skillLbl in workingSkills:
                     skillCap = Decimal(box.Text)
-                    trainer = school["trainer"](skillCap, lbl, skillLbl)
+                    trainer = None
+                    try:
+                        trainer = school["trainer"](skillCap, lbl, skillLbl)
+                    except:
+                        trainer = school["trainer"](skillCap)
                     self.gump.setStatus(f"Training {school['skillName']}...")
                     trainer.train(lambda shcoolName=school["name"]: self.calculateSkillLabels(shcoolName))
         except Exception as e:
@@ -286,6 +301,9 @@ class Trainer:
         
         thiefGump = g.addTabButton("Thief", "thief", 400)
         self._createSchoolGump(thiefGump, "Thief")
+
+        tamingGump = g.addTabButton("Taming", "taming", 400)
+        self._createSchoolGump(tamingGump, "Taming")
 
         g.createSubGump(self.totalGumpWidth, 100, withStatus=True)
 

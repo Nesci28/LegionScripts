@@ -2087,6 +2087,7 @@ class Color:
 
 #=========== Start of _Jsons\button_types.py ============#
 buttonTypesStr = {
+    "taming": {"hover": 24005, "normal": 24005, "pressed": 24005},
     "arrowDown": {"hover": 4504, "normal": 4504, "pressed": 4504},
     "arrowDownLeft": {"hover": 4505, "normal": 4505, "pressed": 4505},
     "arrowDownRight": {"hover": 4503, "normal": 4503, "pressed": 4503},
@@ -2123,6 +2124,7 @@ buttonTypesStr = {
     "skullWithCrown": {"hover": 40321, "normal": 40321, "pressed": 40321},
     "skullX": {"hover": 9804, "normal": 9804, "pressed": 9804},
     "squareX": {"hover": 40015, "normal": 40015, "pressed": 40015},
+    "thief": {"hover": 23012, "normal": 23012, "pressed": 23012},
     "thief": {"hover": 23012, "normal": 23012, "pressed": 23012},
     "tracking": {"hover": 4009, "normal": 4008, "pressed": 4009},
     "wordOfDeath": {"hover": 23013, "normal": 23013, "pressed": 23013},

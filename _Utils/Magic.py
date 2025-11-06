@@ -1,4 +1,3 @@
-import json
 import time
 import importlib
 from LegionPath import LegionPath
@@ -7,13 +6,12 @@ LegionPath.addSubdirs()
 
 import Util
 
+
 importlib.reload(Util)
 
 from Util import Util
 
-with open(LegionPath.createPath("_Jsons\\spell-def-magic.json")) as f:
-    SPELLS = json.load(f)
-
+from spell_def_magic import SPELLS
 
 class Magic:
     _instance = None
