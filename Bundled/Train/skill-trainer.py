@@ -8,6 +8,7 @@ import re
 import sys
 import time
 import traceback
+import math
 
 
 #=========== Start of LegionPath.py ============#
@@ -3097,7 +3098,7 @@ class Caster:
             self.skillLevelLabel.Hue = 88
             self.skillLevelLabel.Text = Math.truncateDecimal(skillLevel, 1)
 
-        self.magic.healCure(ceil(API.Player.HitsMax / 3) * 2, API.Player.HitsMax - 1)
+        self.magic.healCure(math.ceil(API.Player.HitsMax / 3) * 2, API.Player.HitsMax - 1)
 
         castInfo = self._getCastingInfo(skillLevel, spells)
         manaCost, spellName, totalPause, nextSpell = (
@@ -3162,7 +3163,7 @@ class Caster:
                 totalPause = castTime + recoverTime
 
                 lmc = API.Player.LowerManaCost
-                manaCost = ceil(entry["manaCost"] * (1 - lmc / 100))
+                manaCost = math.ceil(entry["manaCost"] * (1 - lmc / 100))
 
                 self._checkIfGearBroken()
                 nextSpell = None

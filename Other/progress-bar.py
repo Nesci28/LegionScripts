@@ -39,6 +39,7 @@ class ProgressBar:
 
         self._karmaProgressBar = None
         self._fameProgressBar = None
+        self._skills = [{ "name": "Animal Taming", "progressBar": None }]
 
     def main(self):
         try:
@@ -65,13 +66,20 @@ class ProgressBar:
             if self._fameProgressBar:
                 for e in self._fameProgressBar:
                     e.Dispose()
-            self._karmaProgressBar = self.gump.createProgressBar(1, 1, 19, 500 - 12, values["karma"], 10000)
-            self._fameProgressBar = self.gump.createProgressBar(1, 21, 19, 500 - 12, values["fame"], 32000)
+            y = 1
+            self._karmaProgressBar = self.gump.createProgressBar(1, y, 19, 500 - 12, values["karma"], 10000)
+            y += 20
+            self._fameProgressBar = self.gump.createProgressBar(1, y, 19, 500 - 12, values["fame"], 32000)
+            for skill in self._skills:
+                y += 20
+                skill["progressBar"] = self.gump.createProgressBar(1, y, 19, 500 - 12, Util.getSkillInfo(skill["name"])["value"], 100)
 
     def _checkJournal(self):
-        if not API.InJournalAny(
-            ["$You have (.*) fame.", "$You have (.*) karma."]
-        ):
+        journalMessages = ["$You have (.*) fame.", "$You have (.*) karma."]
+        for skill in self._skills:
+            name = skill["name"]
+            journalMessages.append(f"$Your skill in {name} has increased(.*).")
+        if not API.InJournalAny(journalMessages):
             return
         API.ClearJournal()
         return self._getValues()
@@ -109,7 +117,7 @@ class ProgressBar:
 
     def _showGump(self):
         width = 500
-        height = 51
+        height = 51 + (20 * len(self._skills))
         g = Gump(width, height, self._onClose, False)
         self.gump = g
         y = 1
@@ -119,6 +127,10 @@ class ProgressBar:
         self._karmaProgressBar = self.gump.createProgressBar(1, y, 19, width - 12, values["karma"], 10000)
         y += 20
         self._karmaProgressBar = self.gump.createProgressBar(1, y, 19, width - 12, values["fame"], 32000)
+        for skill in self._skills:
+            y += 20
+            skill["progressBar"] = self.gump.createProgressBar(1, y, 19, 500 - 12, Util.getSkillInfo(skill["name"])["value"], 100)
+
 
         self.gump.create()
 

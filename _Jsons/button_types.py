@@ -1,4 +1,5 @@
 buttonTypesStr = {
+    "grab": {"hover": 4031, "normal": 4029, "pressed": 4030},
     "taming": {"hover": 24005, "normal": 24005, "pressed": 24005},
     "arrowDown": {"hover": 4504, "normal": 4504, "pressed": 4504},
     "arrowDownLeft": {"hover": 4505, "normal": 4505, "pressed": 4505},

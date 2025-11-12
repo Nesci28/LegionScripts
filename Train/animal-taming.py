@@ -11,64 +11,88 @@ import Util
 import Magic
 import Timer
 import Math
+import Spot
 
 importlib.reload(Animal)
 importlib.reload(Util)
 importlib.reload(Magic)
 importlib.reload(Timer)
 importlib.reload(Math)
+importlib.reload(Spot)
 
 from Animal import Animal
 from Util import Util
 from Magic import Magic
 from Timer import Timer
 from Math import Math
+from Spot import Spot
 
 
 class AnimalTaming:
-    _maxDistance = 18
+    _maxDistance = 50
+    _spots = [
+        Spot(60.1, 71.1, 4052, 566)
+    ]
     _animals = {
         # between 30 - 31
-        "cat": Animal("cat", 0x00C9, 0x0000, 30, 39, ["feline"]),
-        "chicken": Animal("chicken", 0x00D0, 0x0000, 30, 39, None),
-        "mountain goat": Animal("mountain goat", 0x0058, 0x0000, 30, 39, None),
+        "cat": Animal("cat", 0x00C9, 0x0000, 30, 39, ["feline"], "Energy Bolt"),
+        "chicken": Animal("chicken", 0x00D0, 0x0000, 30, 39, None, "Energy Bolt"),
+        "mountain goat": Animal(
+            "mountain goat", 0x0058, 0x0000, 30, 39, None, "Energy Bolt"
+        ),
         # between 31.1 - 51.1
-        "Cow (brown)": Animal("cow", 0x00E7, 0x0000, 31.1, 51.1, None),
-        "Cow (black)": Animal("cow", 0x00D8, 0x0000, 31.1, 51.1, None),
-        "Goat": Animal("goat", 0x00D1, 0x0000, 31.1, 51.1, None),
-        "Pig": Animal("pig", 0x00CB, 0x0000, 31.1, 51.1, None),
-        "Sheep": Animal("sheep", 0x00CF, 0x0000, 31.1, 51.1, None),
+        "Cow (brown)": Animal("cow", 0x00E7, 0x0000, 31.1, 51.1, None, "Energy Bolt"),
+        "Cow (black)": Animal("cow", 0x00D8, 0x0000, 31.1, 51.1, None, "Energy Bolt"),
+        "Goat": Animal("goat", 0x00D1, 0x0000, 31.1, 51.1, None, "Energy Bolt"),
+        "Pig": Animal("pig", 0x00CB, 0x0000, 31.1, 51.1, None, "Energy Bolt"),
+        "Sheep": Animal("sheep", 0x00CF, 0x0000, 31.1, 51.1, None, "Energy Bolt"),
         # between 43.1 - 63.1
-        "Hind": Animal("hind", 0x00ED, 0x0000, 43.1, 63.1, None),
-        "Timber Wolf": Animal("timber wolf", 0x00E1, 0x0000, 43.1, 63.1, ["canine"]),
+        "Hind": Animal("hind", 0x00ED, 0x0000, 43.1, 63.1, None, "Energy Bolt"),
+        "Timber Wolf": Animal(
+            "timber wolf", 0x00E1, 0x0000, 43.1, 63.1, ["canine"], "Energy Bolt"
+        ),
         # between 49.1 - 69.1
-        "Boar": Animal("boar", 0x0122, 0x0000, 49.1, 69.1, None),
+        "Boar": Animal("boar", 0x0122, 0x0000, 49.1, 69.1, None, "Energy Bolt"),
         "Desert Ostard": Animal(
-            "desert ostard", 0x00D2, 0x0000, 49.1, 69.1, ["ostard"]
+            "desert ostard", 0x00D2, 0x0000, 49.1, 69.1, ["ostard"], "Energy Bolt"
         ),
         "forest ostard (green)": Animal(
-            "forest ostard", 0x00DB, 0x88A0, 49.1, 69.1, ["ostard"]
+            "forest ostard", 0x00DB, 0x88A0, 49.1, 69.1, ["ostard"], "Energy Bolt"
         ),
         "forest ostard (red)": Animal(
-            "forest ostard", 0x00DB, 0x889D, 49.1, 69.1, ["ostard"]
+            "forest ostard", 0x00DB, 0x889D, 49.1, 69.1, ["ostard"], "Energy Bolt"
         ),
-        "horse": Animal("horse", 0x00C8, 0x0000, 49.1, 69.1, None),
-        "horse2": Animal("horse", 0x00E2, 0x0000, 49.1, 69.1, None),
-        "horse3": Animal("horse", 0x00CC, 0x0000, 49.1, 69.1, None),
-        "horse4": Animal("horse", 0x00E4, 0x0000, 49.1, 69.1, None),
+        "horse": Animal("horse", 0x00C8, 0x0000, 49.1, 69.1, None, "Energy Bolt"),
+        "horse2": Animal("horse", 0x00E2, 0x0000, 49.1, 69.1, None, "Energy Bolt"),
+        "horse3": Animal("horse", 0x00CC, 0x0000, 49.1, 69.1, None, "Energy Bolt"),
+        "horse4": Animal("horse", 0x00E4, 0x0000, 49.1, 69.1, None, "Energy Bolt"),
         # between 55.1 - 75.1
-        "Black bear": Animal("black bear", 0x00D3, 0x0000, 55.1, 75.1, ["bear"]),
-        "Llama": Animal("llama", 0x00DC, 0x0000, 55.1, 75.1, None),
-        "Polar bear": Animal("polar bear", 0x00D5, 0x0000, 55.1, 75.1, ["bear"]),
-        "Walrus": Animal("walrus", 0x00DD, 0x0000, 55.1, 75.1, None),
+        "Black bear": Animal(
+            "black bear", 0x00D3, 0x0000, 55.1, 75.1, ["bear"], "Energy Bolt"
+        ),
+        "Llama": Animal("llama", 0x00DC, 0x0000, 55.1, 75.1, None, "Energy Bolt"),
+        "Polar bear": Animal(
+            "polar bear", 0x00D5, 0x0000, 55.1, 75.1, ["bear"], "Flamestrike"
+        ),
+        "Walrus": Animal("walrus", 0x00DD, 0x0000, 55.1, 75.1, None, "Energy Bolt"),
         # between 61.1 - 81.1
-        "Brown Bear": Animal("brown bear", 0x00A7, 0x0000, 61.1, 81.1, ["bear"]),
-        "cougar": Animal("cougar", 0x003F, 0x0000, 61.1, 81.1, ["feline"]),
+        "Brown Bear": Animal(
+            "brown bear", 0x00A7, 0x0000, 61.1, 81.1, ["bear"], "Energy Bolt"
+        ),
+        "cougar": Animal(
+            "cougar", 0x003F, 0x0000, 61.1, 81.1, ["feline"], "Energy Bolt"
+        ),
         # between 73.1 - 93.1
-        "snow leopard": Animal("snow leopard", 0x0040, 0x0000, 73.1, 93.1, ["feline"]),
-        "snow leopard2": Animal("snow leopard", 0x0041, 0x0000, 73.1, 93.1, ["feline"]),
+        "snow leopard": Animal(
+            "snow leopard", 0x0040, 0x0000, 73.1, 93.1, ["feline"], "Energy Bolt"
+        ),
+        "snow leopard2": Animal(
+            "snow leopard", 0x0041, 0x0000, 73.1, 93.1, ["feline"], "Energy Bolt"
+        ),
         # between 79.1 - 99.1
-        "great hart": Animal("great hart", 0x00EA, 0x0000, 79.1, 99.1, None),
+        "great hart": Animal(
+            "great hart", 0x00EA, 0x0000, 79.1, 99.1, None, "Flamestrike"
+        ),
     }
 
     def __init__(self):
@@ -76,6 +100,7 @@ class AnimalTaming:
         self._killList = []
         self._magic = Magic()
 
+        self._currentAnimal = None
         self._animalBeingTamed = None
         self._tameHandled = False
         self._isTaming = False
@@ -129,7 +154,11 @@ class AnimalTaming:
                     lastCoordX = None
                     lastCoordY = None
                     count = 0
-                    while animal and Math.distanceBetween(API.Player, self._animalBeingTamed) > 2 and not isBlocked:
+                    while (
+                        animal
+                        and Math.distanceBetween(API.Player, self._animalBeingTamed) > 2
+                        and not isBlocked
+                    ):
                         if count >= 10:
                             isBlocked = True
                         hasMoved = False
@@ -158,7 +187,10 @@ class AnimalTaming:
                 if self._animalBeingTamed == None:
                     self._isTaming = False
                 if API.InJournalAny(
-                    ["It seems to accept you as master.", "That wasn't even challenging."]
+                    [
+                        "It seems to accept you as master.",
+                        "That wasn't even challenging.",
+                    ]
                 ):
                     Animal.rename(self._animalBeingTamed, "Tamed")
                     Animal.release(self._animalBeingTamed)
@@ -204,13 +236,17 @@ class AnimalTaming:
         animal = API.FindMobile(animal.Serial)
         if not animal or animal.IsDead:
             return
-        while animal and animal.Hits > 0 and not animal.IsDead:
-            API.HeadMsg(f"Killing this animal", animal.Serial, 33)
-            API.PreTarget(animal.Serial, "Harmful")
-            spell = "Flamestrike"
-            self._magic.cast(spell)
-            API.Pause(3)
-            animal = API.FindMobile(animal.Serial)
+        API.HeadMsg(f"Killing this animal", animal.Serial, 33)
+
+        if self._currentAnimal:
+            self._currentAnimal.kill(animal.Serial)
+        else:
+            while animal and animal.Hits > 0 and not animal.IsDead:
+                spell = "Fireball"
+                self._magic.cast(spell)
+                API.WaitForTarget("harmfull")
+                API.Target(animal.Serial)
+                animal = API.FindMobile(animal.Serial)
 
     def _getAnimalIDsAtOrOverTamingDifficulty(self):
         animalSkillInfo = Util.getSkillInfo("Animal Taming")["value"]
@@ -248,8 +284,16 @@ class AnimalTaming:
                 if distance < finalDistance:
                     finalAnimal = tameableAnimal
                     finalDistance = distance
+            for animal in self._animals:
+                animal = self._animals[animal]
+                if animal.mobileID == finalAnimal.Graphic:
+                    self._currentAnimal = animal
+                    break
             return finalAnimal
         API.SysMsg("No animal")
+        for spot in self._spots:
+            if spot.isRightSpot("Animal Taming"):
+                spot.move()
         return None
 
     def _hasPath(self, animal):

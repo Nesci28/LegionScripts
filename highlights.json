@@ -45,6 +45,8 @@
     "Overweight": true,
     "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 0,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -72,7 +74,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Jewelry - Seth",
@@ -108,8 +111,10 @@
     ],
     "AcceptExtraProperties": true,
     "Overweight": true,
-    "MinimumProperty": 3,
+    "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 3,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -137,7 +142,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Bokuto - Seth",
@@ -170,6 +176,8 @@
     "Overweight": true,
     "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 0,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -197,7 +205,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Shield - Seth",
@@ -240,6 +249,8 @@
     "Overweight": true,
     "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 0,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -267,7 +278,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Weapon - Seth",
@@ -300,6 +312,8 @@
     "Overweight": true,
     "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 0,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -327,7 +341,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Weapon - Seth",
@@ -355,6 +370,8 @@
     "Overweight": true,
     "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 0,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -382,7 +399,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Armor - Seth",
@@ -420,6 +438,8 @@
     "Overweight": true,
     "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 0,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -447,7 +467,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Jewelry (Dexxer) - Nikard",
@@ -498,8 +519,10 @@
     ],
     "AcceptExtraProperties": true,
     "Overweight": true,
-    "MinimumProperty": 2,
+    "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 2,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -527,7 +550,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Jewelry (Mage) - Nikard",
@@ -593,8 +617,10 @@
     ],
     "AcceptExtraProperties": true,
     "Overweight": true,
-    "MinimumProperty": 2,
+    "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 2,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -622,7 +648,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Jewelry (Other) - Nikard",
@@ -688,8 +715,10 @@
     ],
     "AcceptExtraProperties": true,
     "Overweight": true,
-    "MinimumProperty": 6,
+    "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 6,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Brittle",
       "Cursed"
@@ -716,7 +745,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Jewelry (Other) - Nikard",
@@ -782,8 +812,10 @@
     ],
     "AcceptExtraProperties": true,
     "Overweight": true,
-    "MinimumProperty": 6,
+    "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 6,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Brittle",
       "Cursed"
@@ -810,7 +842,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Weapon - Nikard",
@@ -856,8 +889,10 @@
     ],
     "AcceptExtraProperties": true,
     "Overweight": true,
-    "MinimumProperty": 3,
+    "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 3,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -885,7 +920,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Armor - Nikard",
@@ -966,13 +1002,22 @@
     ],
     "AcceptExtraProperties": true,
     "Overweight": true,
-    "MinimumProperty": 3,
+    "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 3,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Cursed"
     ],
-    "RequiredRarities": [],
+    "RequiredRarities": [
+      "Greater Artifact",
+      "Legendary Artifact",
+      "Lesser Artifact",
+      "Major Artifact",
+      "Minor Artifact",
+      "Greater Magic Item"
+    ],
     "GridHighlightSlot": {
       "Talisman": false,
       "RightHand": false,
@@ -994,7 +1039,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Jewelry - Artifact",
@@ -1006,6 +1052,8 @@
     "Overweight": true,
     "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 0,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -1036,7 +1084,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Jewerly - Orion",
@@ -1087,8 +1136,10 @@
     ],
     "AcceptExtraProperties": false,
     "Overweight": true,
-    "MinimumProperty": 2,
+    "MinimumProperty": 0,
     "MaximumProperty": 4,
+    "MinimumMatchingProperty": 2,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Brittle",
       "Cursed"
@@ -1115,7 +1166,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Jewerly - Orion",
@@ -1166,8 +1218,10 @@
     ],
     "AcceptExtraProperties": true,
     "Overweight": true,
-    "MinimumProperty": 5,
+    "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 5,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Brittle",
       "Cursed"
@@ -1194,7 +1248,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Weapon - Orion",
@@ -1235,8 +1290,10 @@
     ],
     "AcceptExtraProperties": true,
     "Overweight": true,
-    "MinimumProperty": 2,
+    "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 2,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Cursed"
     ],
@@ -1262,7 +1319,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Weapon - Orion",
@@ -1298,8 +1356,10 @@
     ],
     "AcceptExtraProperties": true,
     "Overweight": true,
-    "MinimumProperty": 2,
+    "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 2,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Cursed"
     ],
@@ -1325,7 +1385,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Weapon - Orion",
@@ -1366,8 +1427,10 @@
     ],
     "AcceptExtraProperties": true,
     "Overweight": true,
-    "MinimumProperty": 3,
+    "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 3,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Cursed"
     ],
@@ -1393,7 +1456,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Shield - Orion",
@@ -1411,6 +1475,8 @@
     "Overweight": true,
     "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 0,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -1438,7 +1504,8 @@
       "Footwear": false,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Legendary Artifact",
@@ -1450,6 +1517,8 @@
     "Overweight": false,
     "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 0,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [
       "Antique",
       "Brittle",
@@ -1479,7 +1548,8 @@
       "Footwear": true,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Imbuing",
@@ -1542,6 +1612,8 @@
     "Overweight": false,
     "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 0,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [],
     "RequiredRarities": [],
     "GridHighlightSlot": {
@@ -1565,7 +1637,8 @@
       "Footwear": false,
       "Other": true
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   },
   {
     "Name": "Unravel",
@@ -1577,6 +1650,8 @@
     "Overweight": false,
     "MinimumProperty": 0,
     "MaximumProperty": 0,
+    "MinimumMatchingProperty": 0,
+    "MaximumMatchingProperty": 0,
     "ExcludeNegatives": [],
     "RequiredRarities": [
       "Greater Artifact",
@@ -1605,6 +1680,7 @@
       "Footwear": true,
       "Other": false
     },
-    "LootOnMatch": false
+    "LootOnMatch": false,
+    "IsHighlightProperties": true
   }
 ]

@@ -53,6 +53,12 @@ class Gump:
         self._lastCheckTime = time.time()
         self._checkInterval = 0.1
 
+    def hide(self):
+        self.gump.IsVisible = False
+
+    def show(self):
+        self.gump.IsVisible = True
+
     def create(self):
         API.AddGump(self.gump)
 
@@ -121,7 +127,7 @@ class Gump:
             elements.append(fill)
 
         # Optional text overlay (e.g. “75 / 100”)
-        progress_label = self.addLabel(f"{int(current)} / {int(total)}", x + width // 2 - 15, y + (height // 2) - 7, 1)
+        progress_label = self.addLabel(f"{current} / {int(total)}", x + width // 2 - 15, y + (height // 2) - 7, 1)
         elements.append(progress_label)
 
         return elements

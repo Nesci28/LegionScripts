@@ -1,4 +1,5 @@
 import uuid
+import re
 
 class Python:
     @staticmethod
@@ -16,3 +17,8 @@ class Python:
     @staticmethod
     def v4():
         return str(uuid.uuid4())
+
+    @staticmethod
+    def camelToSpace(camelCaseString):
+        s1 = re.sub(r'([a-z0-9])([A-Z])', r'\1 \2', camelCaseString)
+        return s1.lower()

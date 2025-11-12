@@ -1,11 +1,12 @@
 class Animal:
-    def __init__(self, name, mobileID, color, minTamingSkill, maxTamingSkill, packType):
+    def __init__(self, name, mobileID, color, minTamingSkill, maxTamingSkill, packType, killingSpell):
         self.name = name
         self.mobileID = mobileID
         self.color = color
         self.minTamingSkill = minTamingSkill
         self.maxTamingSkill = maxTamingSkill
         self.packType = packType
+        self.killinSpell = killingSpell
 
     @staticmethod
     def rename(animal, name):
@@ -19,7 +20,12 @@ class Animal:
             API.Pause(0.1)
         API.ReplyGump(2, 601)
 
-    @staticmethod
-    def kill(magic, animal, spellToKill):
-        API.PreTarget(animal.Serial, "Harmful")
-        magic.cast(spellToKill)
+    def kill(self, animalSerial):
+        animal = API.FindMobile(animalSerial)
+        while animal and animal.Hits > 0 and not animal.IsDead:
+            API.CastSpell(self.killinSpell)
+            API.WaitForTarget("harmful")
+            API.Target(animalSerial)
+            while API.Player.IsCasting or API.Player.IsRecovering:
+                API.Pause(0.05)
+            animal = API.FindMobile(animal.Serial)

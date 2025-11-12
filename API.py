@@ -52,7 +52,7 @@ class PyBaseControl:
         """
         pass
 
-    def SetX(self, x: "int") -> None:
+    def SetX(self, x: "int") -> "PyBaseControl":
         """
          Sets the control's X position.
          Used in python API
@@ -60,7 +60,7 @@ class PyBaseControl:
         """
         pass
 
-    def SetY(self, y: "int") -> None:
+    def SetY(self, y: "int") -> "PyBaseControl":
         """
          Sets the control's Y position.
          Used in python API
@@ -68,7 +68,7 @@ class PyBaseControl:
         """
         pass
 
-    def SetPos(self, x: "int", y: "int") -> None:
+    def SetPos(self, x: "int", y: "int") -> "PyBaseControl":
         """
          Sets the control's X and Y positions.
          Used in python API
@@ -76,7 +76,13 @@ class PyBaseControl:
         """
         pass
 
-    def SetWidth(self, width: "int") -> None:
+    def GetWidth(self) -> "int":
+        pass
+
+    def GetHeight(self) -> "int":
+        pass
+
+    def SetWidth(self, width: "int") -> "PyBaseControl":
         """
          Sets the control's width.
          Used in python API
@@ -84,7 +90,7 @@ class PyBaseControl:
         """
         pass
 
-    def SetHeight(self, height: "int") -> None:
+    def SetHeight(self, height: "int") -> "PyBaseControl":
         """
          Sets the control's height.
          Used in python API
@@ -92,7 +98,7 @@ class PyBaseControl:
         """
         pass
 
-    def SetRect(self, x: "int", y: "int", width: "int", height: "int") -> None:
+    def SetRect(self, x: "int", y: "int", width: "int", height: "int") -> "PyBaseControl":
         """
          Sets the control's position and size in one operation.
          Used in python API
@@ -100,7 +106,7 @@ class PyBaseControl:
         """
         pass
 
-    def CenterXInViewPort(self) -> None:
+    def CenterXInViewPort(self) -> "PyBaseControl":
         """
          Centers a GUMP horizontally in the viewport. Only works on Gump instances.
          Used in python API
@@ -108,7 +114,7 @@ class PyBaseControl:
         """
         pass
 
-    def CenterYInViewPort(self) -> None:
+    def CenterYInViewPort(self) -> "PyBaseControl":
         """
          Centers a GUMP vertically in the viewport. Only works on Gump instances.
          Used in python API
@@ -124,7 +130,7 @@ class PyBaseControl:
         """
         pass
 
-    def SetAlpha(self, alpha: "float") -> None:
+    def SetAlpha(self, alpha: "float") -> "PyBaseControl":
         """
          Sets the control's Alpha value.
          Used in python API
@@ -132,7 +138,7 @@ class PyBaseControl:
         """
         pass
 
-    def Clear(self) -> None:
+    def Clear(self) -> "PyBaseControl":
         """
          Clears all child controls from this control.
          Used in python API
@@ -623,6 +629,17 @@ class PyGumps:
         """
         pass
 
+    def CreateTiledGumpPic(self, graphic: "int", width: "int", height: "int", hue: "int" = 0) -> "Any":
+        """
+         Create a gump pic that tiles(repeats) (Use this for gump art, not item art)
+         Example:
+         ```py
+         gumpPic = API.CreateTiledGumpPic(0xafb, 100, 100)
+         gump.Add(gumpPic)
+        
+        """
+        pass
+
     def CreateDropDown(self, width: "int", items: "list[str]", selectedIndex: "int" = 0) -> "PyControlDropDown":
         """
          Creates a dropdown control (combobox) with the specified width and items.
@@ -948,6 +965,11 @@ class PyTextBox(PyBaseControl):
 
     def SetText(self, text: "str") -> None:
         pass
+
+class PyTiledGumpPic(PyBaseControl):
+   ""
+    Graphic: int = None
+    Hue: int = None
 
 class PyTTFTextInputField(PyBaseControl):
    ""
