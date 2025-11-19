@@ -521,6 +521,7 @@
             "Studded Gorget": {
                 "resources": [
                     {
+                      
                         "graphic": 4225,
                         "amount": 6,
                         "hasSpecialHue": true

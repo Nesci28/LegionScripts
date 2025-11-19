@@ -31,7 +31,9 @@ from Spot import Spot
 class AnimalTaming:
     _maxDistance = 50
     _spots = [
-        Spot(60.1, 71.1, 4052, 566)
+        Spot(60.1, 70.1, 4052, 566),
+        Spot(70.2, 78.1, 4576, 1439),
+        Spot(78.2, 88.1, 3943, 378),
     ]
     _animals = {
         # between 30 - 31

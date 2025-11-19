@@ -47,22 +47,22 @@ bodSkillsStr = {
         },
     },
     "Tailoring": {
-        "bod": {"graphic": "0x2258", "hue": "0x0483"},
+        "bod": {"graphic": 0x2258, "hue": 0x0483},
         "items": {
             "Bandana": {
                 "buttonId": 4,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1540",
+                "graphic": 0x1540,
                 "resources": [
-                    {"amount": 2, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 2, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Body Sash": {
                 "buttonId": 44,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1541",
+                "graphic": 0x1541,
                 "resources": [
-                    {"amount": 4, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 4, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Bone Armor": {
@@ -113,9 +113,9 @@ bodSkillsStr = {
             "Bonnet": {
                 "buttonId": 11,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1719",
+                "graphic": 0x1719,
                 "resources": [
-                    {"amount": 11, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 11, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Boots": {
@@ -127,57 +127,57 @@ bodSkillsStr = {
             "Cap": {
                 "buttonId": 6,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1715",
+                "graphic": 0x1715,
                 "resources": [
-                    {"amount": 11, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 11, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Cloak": {
                 "buttonId": 25,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1515",
+                "graphic": 0x1515,
                 "resources": [
-                    {"amount": 14, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 14, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Doublet": {
                 "buttonId": 18,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1F7B",
+                "graphic": 0x1F7B,
                 "resources": [
-                    {"amount": 8, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 8, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Fancy Dress": {
                 "buttonId": 24,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1EFF",
+                "graphic": 0x1EFF,
                 "resources": [
-                    {"amount": 12, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 12, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Fancy Shirt": {
                 "buttonId": 20,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1EFD",
+                "graphic": 0x1EFD,
                 "resources": [
-                    {"amount": 8, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 8, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Feathered Hat": {
                 "buttonId": 12,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x171A",
+                "graphic": 0x171A,
                 "resources": [
-                    {"amount": 12, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 12, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Floppy Hat": {
                 "buttonId": 5,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1713",
+                "graphic": 0x1713,
                 "resources": [
-                    {"amount": 11, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 11, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Full Apron": {
@@ -185,40 +185,76 @@ bodSkillsStr = {
                 "disposeMethod": "Salvage Bag",
                 "graphic": 5437,
                 "resources": [
-                    {"amount": 10, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 10, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Half Apron": {
                 "buttonId": 45,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x153B",
+                "graphic": 0x153B,
                 "resources": [
-                    {"amount": 6, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 6, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Jester Hat": {
                 "buttonId": 14,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x171C",
+                "graphic": 0x171C,
                 "resources": [
-                    {"amount": 15, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 15, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Jester Suit": {
                 "buttonId": 27,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1F9F",
+                "graphic": 0x1F9F,
                 "resources": [
-                    {"amount": 24, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 24, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Kilt": {
                 "buttonId": 39,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1537",
+                "graphic": 0x1537,
                 "resources": [
-                    {"amount": 8, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 8, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
+            },
+            "Leather Skirt": {
+                "buttonId": 636,
+                "disposeMethod": "Salvage Bag",
+                "graphic": 0x1C08,
+                "resources": [{"amount": 6, "graphic": 4225, "hasSpecialHue": True}],
+            },
+            "Leather Bustier": {
+                "buttonId": 637,
+                "disposeMethod": "Salvage Bag",
+                "graphic": 0x1C0A,
+                "resources": [{"amount": 6, "graphic": 4225, "hasSpecialHue": True}],
+            },
+            "Leather Shorts": {
+                "buttonId": 635,
+                "disposeMethod": "Salvage Bag",
+                "graphic": 0x1C00,
+                "resources": [{"amount": 8, "graphic": 4225, "hasSpecialHue": True}],
+            },
+            "Female Leather Armor": {
+                "buttonId": 639,
+                "disposeMethod": "Salvage Bag",
+                "graphic": 0x1C06,
+                "resources": [{"amount": 8, "graphic": 4225, "hasSpecialHue": True}],
+            },
+            "Studded Bustier": {
+                "buttonId": 638,
+                "disposeMethod": "Salvage Bag",
+                "graphic": 0x1C0C,
+                "resources": [{"amount": 8, "graphic": 4225, "hasSpecialHue": True}],
+            },
+            "Studded Armor": {
+                "buttonId": 640,
+                "disposeMethod": "Salvage Bag",
+                "graphic": 0x1C02,
+                "resources": [{"amount": 10, "graphic": 4225, "hasSpecialHue": True}],
             },
             "Leather Cap": {
                 "buttonId": 609,
@@ -259,17 +295,17 @@ bodSkillsStr = {
             "Long Pants": {
                 "buttonId": 38,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1539",
+                "graphic": 0x1539,
                 "resources": [
-                    {"amount": 8, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 8, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Plain Dress": {
                 "buttonId": 23,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1F01",
+                "graphic": 0x1F01,
                 "resources": [
-                    {"amount": 10, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 10, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Robe": {
@@ -277,7 +313,7 @@ bodSkillsStr = {
                 "disposeMethod": "Salvage Bag",
                 "graphic": 7939,
                 "resources": [
-                    {"amount": 16, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 16, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Sandals": {
@@ -291,7 +327,7 @@ bodSkillsStr = {
                 "disposeMethod": "Salvage Bag",
                 "graphic": 5399,
                 "resources": [
-                    {"amount": 8, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 8, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Shoes": {
@@ -303,33 +339,33 @@ bodSkillsStr = {
             "Short Pants": {
                 "buttonId": 37,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x152E",
+                "graphic": 0x152E,
                 "resources": [
-                    {"amount": 6, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 6, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Skirt": {
                 "buttonId": 40,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1516",
+                "graphic": 0x1516,
                 "resources": [
-                    {"amount": 10, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 10, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Skullcap": {
                 "buttonId": 3,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1544",
+                "graphic": 0x1544,
                 "resources": [
-                    {"amount": 2, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 2, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Straw Hat": {
                 "buttonId": 8,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1717",
+                "graphic": 0x1717,
                 "resources": [
-                    {"amount": 10, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 10, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Studded Gorget": {
@@ -338,20 +374,44 @@ bodSkillsStr = {
                 "graphic": 5078,
                 "resources": [{"amount": 6, "graphic": 4225, "hasSpecialHue": True}],
             },
+            "Studded Gloves": {
+                "buttonId": 626,
+                "disposeMethod": "Salvage Bag",
+                "graphic": 0x13D5,
+                "resources": [{"amount": 8, "graphic": 4225, "hasSpecialHue": True}],
+            },
+            "Studded Sleeves": {
+                "buttonId": 627,
+                "disposeMethod": "Salvage Bag",
+                "graphic": 0x13D4,
+                "resources": [{"amount": 10, "graphic": 4225, "hasSpecialHue": True}],
+            },
+            "Studded Leggings": {
+                "buttonId": 628,
+                "disposeMethod": "Salvage Bag",
+                "graphic": 0x13DA,
+                "resources": [{"amount": 12, "graphic": 4225, "hasSpecialHue": True}],
+            },
+            "Studded Tunic": {
+                "buttonId": 629,
+                "disposeMethod": "Salvage Bag",
+                "graphic": 0x13DB,
+                "resources": [{"amount": 14, "graphic": 4225, "hasSpecialHue": True}],
+            },
             "Surcoat": {
                 "buttonId": 22,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1FFD",
+                "graphic": 0x1FFD,
                 "resources": [
-                    {"amount": 14, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 14, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Tall Straw Hat": {
                 "buttonId": 9,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1716",
+                "graphic": 0x1716,
                 "resources": [
-                    {"amount": 13, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 13, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Thigh Boots": {
@@ -363,25 +423,25 @@ bodSkillsStr = {
             "Tricorne Hat": {
                 "buttonId": 13,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x171B",
+                "graphic": 0x171B,
                 "resources": [
-                    {"amount": 12, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 12, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Tunic": {
                 "buttonId": 21,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1FA1",
+                "graphic": 0x1FA1,
                 "resources": [
-                    {"amount": 12, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 12, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Wide-brim Hat": {
                 "buttonId": 7,
                 "disposeMethod": "Salvage Bag",
-                "graphic": "0x1714",
+                "graphic": 0x1714,
                 "resources": [
-                    {"amount": 12, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 12, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
             "Wizard's Hat": {
@@ -389,7 +449,7 @@ bodSkillsStr = {
                 "disposeMethod": "Salvage Bag",
                 "graphic": 5912,
                 "resources": [
-                    {"amount": 15, "graphic": "0x1766", "hasSpecialHue": False}
+                    {"amount": 15, "graphic": 0x1766, "hasSpecialHue": False}
                 ],
             },
         },

@@ -1,4 +1,5 @@
 import importlib
+import re
 from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
@@ -11,6 +12,14 @@ from Util import Util
 
 
 class Craft:
+    materialMap = {
+        # 5000: "LEATHER/HIDES",
+        5000: "LEATHER/HIDES",
+        5001: "SPINED HIDES",
+        5002: "HORNED HIDES",
+        5003: "BARBED HIDES",
+    }
+
     def __init__(self, bodSkill, craftingInfo, resourceChest):
         self.bodSkill = bodSkill
         self.craftingInfo = craftingInfo
@@ -43,11 +52,23 @@ class Craft:
             if resourceInBackpack:
                 Util.moveItem(resourceInBackpack.Serial, self.resourceChest.Serial)
 
+    def _getSelectedResource(self):
+        try:
+            lines = API.GetGumpContents(460)
+            match = re.search(r'([A-Za-z/ ]+)\([0-9]+\)\s*\*', lines)
+            selectedResource = match.group(1).strip()
+            return selectedResource
+        except:
+            return None
+
     def _selectResource(self, material):
+        selectedMaterial = self._getSelectedResource()
         buttonId = material["buttonId"]
-        if buttonId and not self.materialSelected:
+        mappedResource = None
+        if buttonId:
+            mappedResource = self.materialMap[buttonId]
+        if buttonId and mappedResource != selectedMaterial:
             API.ReplyGump(buttonId, 460)
-            self.materialSelected = True
             API.Pause(1)
 
     def _checkItems(self, isExceptional, bodSkillItem):
@@ -56,11 +77,11 @@ class Craft:
         if len(items) == 0:
             return False
         for item in items:
-            isNormal = False
+            isNormal = True
             props = API.ItemNameAndProps(item.Serial).split("\n")
             for prop in props:
-                if prop == "Normal":
-                    isNormal = True
+                if prop == "Exceptional":
+                    isNormal = False
                     break
             if isNormal and isExceptional:
                 self._disposeItem(item, bodSkillItem)
@@ -78,7 +99,8 @@ class Craft:
                 trashContents = Util.getContents(trash)
             Util.moveItem(item.Serial, trash.Serial)
         if disposeMethod == "Salvage Bag":
-            salvageBag = API.FindType(0x0E76, API.Backpack, hue=0x024E)
+            salvageBag = API.FindType(0x0E76, API.Backpack, hue=590)
+            API.SysMsg("Moving to salave bag")
             Util.moveItem(item.Serial, salvageBag.Serial)
             API.ContextMenu(salvageBag.Serial, 910)
 

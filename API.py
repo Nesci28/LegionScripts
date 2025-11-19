@@ -1,5 +1,5 @@
 class Buff:
-   ""
+    ""
     Graphic: int = None
     Text: str = None
     Timer: int = None
@@ -7,7 +7,7 @@ class Buff:
     Title: str = None
 
 class PyAlphaBlendControl(PyBaseControl):
-   ""
+    ""
     Hue: int = None
     Alpha: float = None
     BaseColorR: int = None
@@ -23,7 +23,7 @@ class PyAlphaBlendControl(PyBaseControl):
         pass
 
 class PyBaseControl:
-   ""
+    ""
     CanMove: bool = None
     IsVisible: bool = None
     IsDisposed: bool = None
@@ -154,7 +154,7 @@ class PyBaseControl:
         pass
 
 class PyBaseGump(PyBaseControl, IPyGump):
-   ""
+    ""
     IsDisposed: bool = None
     PacketGumpText: str = None
     CanCloseWithRightClick: bool = None
@@ -188,7 +188,7 @@ class PyBaseGump(PyBaseControl, IPyGump):
         pass
 
 class PyButton(PyBaseControl):
-   ""
+    ""
     ButtonID: int = None
     IsClicked: bool = None
     ButtonAction: int = None
@@ -204,7 +204,7 @@ class PyButton(PyBaseControl):
         pass
 
 class PyCheckbox(PyBaseControl):
-   ""
+    ""
     IsChecked: bool = None
     Text: str = None
 
@@ -233,7 +233,7 @@ class PyCheckbox(PyBaseControl):
         pass
 
 class PyControlDropDown(PyBaseControl):
-   ""
+    ""
 
     def GetSelectedIndex(self) -> "int":
         """
@@ -243,7 +243,7 @@ class PyControlDropDown(PyBaseControl):
         pass
 
 class PyEntity(PyGameObject):
-   ""
+    ""
     Name: str = None
     __class__: str = None
     Serial: int = None
@@ -265,7 +265,7 @@ class PyEntity(PyGameObject):
         pass
 
 class PyEvents:
-   ""
+    ""
 
     def OnPlayerHitsChanged(self, callback: "Any") -> None:
         """
@@ -326,7 +326,7 @@ class PyEvents:
         pass
 
 class PyGameObject:
-   ""
+    ""
     Impassible: bool = None
     X: int = None
     Y: int = None
@@ -368,14 +368,14 @@ class PyGameObject:
         pass
 
 class PyGumpPic(PyBaseControl):
-   ""
+    ""
     Graphic: int = None
     Hue: int = None
     IsPartialHue: bool = None
     ContainsByBounds: bool = None
 
 class PyGumps:
-   ""
+    ""
 
     def CreateGump(self, acceptMouseInput: "bool" = True, canMove: "bool" = True, keepOpen: "bool" = False) -> "PyBaseGump":
         """
@@ -684,7 +684,7 @@ class PyGumps:
         pass
 
 class PyItem(PyEntity):
-   ""
+    ""
     Amount: int = None
     Opened: bool = None
     Container: int = None
@@ -703,8 +703,16 @@ class PyItem(PyEntity):
         """
         pass
 
+    def NameAndProps(self, wait: "bool" = False, timeout: "int" = 10) -> "str":
+        """
+         Gets the item name and properties (tooltip text).
+         This returns the name and properties in a single string. You can split it by newline if you want to separate them.
+        
+        """
+        pass
+
 class PyJournalEntry:
-   ""
+    ""
     Hue: int = None
     Name: str = None
     Text: str = None
@@ -714,16 +722,16 @@ class PyJournalEntry:
     Disposed: bool = None
 
 class PyLabel(PyBaseControl):
-   ""
+    ""
     Text: str = None
     Hue: int = None
 
 class PyLand(PyGameObject):
-   ""
+    ""
     __class__: str = None
 
 class PyMobile(PyEntity):
-   ""
+    ""
     X: int = None
     Y: int = None
     Z: int = None
@@ -741,17 +749,26 @@ class PyMobile(PyEntity):
     IsRenamable: bool = None
     IsHuman: bool = None
     IsYellowHits: bool = None
+    Notoriety: Notoriety = None
     InWarMode: bool = None
     Backpack: PyItem = None
     Mount: PyItem = None
     __class__: str = None
 
+    def NameAndProps(self, wait: "bool" = False, timeout: "int" = 10) -> "str":
+        """
+         Gets the mobile name and properties (tooltip text).
+         This returns the name and properties in a single string. You can split it by newline if you want to separate them.
+        
+        """
+        pass
+
 class PyMulti(PyGameObject):
-   ""
+    ""
     __class__: str = None
 
 class PyNiceButton(PyBaseControl):
-   ""
+    ""
     ButtonParameter: int = None
     IsSelectable: bool = None
     IsSelected: bool = None
@@ -782,7 +799,7 @@ class PyNiceButton(PyBaseControl):
         pass
 
 class PyNineSliceGump(PyBaseControl, IPyGump):
-   ""
+    ""
     NineSliceGump = None
     Gump: PyBaseGump = None
 
@@ -829,13 +846,13 @@ class PyNineSliceGump(PyBaseControl, IPyGump):
         pass
 
 class ModernNineSliceGump(NineSliceGump):
-   ""
+    ""
 
     def SetResizeCallback(self, callback: "Any") -> None:
         pass
 
 class PyPlayer(PyMobile):
-   ""
+    ""
     X: int = None
     Y: int = None
     Z: int = None
@@ -897,7 +914,7 @@ class PyPlayer(PyMobile):
     __class__: str = None
 
 class PyProfile:
-   ""
+    ""
     CharacterName: str = None
     ServerName: str = None
     LootBagSerial: int = None
@@ -906,7 +923,7 @@ class PyProfile:
     AutoLootEnabled: bool = None
 
 class PyRadioButton(PyCheckbox):
-   ""
+    ""
     GroupIndex: int = None
 
     def GetGroupIndex(self) -> "int":
@@ -928,16 +945,16 @@ class PyRadioButton(PyCheckbox):
         pass
 
 class PyResizableStaticPic(PyBaseControl):
-   ""
+    ""
     Hue: int = None
     Graphic: int = None
     DrawBorder: bool = None
 
 class PyScrollArea(PyBaseControl):
-   ""
+    ""
 
 class PySimpleProgressBar(PyBaseControl):
-   ""
+    ""
 
     def SetProgress(self, value: "float", max: "float") -> None:
         """
@@ -947,7 +964,7 @@ class PySimpleProgressBar(PyBaseControl):
         pass
 
 class PyStatic(PyGameObject):
-   ""
+    ""
     IsImpassible: bool = None
     IsTree: bool = None
     IsVegetation: bool = None
@@ -956,7 +973,7 @@ class PyStatic(PyGameObject):
     __class__: str = None
 
 class PyTextBox(PyBaseControl):
-   ""
+    ""
     Text: str = None
     Hue: int = None
     Font: str = None
@@ -967,12 +984,12 @@ class PyTextBox(PyBaseControl):
         pass
 
 class PyTiledGumpPic(PyBaseControl):
-   ""
+    ""
     Graphic: int = None
     Hue: int = None
 
 class PyTTFTextInputField(PyBaseControl):
-   ""
+    ""
     Text: str = None
     CaretIndex: int = None
     NumbersOnly: bool = None

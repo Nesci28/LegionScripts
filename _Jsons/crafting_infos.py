@@ -2,7 +2,7 @@ craftingInfosStr = {
     "Blacksmithy": {
         "tool": {"graphic": 5091, "buttonId": 21},
         "materialHues": {
-            "iron": {"hue": "0x0000", "buttonId": 5000},
+            "iron": {"hue": 0x0000, "buttonId": 5000},
             "dull copper": {"hue": 2419, "buttonId": 5001},
             "shadow iron": {"hue": 2406, "buttonId": 5002},
             "copper": {"hue": 2413, "buttonId": 5003},
@@ -16,7 +16,7 @@ craftingInfosStr = {
     "Tinkering": {
         "tool": {"graphic": 7865, "buttonId": 11},
         "materialHues": {
-            "iron": {"hue": "0x0000", "buttonId": 5000},
+            "iron": {"hue": 0x0000, "buttonId": 5000},
             "dull copper": {"hue": 2419, "buttonId": 5001},
             "shadow iron": {"hue": 2406, "buttonId": 5002},
             "copper": {"hue": 2413, "buttonId": 5003},
@@ -28,13 +28,13 @@ craftingInfosStr = {
         },
     },
     "Tailoring": {
-        "tool": {"graphic": "0x0F9D", "buttonId": 14},
+        "tool": {"graphic": 0x0F9D, "buttonId": 14},
         "materialHues": {
-            "cloth": {"hue": "0x0000", "buttonId": None},
-            "normal leather": {"hue": "0x0000", "buttonId": 5000},
-            "spined leather": {"hue": "0x08AC", "buttonId": 5001},
-            "horned leather": {"hue": "0x0845", "buttonId": 5002},
-            "barbed leather": {"hue": "0x0851", "buttonId": 5003},
+            "cloth": {"hue": 0x0000, "buttonId": None},
+            "normal leather": {"hue": 0x0000, "buttonId": 5000},
+            "spined leather": {"hue": 0x08AC, "buttonId": 5001},
+            "horned leather": {"hue": 0x0845, "buttonId": 5002},
+            "barbed leather": {"hue": 0x0851, "buttonId": 5003},
         },
     },
 }

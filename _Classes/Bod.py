@@ -106,6 +106,7 @@ class Bod:
     def _getMaterial(materialProp):
         materials = [
             "cloth",
+            "normal leather",
             "spined leather",
             "horned leather",
             "barbed leather",

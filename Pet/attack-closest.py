@@ -29,6 +29,9 @@ for enemy in enemies:
 
 if closestEnemy:
     API.HeadMsg(f"Enemy Located: {closestEnemy.Name}", closestEnemy.Serial)
+    API.Dismount()
     API.Msg("All Kill")
     API.WaitForTarget()
     API.Target(closestEnemy)
+else:
+    API.Mount()

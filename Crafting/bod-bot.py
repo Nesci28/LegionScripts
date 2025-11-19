@@ -304,7 +304,6 @@ class BodBot:
                 API.ContextMenu(self.npcSerial, 403)
                 API.Pause(0.1)
                 count += 1
-                API.SysMsg(str(count))
             if API.HasGump(455):
                 API.ReplyGump(1, 455)
             filledBods = self._getFilledBods()
