@@ -85,56 +85,60 @@ class BodBot:
             self._onClose()
 
     def _showGump(self):
-        width = 375
-        height = 470
-        g = Gump(width, height, self._onClose)
+        width = 455
+        height = 680
+        g = Gump(width, height, self._onClose, gumpId=0xB0D001)
         self.gump = g
+        g.addTitle("TAILORING & RESOURCES")
 
-        y = 1
-        x = 1
+        categoriesPanel = g.addPanel(10, 42, 220, 118, "Crafting Categories")
+        categoriesX = categoriesPanel["x"]
+        categoriesY = categoriesPanel["y"] + 3
 
         for i, profession in enumerate(self.professions):
             label = profession.capitalize()
-            checkbox = g.addCheckbox(
+            rowY = categoriesY + i * 27
+            g.addRow(categoriesX - 2, rowY - 3, categoriesPanel["width"] + 4, 24, self.selectedProfession == label)
+            checkbox = g.addRadio(
                 label,
-                x,
-                y,
+                categoriesX,
+                rowY,
+                1,
                 self.selectedProfession == label,
                 self.gump.onClick(
                     lambda profession=profession: self._onProfessionClicked(profession)
                 ),
             )
             self.checkboxes.append({"label": label, "checkbox": checkbox})
-            if (i + 1) % 3 == 0 and i != len(self.professions) - 1:
-                y += 25
-                x = 0
-            else:
-                x += 125
-        x = 1
-        y += 25
 
+        bodTypesPanel = g.addPanel(238, 42, width - 248, 118, "BOD Categories")
         for i, type in enumerate(["Small", "Large"]):
-            checkbox = g.addCheckbox(
+            rowY = bodTypesPanel["y"] + 5 + i * 28
+            g.addRow(bodTypesPanel["x"] + 2, rowY - 3, bodTypesPanel["width"] - 4, 24, self.selectedType == type)
+            checkbox = g.addRadio(
                 type,
-                x,
-                y,
-                i == 0,
+                bodTypesPanel["x"] + 4,
+                rowY,
+                2,
+                self.selectedType == type,
                 self.gump.onClick(lambda type=type: self._onTypeClicked(type)),
             )
             self.typeCheckboxes.append({"label": type, "checkbox": checkbox})
-            x += 125
-        x = 1
-        y += 25
+
+        settingsPanel = g.addPanel(10, 168, width - 20, 112, "Settings")
+        radioX = settingsPanel["x"] + 4
+        textX = settingsPanel["x"] + 26
+        y = settingsPanel["y"] + 4
 
         selectResourceContainerText = "Select resource container"
         if self.containerSerial:
             selectResourceContainerText = (
                 f"Selected resource container ({self.containerSerial})"
             )
-        resourceLabel = g.addLabel(selectResourceContainerText, 25, y)
+        resourceLabel = g.addLabel(selectResourceContainerText, textX, y)
         g.addButton(
             "",
-            x,
+            radioX,
             y,
             "radioBlue",
             self.gump.onClick(
@@ -144,16 +148,14 @@ class BodBot:
             ),
         )
 
-        x = 1
         y += 20
-
         selectNpcText = "Select npc"
         if self.tailorSerial:
             selectNpcText = f"Selected npc ({self.tailorSerial})"
-        npcLabel = g.addLabel(selectNpcText, 25, y)
+        npcLabel = g.addLabel(selectNpcText, textX, y)
         g.addButton(
             "",
-            x,
+            radioX,
             y,
             "radioBlue",
             self.gump.onClick(
@@ -161,41 +163,31 @@ class BodBot:
             ),
         )
 
-        x = 1
         y += 20
-
-        selectNpcText = "Select runebook"
+        selectRunebookText = "Select runebook"
         if self.runebookSerial:
-            selectNpcText = f"Selected runebook ({self.runebookSerial})"
-        npcLabel = g.addLabel(selectNpcText, 25, y)
+            selectRunebookText = f"Selected runebook ({self.runebookSerial})"
+        runebookLabel = g.addLabel(selectRunebookText, textX, y)
         g.addButton(
             "",
-            x,
+            radioX,
             y,
             "radioBlue",
             self.gump.onClick(
-                lambda npcLabel=npcLabel: self._onRunebookSelectionClicked(npcLabel)
+                lambda npcLabel=runebookLabel: self._onRunebookSelectionClicked(
+                    npcLabel
+                )
             ),
         )
-        # g.addButton(
-        #     "Next",
-        #     225,
-        #     y,
-        #     "default",
-        #     self.gump.onClick(lambda: self._onNextClicked()),
-        #     True,
-        # )
 
-        x = 1
         y += 20
-
         selectBeetleText = "Select Beetle"
         if self.beetleSerial:
             selectBeetleText = f"Selected Beetle ({self.beetleSerial})"
-        beetleLabel = g.addLabel(selectBeetleText, 25, y)
+        beetleLabel = g.addLabel(selectBeetleText, textX, y)
         g.addButton(
             "",
-            x,
+            radioX,
             y,
             "radioBlue",
             self.gump.onClick(
@@ -205,19 +197,19 @@ class BodBot:
             ),
         )
         g.addButton(
-            "Cloth",
-            225,
-            y,
+            "CLOTH",
+            settingsPanel["x"] + settingsPanel["width"] - 77,
+            y - 3,
             "default",
             self.gump.onClick(lambda: self._onClothClicked()),
             True,
+            72,
         )
 
-        x = 1
-        y += 20
-
-        scrollAreaWidth = width - 13
-        scrollAreaHeight = round(height / 2)
+        listPanel = g.addPanel(10, 288, width - 20, 300, "Fill Status & Items")
+        x = listPanel["x"]
+        y = listPanel["y"] + 2
+        footerHeight = 32
 
         g.addLabel("Filled", x, y)
         x += 40
@@ -225,40 +217,53 @@ class BodBot:
         x += 50
         g.addLabel("Maxed", x, y)
         x += 47
-        g.addLabel("Item required", x, y)
-        x += 150
+        g.addLabel(f"Items ({self.selectedProfession})", x, y)
+        x += 185
         g.addLabel("Mark", x, y)
-        x = 1
-        y += 20
+
         self.scrollArea = API.CreateGumpScrollArea(
-            x, y, scrollAreaWidth, scrollAreaHeight
+            listPanel["x"], y + 18, listPanel["width"], listPanel["height"] - footerHeight - 22
         )
         self.gump.gump.Add(self.scrollArea)
-        self._scan()
 
-        y += scrollAreaHeight + 2
-        x = 1
+        footerY = listPanel["y"] + listPanel["height"] - footerHeight
+        g.addColorBox(listPanel["x"], footerY, 1, listPanel["width"], Gump.theme["panelHeaderLine"], 0.85)
+        g.addColorBox(listPanel["x"], footerY + 1, footerHeight - 1, listPanel["width"], Gump.theme["statusBg"], 0.92, withTexture=True)
+        g.addColorBox(listPanel["x"] + int(listPanel["width"] / 2), footerY + 4, footerHeight - 8, 1, Gump.theme["panelHeaderLine"], 0.55)
 
-        bodCountLabel = g.addLabel("Bod count: 0", 1, y)
+        bodCountLabel = g.addLabel("BOD COUNT: 0", listPanel["x"] + 14, footerY + 9)
         self.bodCountLabel = bodCountLabel
 
-        totalLabel = g.addLabel("Bribe total: 0", 150, y)
+        totalLabel = g.addLabel("BRIBE TOTAL: 0", listPanel["x"] + int(listPanel["width"] / 2) + 14, footerY + 9)
         self.totalLabel = totalLabel
-        y += 25
 
-        for action in ["Bribe", "Fill", "Turn in", "Rescan"]:
+        x = 24
+        y = 604
+        for actionLabel, action in [
+            ("BRIBE", "Bribe"),
+            ("FILL", "Fill"),
+            ("TURN IN", "Turn in"),
+            ("RESCAN", "Rescan"),
+        ]:
             g.addButton(
-                action,
+                actionLabel,
                 x,
                 y,
                 "default",
                 self.gump.onClick(lambda action=action: self._onActionClicked(action)),
                 True,
+                70,
             )
-            x += 75
-        x = 1
-        self._scan()
+            x += 86
+
         self.gump.create()
+        self.gump.setStatus("Opening...")
+        self.gump.pendingCallbacks.append(self._initialScan)
+
+    def _initialScan(self):
+        self.gump.setStatus("Scanning BODs...")
+        self._scan()
+        self.gump.setStatus("Ready.")
 
     def _onActionClicked(self, action):
         if action == "Bribe":
@@ -361,7 +366,7 @@ class BodBot:
                         runeIndex += 1
                         continue
                     self.total += total
-                    self.totalLabel.Text = f"Bribe total: {str(self.total)}"
+                    self.totalLabel.Text = f"BRIBE TOTAL: {str(self.total)}"
             self._resetScrollAreaElement(bodInfo)
         self.gump.setStatus("Ready")
 
@@ -380,6 +385,9 @@ class BodBot:
         self._appendToScrollArea(bodInfo)
 
     def _scan(self):
+        if not self.scrollArea:
+            return
+        self.gump.setStatus("Scanning BODs...")
         self.scrollArea.Clear()
         self.bodInfos = []
 
@@ -425,10 +433,12 @@ class BodBot:
                 self._appendToScrollArea(bodInfo)
 
             if self.bodCountLabel:
-                self.bodCountLabel.Text = f"Bod count: {len(self.bodInfos)}"
+                self.bodCountLabel.Text = f"BOD COUNT: {len(self.bodInfos)}"
+            self.gump.setStatus("Ready.")
         except Exception as e:
             API.SysMsg(str(e))
             API.SysMsg(traceback.format_exc())
+            self.gump.setStatus("Scan failed.", 33)
 
     def _appendToScrollArea(self, bodInfo):
         yOffset = bodInfo["yOffset"]
@@ -440,7 +450,7 @@ class BodBot:
                 bodInfo["label"],
                 bodInfo["markButton"],
             ],
-            [7, 53, 100, 137, 288],
+            [8, 54, 100, 150, 338],
         ):
             el.SetX(dx)
             el.SetY(yOffset)
@@ -557,16 +567,14 @@ class BodBot:
 
     def _onTypeClicked(self, type):
         for checkbox in self.typeCheckboxes:
-            if checkbox["label"] != type:
-                checkbox["checkbox"].IsChecked = False
+            checkbox["checkbox"].IsChecked = checkbox["label"] == type
         self.selectedType = type
         API.SetSharedVar("BOD_BOT_SELECTED_TYPE", type)
         self._scan()
 
     def _onProfessionClicked(self, profession):
         for checkbox in self.checkboxes:
-            if checkbox["label"] != profession:
-                checkbox["checkbox"].IsChecked = False
+            checkbox["checkbox"].IsChecked = checkbox["label"] == profession
         self.selectedProfession = profession
         API.SetSharedVar("BOD_BOT_SELECTED_PROFESSION", profession)
         self.bodSkill = self.bodSkills[self.selectedProfession]

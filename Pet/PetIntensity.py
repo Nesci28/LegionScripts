@@ -23,6 +23,13 @@ from Util import Util
 
 class PetIntensity:
     SAVE_FILE = f"{Util.getPlayerName()}_pet_intensity_history.json"
+    RATING_COLORS = {
+        "below": "#b51d2a",
+        "poor": "#d17a22",
+        "average": "#d17a22",
+        "good": "#36a852",
+        "perfect": "#277bd8",
+    }
 
     loreGumpId = 0x1DB
     statRe = re.compile(
@@ -132,7 +139,7 @@ class PetIntensity:
         "unicorn": {"min": 3834, "max": 4222, "dmg": 75, "magical": 1500, "ability": 0},
         "lesser hiryu": {
             "min": 2070,
-            "max": 2705,
+            "max": 2882,
             "dmg": 80,
             "magical": 0,
             "ability": 200,
@@ -232,14 +239,21 @@ class PetIntensity:
         self.GUMP_WIDTH = 270
         self.GUMP_HEIGHT = 340
 
-        self.gump = Gump(self.GUMP_WIDTH, self.GUMP_HEIGHT, self._onClose, False)
+        self.gump = Gump(self.GUMP_WIDTH, self.GUMP_HEIGHT, self._onClose, False, gumpId=0xBEE701)
         self._running = True
         self._isTameableIcon = None
         self.state = self._emptyState()
         self.isDrawed = False
         self._historyChartY = None
+        self._historyChartX = None
+        self._historyChartWidth = None
+        self._historyChartHeight = None
         self._resistChartY = None
+        self._resistChartX = None
+        self._resistChartWidth = None
         self._ratingThresholdTextBox = None
+        self.selectedPetKey = "cu sidhe"
+        self.petTypeRadios = []
 
     def _emptyState(self):
         if self._isTameableIcon:
@@ -252,9 +266,11 @@ class PetIntensity:
             "pretame": False,
             "pctValue": 0,
             "pctRating": "0%",
+            "intensityValue": 0,
             "oldSlots": "?",
             "newSlots": "?",
             "name": None,
+            "undefined": None,
             "isWild": None,
             "cuColor": None,
             "cuRarity": None,
@@ -264,107 +280,191 @@ class PetIntensity:
         }
 
     def _showGump(self):
-        self.GUMP_WIDTH = 380
-        self.GUMP_HEIGHT = 470
-        self.gump = Gump(self.GUMP_WIDTH, self.GUMP_HEIGHT, self._onClose, False)
+        self.GUMP_WIDTH = 455
+        self.GUMP_HEIGHT = 525
+        self.gump = Gump(self.GUMP_WIDTH, self.GUMP_HEIGHT, self._onClose, False, gumpId=0xBEE701)
+        self.petTypeRadios = []
+        self.metricHighlights = {}
+        self.currentHighlights = {}
 
-        self.gump.addButton(
-            "", 0, 0, "help", self.gump.onClick(lambda: self._help()), True
-        )
-        self.gump.addLabel("Pet Intensity Calculator", round(self.GUMP_WIDTH / 2 - 95), 5, hue=67)
-        self.gump.addLabel("Rating:", self.GUMP_WIDTH - 75, 5, hue=901)
-        self._ratingThresholdTextBox = self.gump.addSkillTextBox(70, self.GUMP_WIDTH - 75, 25, 0, 100, 60, 20)
+        self.gump.addTitle("PET INTENSITY CALCULATOR")
+        self.gump.addHelpButton(338, 7, self.gump.onClick(lambda: self._help()))
 
-        y = 35
-        self.nameLabel = self.gump.addLabel("", 10, y)
-        y += 15
-        self.slotLabel = self.gump.addLabel("", 10, y)
-        y += 15
-        self.ratingLabel = self.gump.addLabel("", 10, y)
-        y += 15
-        self.colorLabel = self.gump.addLabel("", 10, y)
-        y += 15
-        self.templateLabel = self.gump.addLabel("", 10, y)
-        y += 15
-        self.webLabel = self.gump.addLabel("", 10, y)
-        y += 10
+        statPanel = self.gump.addPanel(14, 42, 207, 96, "Stats")
+        resistPanel = self.gump.addPanel(234, 42, 207, 96, "Resists")
 
-        spacing = 64
-        start_x = 10
-
-        self.gump.addColorBox(10, y, 1, self.GUMP_WIDTH - 30, "#999999")
-        y += 10
-        self.gump.addLabel("Stats:", 10, y)
-        y += 15
         self.statLabels = {}
-        statNames = ["Hits", "Stam", "Mana"]
-        for i, name in enumerate(statNames):
-            self.statLabels[name] = self.gump.addLabel(
-                f"{name}: --", start_x + i * spacing, y, hue=906
-            )
-        y += 15
-        statNames = ["Str", "Dex", "Int"]
-        for i, name in enumerate(statNames):
-            self.statLabels[name] = self.gump.addLabel(
-                f"{name}: --", start_x + i * spacing, y, hue=906
-            )
-        y += 25
-        self.gump.addColorBox(10, y, 1, self.GUMP_WIDTH - 30, "#999999")
-        y += 5
+        self._addMetricCells(
+            statPanel,
+            [["Hits", "Stam", "Mana"], ["Str", "Dex", "Int"]],
+            self.statLabels,
+        )
 
-        self.gump.addLabel("Resists:", 10, y)
-        y += 15
         self.resistLabels = {}
-        resistNames = ["Phys", "Fire", "Cold", "Pois", "Ener"]
-        for i, name in enumerate(resistNames):
-            self.resistLabels[name] = self.gump.addLabel(
-                f"{name}: --", start_x + i * spacing, y, hue=906
-            )
-        y += 25
-        self.gump.addColorBox(10, y, 1, self.GUMP_WIDTH - 30, "#999999")
-        y += 5
+        self._addMetricCells(
+            resistPanel,
+            [["Phys", "Fire", "Cold"], ["Pois", "Ener"]],
+            self.resistLabels,
+            {
+                "Phys": "#d8c6a0",
+                "Fire": "#d35c4c",
+                "Cold": "#63b9d7",
+                "Pois": "#74c95c",
+                "Ener": "#b07ad8",
+            },
+        )
 
-        self.gump.addLabel("Intensity Distribution", 10, y)
-        y += 25
-
+        intensityPanel = self.gump.addPanel(
+            14, 152, self.GUMP_WIDTH - 28, 160, "Intensity Distribution"
+        )
         self.totalPetLabel = self.gump.addLabel("", 0, 0)
-
-        self._historyChartY = y
+        chart = self.gump.addChartGrid(
+            intensityPanel["x"] + 4,
+            intensityPanel["y"] + 8,
+            intensityPanel["width"] - 8,
+            intensityPanel["height"] - 12,
+            ["25%", "20%", "15%", "10%", "5%", ""],
+            ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90"],
+        )
+        self._historyChartX = chart["x"]
+        self._historyChartWidth = chart["width"]
+        self._historyChartY = chart["y"]
+        self._historyChartHeight = chart["height"]
         self._drawHistoryIntensityChart()
-        y += 125
-        self._resistChartY = y
-        self._drawHistoryResistChart()
-        y += 50
 
-        self.totalPetLabel.SetX(10)
-        self.totalPetLabel.SetY(y)
+        resistHistoryPanel = self.gump.addPanel(
+            14, 326, self.GUMP_WIDTH - 28, 62, "Elite Resist History"
+        )
+        self._resistChartX = resistHistoryPanel["x"] + 8
+        self._resistChartWidth = resistHistoryPanel["width"] - 16
+        self._resistChartY = resistHistoryPanel["y"] + 14
+        self._drawHistoryResistChart()
+
+        selectPanel = self.gump.addPanel(14, 402, 198, 88, "Select Pet Type")
+        for i, (label, key) in enumerate([("Cu Sidhe", "cu sidhe"), ("Lesser Hiryu", "lesser hiryu")]):
+            rowY = selectPanel["y"] + 5 + i * 28
+            self.gump.addRow(
+                selectPanel["x"] + 2,
+                rowY - 3,
+                selectPanel["width"] - 4,
+                24,
+                key == self.selectedPetKey,
+            )
+            radio = self.gump.addRadio(
+                label,
+                selectPanel["x"] + 4,
+                rowY,
+                10,
+                key == self.selectedPetKey,
+                self.gump.onClick(lambda key=key: self._onPetTypeClicked(key)),
+            )
+            self.petTypeRadios.append({"key": key, "radio": radio})
+
+        detailsPanel = self.gump.addPanel(226, 402, self.GUMP_WIDTH - 240, 88, "Current Pet")
+        self.nameLabel = self.gump.addLabel("No pet analyzed", detailsPanel["x"] + 8, detailsPanel["y"] + 14)
+        self.currentHighlights["slots"] = self._addRatingHighlight(detailsPanel["x"] + 4, detailsPanel["y"] + 32, detailsPanel["width"] - 8, 16)
+        self.currentHighlights["rating"] = self._addRatingHighlight(detailsPanel["x"] + 4, detailsPanel["y"] + 50, detailsPanel["width"] - 8, 16)
+        self.slotLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 32)
+        self.ratingLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 50)
+        self.templateLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 68)
+        self.colorLabel = self.gump.addLabel("", detailsPanel["x"] + 104, detailsPanel["y"] + 70)
+        self.webLabel = self.gump.addLabel("", 0, 0)
+
+        self.totalPetLabel.SetX(self.GUMP_WIDTH - 138)
+        self.totalPetLabel.SetY(370)
 
         self.gump.create()
 
+    def _addMetricCells(self, panel, rows, labels, colors=None):
+        colors = colors or {}
+        cellHeight = 29
+        cellWidth = int(panel["width"] / 3)
+        for rowIndex, row in enumerate(rows):
+            y = panel["y"] + 14 + rowIndex * cellHeight
+            self.gump.addColorBox(panel["x"], y, 1, panel["width"], Gump.theme["panelHeaderLine"], 0.22)
+            if rowIndex > 0:
+                self.gump.addColorBox(panel["x"], y - 1, 1, panel["width"], "#000000", 0.35)
+            for colIndex, name in enumerate(row):
+                x = panel["x"] + colIndex * cellWidth
+                if colIndex > 0:
+                    self.gump.addColorBox(x, y, cellHeight, 1, Gump.theme["panelHeaderLine"], 0.25)
+                self.metricHighlights[name] = self._addRatingHighlight(x + 2, y + 2, cellWidth - 4, cellHeight - 4)
+                labelColor = colors.get(name, "#efe4cd")
+                labels[name] = self.gump.addTtfLabel(
+                    f"{name}: --",
+                    x + 8,
+                    y + 4,
+                    cellWidth - 10,
+                    20,
+                    12,
+                    labelColor,
+                    "left",
+                    None,
+                )
+
+    def _addRatingHighlight(self, x, y, width, height):
+        highlights = {}
+        for rating, color in self.RATING_COLORS.items():
+            box = self.gump.addColorBox(x, y, height, width, color, 0.34, withTexture=False)
+            box.IsVisible = False
+            highlights[rating] = box
+        return highlights
+
+    def _setRatingHighlight(self, highlights, rating):
+        for key, box in highlights.items():
+            box.IsVisible = key == rating
+
+    def _ratingColorKey(self, rating):
+        if not rating:
+            return None
+        return rating.lower()
+
+    def _onPetTypeClicked(self, key):
+        self.selectedPetKey = key
+        for item in self.petTypeRadios:
+            item["radio"].IsChecked = item["key"] == key
+
     def _updateStatsSection(self):
         if not self.state["stats"]:
-            for lbl in self.statLabels.values():
-                lbl.Text = "--"
+            for name, lbl in self.statLabels.items():
+                lbl.Text = f"{name}: --"
+                self._setRatingHighlight(self.metricHighlights.get(name, {}), None)
             return
 
         names = ["Hits", "Stam", "Mana", "Str", "Dex", "Int"]
         for i, val in enumerate(self.state["stats"]):
             name = names[i]
             self.statLabels[name].Text = f"{name}: {int(val)}"
+            self._setRatingHighlight(
+                self.metricHighlights.get(name, {}),
+                self._ratingColorKey(self._rateMetric(name, val)),
+            )
 
     def _updateResistSection(self):
         if not self.state["resists"]:
-            for lbl in self.resistLabels.values():
-                lbl.Text = "--"
+            for name, lbl in self.resistLabels.items():
+                lbl.Text = f"{name}: --"
+                self._setRatingHighlight(self.metricHighlights.get(name, {}), None)
             return
 
         names = ["Phys", "Fire", "Cold", "Pois", "Ener"]
         for i, val in enumerate(self.state["resists"]):
             name = names[i]
             self.resistLabels[name].Text = f"{name}: {int(val)}"
+            self._setRatingHighlight(
+                self.metricHighlights.get(name, {}),
+                self._ratingColorKey(self._rateMetric(name, val)),
+            )
 
     def _updateGump(self):
         if not self.state["petKey"] and not self.state["undefined"]:
+            return
+
+        if self.state["undefined"]:
+            self.nameLabel.Text = f"Unsupported: {self.state['undefined']}"
+            self.slotLabel.Text = ""
+            self.ratingLabel.Text = ""
+            self.templateLabel.Text = ""
             return
 
         self.nameLabel.Text = f"Name:    {self.state['name'].strip()}"
@@ -372,16 +472,133 @@ class PetIntensity:
             f"Slot:    {self.state['oldSlots']} → {self.state['newSlots']}"
         )
         self.ratingLabel.Text = f"Rating:   {self.state['pctRating']}"
+        self._setRatingHighlight(
+            self.currentHighlights["slots"],
+            self._ratingColorKey(self._rateSlots()),
+        )
+        self._setRatingHighlight(
+            self.currentHighlights["rating"],
+            self._ratingColorKey(self._rateIntensity()),
+        )
         if self.state["cuColor"]:
             self.colorLabel.Text = (
                 f"Color:   {self.state['cuColor']} ({self.state['cuRarity']})"
             )
+        else:
+            self.colorLabel.Text = ""
         if self.state["cuTemplate"]:
             self.templateLabel.Text = f"Elite:    {self.state['cuTemplate']}"
         else:
             self.templateLabel.Text = f"Elite:    None"
         self._updateStatsSection()
         self._updateResistSection()
+
+    def _normalizedStatValue(self, metric, value):
+        if metric not in ["Hits", "Str"]:
+            return value
+        if self.state["isWild"]:
+            return value
+        return value * Decimal("2")
+
+    def _rateRange(self, value, minimum, poorMax, averageMax, goodMax, perfectMin=None):
+        value = Decimal(value)
+        if value < Decimal(str(minimum)):
+            return "below"
+        if perfectMin is not None and value >= Decimal(str(perfectMin)):
+            return "perfect"
+        if value <= Decimal(str(poorMax)):
+            return "poor"
+        if value <= Decimal(str(averageMax)):
+            return "average"
+        if value <= Decimal(str(goodMax)):
+            return "good"
+        return "perfect"
+
+    def _rateExactPerfectLowGood(self, value, minimum, perfect, goodMin, averageMin, poorAbove):
+        value = Decimal(value)
+        if value < Decimal(str(perfect)):
+            return "below"
+        if value == Decimal(str(perfect)):
+            return "perfect"
+        if Decimal(str(goodMin)) <= value < Decimal(str(averageMin)):
+            return "good"
+        if Decimal(str(averageMin)) <= value <= Decimal(str(poorAbove)):
+            return "average"
+        return "poor"
+
+    def _rateMetric(self, metric, value):
+        petKey = self.state["petKey"]
+        if not petKey:
+            return None
+
+        if metric == "Hits":
+            value = self._normalizedStatValue(metric, value)
+            if petKey == "cu sidhe":
+                return self._rateRange(value, 1010, 1099, 1149, 1199, 1200)
+            if petKey == "lesser hiryu":
+                return self._rateRange(value, 400, 499, 549, 579, 580)
+        if metric == "Str":
+            value = self._normalizedStatValue(metric, value)
+            if petKey == "cu sidhe":
+                return self._rateRange(value, 1200, 1199, 1209, 1219, 1220)
+            if petKey == "lesser hiryu":
+                return self._rateRange(value, 300, 359, 389, 404, 405)
+
+        if petKey == "cu sidhe":
+            rules = {
+                "Phys": lambda v: self._rateRange(v, 50, 54, 59, 64, 65),
+                "Fire": lambda v: self._rateRange(v, 25, 34, 39, 44, 45),
+                "Cold": lambda v: self._rateExactPerfectLowGood(v, 70, 70, 71, 73, 75),
+                "Pois": lambda v: self._rateRange(v, 30, 39, 44, 49, 50),
+                "Ener": lambda v: self._rateExactPerfectLowGood(v, 70, 70, 71, 73, 75),
+            }
+            return rules.get(metric, lambda _: None)(value)
+
+        if petKey == "lesser hiryu":
+            rules = {
+                "Phys": lambda v: self._rateRange(v, 45, 54, 59, 64, 65),
+                "Fire": lambda v: self._rateRange(v, 60, 69, 74, 79, 80),
+                "Cold": lambda v: self._rateRange(v, 5, 9, 12, 14, 15),
+                "Pois": lambda v: self._rateRange(v, 30, 34, 37, 39, 40),
+                "Ener": lambda v: self._rateRange(v, 30, 34, 37, 39, 40),
+            }
+            return rules.get(metric, lambda _: None)(value)
+
+        return None
+
+    def _rateSlots(self):
+        petKey = self.state["petKey"]
+        try:
+            slots = int(self.state["oldSlots"])
+        except Exception:
+            return None
+        if petKey == "cu sidhe":
+            if slots < 3:
+                return "below"
+            if slots == 3:
+                return "perfect"
+            if slots == 4:
+                return "poor"
+            return "below"
+        if petKey == "lesser hiryu":
+            if slots < 1:
+                return "below"
+            if slots == 1:
+                return "perfect"
+            if slots == 2:
+                return "average"
+            return "below"
+        return None
+
+    def _rateIntensity(self):
+        petKey = self.state["petKey"]
+        if petKey == "cu sidhe":
+            value = Decimal(str(self.state["pctValue"]))
+            return self._rateRange(value, "54.07", "59.99", "64.99", "69.99", "70")
+        if petKey == "lesser hiryu":
+            value = Decimal(str(self.state["intensityValue"]))
+            return self._rateRange(value, 2070, 2399, 2599, 2749, 2750)
+        return None
 
     def _help(self):
         API.SysMsg("Press SHIFT+A to analyze a pet and save history")
@@ -413,7 +630,8 @@ class PetIntensity:
         nmLower = pet.Name.lower()
         API.CloseGump(self.loreGumpId)
 
-        key = next((k for k in self.petConfigs.keys() if k in nmLower), None)
+        supportedKeys = ["cu sidhe", "lesser hiryu"]
+        key = next((k for k in supportedKeys if k in nmLower), None)
         if not key:
             self.state["undefined"] = pet.Name
             return
@@ -503,6 +721,7 @@ class PetIntensity:
             + Decimal(cfg.get("magical", 0))
             + Decimal(cfg.get("ability", 0))
         )
+        self.state["intensityValue"] = float(total)
 
         den = Decimal(cfg["max"]) - Decimal(cfg["min"])
         pctValue = (
@@ -517,9 +736,9 @@ class PetIntensity:
 
     def _drawHistoryResistChart(self):
         try:
-            chartX = 10
+            chartX = self._resistChartX or 10
             chartY = self._resistChartY
-            chartWidth = self.GUMP_WIDTH - 30
+            chartWidth = self._resistChartWidth or self.GUMP_WIDTH - 30
             chartHeight = 20
 
             # Remove old bars
@@ -534,6 +753,11 @@ class PetIntensity:
             # Load data
             if not os.path.exists(self.SAVE_FILE):
                 API.SysMsg("[PetIntensity] No history file found for resist chart.")
+                elements = self.gump.createStackedBarChart(
+                    chartX, chartY, chartHeight, chartWidth, 0, ""
+                )
+                for element in elements:
+                    self.resistChartElements.append(element)
                 return
             with open(self.SAVE_FILE, "r", encoding="utf-8") as f:
                 data = json.load(f)
@@ -556,7 +780,7 @@ class PetIntensity:
 
             elitePct = (elite_count / total) * 100
             elements = self.gump.createStackedBarChart(
-                chartX, chartY, chartHeight, chartWidth, elitePct, "Elite Resist History"
+                chartX, chartY, chartHeight, chartWidth, elitePct, ""
             )
             for element in elements:
                 self.resistChartElements.append(element)
@@ -586,10 +810,10 @@ class PetIntensity:
                     physBins[idx].append(physList[i])
 
             maxCount = max(bins) if any(bins) else 1
-            chart_x = 10
+            chart_x = self._historyChartX or 10
             chart_y = self._historyChartY
-            chart_width = 350
-            chart_height = 100
+            chart_width = self._historyChartWidth or 350
+            chart_height = self._historyChartHeight or 100
             bar_width = int(chart_width / len(bins)) - 2
 
             if hasattr(self, "chartBars"):
@@ -599,15 +823,13 @@ class PetIntensity:
                     except:
                         pass
             self.chartBars = []
-
             for i, count in enumerate(bins):
                 if count <= 0:
                     count = 0.01
                 height = max(1, int((count / maxCount) * chart_height))
                 x = chart_x + i * (bar_width + 2)
                 y = chart_y + (chart_height - height)
-                bar = self.gump.addColorBox(x, y, height, bar_width, "#999999")
-                self.gump.addLabel(f"{i*10}", x, chart_y + chart_height + 5)
+                bar = self.gump.addColorBox(x, y, height, bar_width, "#b8b8b8")
                 self.chartBars.append(bar)
 
             self.totalPetLabel.Text = f"Total pets: {len(intensities)}"
@@ -660,8 +882,7 @@ class PetIntensity:
             self._isTameableIcon.Dispose()
         icon = "isTameable"
         iconY = 10
-        minValue = self._ratingThresholdTextBox.Text
-        if not self.state["isEliteResists"] or self.state["pctValue"] <= int(minValue):
+        if not self.state["isEliteResists"] or self.state["pctValue"] <= 70:
             icon = "isNotTameable"
             iconY = 30
         self._isTameableIcon = self.gump.addButton("", round(self.GUMP_WIDTH / 2 + 10), iconY, icon)

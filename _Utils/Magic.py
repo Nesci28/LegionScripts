@@ -9,7 +9,7 @@ import Util
 
 importlib.reload(Util)
 
-with open(LegionPath.createPath("_Jsons\\spell-def-magic.json")) as f:
+with open(LegionPath.createPath("_Jsons/spell-def-magic.json")) as f:
     SPELLS = json.load(f)
 
 

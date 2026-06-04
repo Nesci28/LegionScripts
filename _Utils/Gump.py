@@ -20,42 +20,108 @@ from Color import Color
 
 from button_types import buttonTypesStr
 
+
+class GumpRadio:
+    def __init__(self, nativeRadio, fills):
+        self.nativeRadio = nativeRadio
+        self.fills = fills
+
+    @property
+    def IsChecked(self):
+        return self.nativeRadio.IsChecked
+
+    @IsChecked.setter
+    def IsChecked(self, value):
+        self.nativeRadio.IsChecked = value
+        for fill in self.fills:
+            fill.IsVisible = value
+
+
 class Gump:
     buttonTypes = Math.convertToHex(buttonTypesStr)
+    theme = {
+        "bgOuter": "#020304",
+        "bgInner": "#080d0f",
+        "bgInset": "#10171a",
+        "grainLine": "#ffffff",
+        "frameOuter": "#24170a",
+        "frameInner": "#9a7232",
+        "frameHighlight": "#d0a85a",
+        "panelOuter": "#4a3517",
+        "panelInner": "#10191c",
+        "panelTop": "#1b2a2e",
+        "panelBottom": "#080d0f",
+        "panelHeader": "#121d20",
+        "panelHeaderLine": "#9a7232",
+        "buttonShadow": "#000000",
+        "buttonFrame": "#7b5724",
+        "buttonFill": "#10202a",
+        "buttonHighlight": "#1f3d51",
+        "row": "#162329",
+        "rowAlt": "#111b20",
+        "selectedRow": "#1c3a26",
+        "statusBg": "#080d0f",
+    }
+    hues = {"text": 2414, "muted": 2406, "accent": 67, "status": 996}
 
-    def __init__(self, width, height, onCloseCb=None, withStatus=True):
+    def __init__(self, width, height, onCloseCb=None, withStatus=True, gumpId=None):
         self.width = width
         self.height = height
         self.onCloseCb = onCloseCb
         self.withStatus = withStatus
+        self.gumpId = gumpId
 
-        self.gump = API.CreateGump(True, True)
+        try:
+            self.gump = API.CreateGump(True, True, False, self.gumpId or 0)
+        except:
+            self.gump = API.CreateGump(True, True)
+        if self.gumpId is not None:
+            for attr in ["ID", "LocalSerial", "ServerSerial"]:
+                try:
+                    setattr(self.gump, attr, self.gumpId)
+                except:
+                    pass
         self.subGumps = []
         self.bg = None
         self._running = True
         self.buttons = []
+        self.hoverControls = []
         self.skillTextBoxes = []
         self.pendingCallbacks = []
         self.tabGumps = {}
+        self._statusPanel = []
 
         self.gump.SetWidth(self.width)
         self.gump.SetHeight(self.height)
         self.gump.CenterXInViewPort()
         self.gump.CenterYInViewPort()
-        self.borders = self._setBorders(0, 0, self.width, self.height)
         self._setBackground()
+        self.borders = self._setBorders(
+            0, 0, self.width, self.height, Gump.theme["frameOuter"], 3, True
+        )
+        self._setBorders(
+            2, 2, self.width - 4, self.height - 4, Gump.theme["frameInner"], 1, True
+        )
+        self._setCornerAccents()
 
         if withStatus:
-            self.statusLabel = API.CreateGumpLabel("Ready.")
-            self.statusLabel.SetX(10)
-            self.statusLabel.SetY(self.height - 30)
-            self.gump.Add(self.statusLabel)
+            self._drawStatusArea()
 
         self._lastCheckTime = time.time()
         self._checkInterval = 0.1
 
     def create(self):
+        self._applyGumpId()
         API.AddGump(self.gump)
+
+    def _applyGumpId(self):
+        if self.gumpId is None:
+            return
+        for attr in ["ID", "LocalSerial", "ServerSerial"]:
+            try:
+                setattr(self.gump, attr, self.gumpId)
+            except:
+                pass
 
     def tick(self):
         if not self._running:
@@ -71,12 +137,15 @@ class Gump:
         if (now - self._lastCheckTime) >= self._checkInterval:
             self.checkValidateForm()
             self._checkEvents()
+            self._updateHoverControls()
             self._lastCheckTime = now
 
     def tickSubGumps(self):
         for subGump, position, _ in self.subGumps:
             if subGump._running and not subGump.gump.IsDisposed:
-                self._setSubGumpPosition(subGump.gump, subGump.width, subGump.height, position)
+                self._setSubGumpPosition(
+                    subGump.gump, subGump.width, subGump.height, position
+                )
 
     def destroy(self):
         if not self._running:
@@ -99,72 +168,84 @@ class Gump:
 
     def createProgressBar(self, x, y, height, width, current, total, title=""):
         elements = []
-
-        # Avoid division by zero
         if total <= 0:
             total = 1
 
-        # Title
         if title:
-            label = self.addLabel(title, x, y)
+            label = self.addLabel(title, x, y, Gump.hues["text"])
             elements.append(label)
-            y += 20
+            y += 18
 
-        # Background (light gray)
-        bg = self.addColorBox(x, y, height, width, "#cccccc")
-        elements.append(bg)
+        panel = self.addPanel(x, y, width, height, withTexture=False)
+        elements.extend(panel["elements"])
 
-        # Purple fill (progress portion)
         ratio = max(0.0, min(1.0, current / total))
-        fill_width = int(width * ratio)
-        if fill_width > 0:
-            fill = self.addColorBox(x, y, height, fill_width, "#4e009b")  # purple
+        fillWidth = int((width - 6) * ratio)
+        if fillWidth > 0:
+            fill = self.addColorBox(
+                x + 3, y + 3, height - 6, fillWidth, Gump.theme["buttonHighlight"], 0.95
+            )
             elements.append(fill)
 
-        # Optional text overlay (e.g. “75 / 100”)
-        progress_label = self.addLabel(f"{int(current)} / {int(total)}", x + width // 2 - 15, y + (height // 2) - 7, 1)
-        elements.append(progress_label)
-
+        progressLabel = self.addLabel(
+            f"{int(current)} / {int(total)}",
+            x + width // 2 - 20,
+            y + (height // 2) - 7,
+            Gump.hues["text"],
+        )
+        elements.append(progressLabel)
         return elements
 
     def createStackedBarChart(self, x, y, height, width, count, title=""):
         elements = []
+        if title:
+            label = self.addLabel(title, x, y, Gump.hues["text"])
+            elements.append(label)
+            y += 18
 
-        # title
-        label = self.addLabel(title, x, y)
-        elements.append(label)
-        y += 20
+        panel = self.addPanel(x, y, width, height, withTexture=False)
+        elements.extend(panel["elements"])
 
-        # Background bar
-        bg = self.addColorBox(x, y, height, width, "#3a3a3a")
-        elements.append(bg)
+        eliteWidth = int((width - 6) * (count / 100))
+        eliteBar = self.addColorBox(
+            x + 3, y + 3, height - 6, max(0, eliteWidth), "#2a8f39", 0.95
+        )
+        elements.append(eliteBar)
 
-        # Draw green (elite) section
-        elite_width = int(width * (count / 100))
-        elite_bar = self.addColorBox(x, y, height, elite_width, "#00aa00")
-        elements.append(elite_bar)
-
-        # Draw red (non-elite) section
-        nonelite_width = width - elite_width
-        if nonelite_width > 0:
-            nonelite_bar = self.addColorBox(x + elite_width, y, height, nonelite_width, "#aa0000")
-            elements.append(nonelite_bar)
+        nonEliteWidth = (width - 6) - eliteWidth
+        if nonEliteWidth > 0:
+            nonEliteBar = self.addColorBox(
+                x + 3 + eliteWidth,
+                y + 3,
+                height - 6,
+                nonEliteWidth,
+                "#8f171a",
+                0.95,
+            )
+            elements.append(nonEliteBar)
         return elements
 
-    def createSubGump(self, width, height, position="bottom", withStatus=False, alwaysVisible=True):
+    def createSubGump(
+        self, width, height, position="bottom", withStatus=False, alwaysVisible=True
+    ):
         gump = Gump(width, height, withStatus=withStatus)
         self._setSubGumpPosition(gump.gump, width, height, position)
         API.AddGump(gump.gump)
         self.subGumps.append((gump, position, alwaysVisible))
         return gump
 
-    def setStatus(self, text, hue=996):
+    def setStatus(self, text, hue=None):
+        if hue is None:
+            hue = Gump.hues["status"]
         if self.withStatus:
             self.statusLabel.Text = text
-            if hue:
+            if hue is not None:
                 self.statusLabel.Hue = hue
 
     def onClick(self, cb, startText=None, endText=None):
+        if not cb:
+            return lambda: None
+
         def wrapped():
             if startText:
                 self.setStatus(startText)
@@ -183,7 +264,17 @@ class Gump:
         tabGump = self.tabGumps[name]
         tabGump.gump.IsVisible = True
 
-    def addTabButton(self, name, iconType, gumpWidth, callback=None, yOffset=45, withStatus=False, label="", isDarkMode=False):
+    def addTabButton(
+        self,
+        name,
+        iconType,
+        gumpWidth,
+        callback=None,
+        yOffset=45,
+        withStatus=False,
+        label="",
+        isDarkMode=False,
+    ):
         y = 10 + len(self.tabGumps) * yOffset
         x = 0
 
@@ -199,19 +290,205 @@ class Gump:
         self.tabGumps[name] = tabGump
         return tabGump
 
-    def addColorBox(self, x, y, height, width, colorHex=Color.defaultBlack, opacity=1):
-        colorBox = API.CreateGumpColorBox(opacity, colorHex)
-        colorBox.SetX(x)
-        colorBox.SetY(y)
-        colorBox.SetWidth(width)
-        colorBox.SetHeight(height)
-        self.gump.Add(colorBox)
-        return colorBox        
-
-    def addCheckbox(self, label, x, y, isChecked, callback, hue=996):
-        checkbox = API.CreateGumpCheckbox(
-            label, hue, isChecked
+    def addTitle(self, text, y=7, hue=None, compact=False):
+        if hue is None:
+            hue = Gump.hues["accent"]
+        self.addColorBox(
+            14,
+            y - 2,
+            20,
+            self.width - 28,
+            Gump.theme["panelHeader"],
+            0.72,
+            withTexture=False,
         )
+        dividerX = 18 if not compact else 26
+        dividerWidth = self.width - 36 if not compact else self.width - 52
+        accentWidth = 42 if not compact else 34
+        self.addDivider(dividerX, y + 18, dividerWidth)
+        self.addColorBox(dividerX + 8, y + 4, 1, accentWidth, Gump.theme["frameHighlight"], 0.55)
+        self.addColorBox(self.width - dividerX - accentWidth - 8, y + 4, 1, accentWidth, Gump.theme["frameHighlight"], 0.55)
+        x = round(self.width / 2 - (len(text) * 3.5))
+        return self.addLabel(text, x, y, hue)
+
+    def addDivider(self, x, y, width, opacity=0.95):
+        lines = []
+        top = self.addColorBox(
+            x, y, 1, width, Gump.theme["panelHeaderLine"], opacity, withTexture=False
+        )
+        bottom = self.addColorBox(
+            x, y + 1, 1, width, Gump.theme["bgInset"], 0.85, withTexture=False
+        )
+        lines.extend([top, bottom])
+        return lines
+
+    def addPanel(self, x, y, width, height, title=None, titleHue=None, withTexture=True):
+        if titleHue is None:
+            titleHue = Gump.hues["text"]
+        elements = []
+        outer = self.addColorBox(
+            x, y, height, width, Gump.theme["panelOuter"], 0.96, withTexture=False
+        )
+        inner = self.addColorBox(
+            x + 1,
+            y + 1,
+            height - 2,
+            width - 2,
+            Gump.theme["panelInner"],
+            0.95,
+            withTexture=False,
+        )
+        topTint = self.addColorBox(
+            x + 2,
+            y + 2,
+            max(6, int(height * 0.25)),
+            max(1, width - 4),
+            Gump.theme["panelTop"],
+            0.35,
+            withTexture=False,
+        )
+        bottomTint = self.addColorBox(
+            x + 2,
+            y + max(2, int(height * 0.55)),
+            max(1, height - int(height * 0.55) - 2),
+            max(1, width - 4),
+            Gump.theme["panelBottom"],
+            0.45,
+            withTexture=False,
+        )
+        elements.extend([outer, inner, topTint, bottomTint])
+        inset = self._setBorders(
+            x + 3,
+            y + 3,
+            width - 6,
+            height - 6,
+            Gump.theme["frameOuter"],
+            1,
+            True,
+        )
+        elements.extend(inset)
+
+        if withTexture and width > 40 and height > 26:
+            step = 14
+            for offset in range(8, height - 4, step):
+                line = self.addColorBox(
+                    x + 3,
+                    y + offset,
+                    1,
+                    width - 6,
+                    Gump.theme["grainLine"],
+                    0.025,
+                    withTexture=False,
+                )
+                elements.append(line)
+            for offset in range(16, width - 8, 32):
+                grain = self.addColorBox(
+                    x + offset,
+                    y + 5,
+                    height - 10,
+                    1,
+                    Gump.theme["grainLine"],
+                    0.01,
+                    withTexture=False,
+                )
+                elements.append(grain)
+
+        contentX = x + 8
+        contentY = y + 8
+        contentHeight = height - 16
+        if title:
+            header = self.addColorBox(
+                x + 1,
+                y + 1,
+                18,
+                width - 2,
+                Gump.theme["panelHeader"],
+                0.9,
+                withTexture=False,
+            )
+            headerLine = self.addColorBox(
+                x + 2,
+                y + 19,
+                1,
+                width - 4,
+                Gump.theme["panelHeaderLine"],
+                0.9,
+                withTexture=False,
+            )
+            label = self.addLabel(title, x + 8, y + 3, titleHue)
+            elements.extend([header, headerLine, label])
+            contentY = y + 24
+            contentHeight = height - 32
+
+        return {
+            "x": contentX,
+            "y": contentY,
+            "width": max(1, width - 16),
+            "height": max(1, contentHeight),
+            "elements": elements,
+        }
+
+    def addRow(self, x, y, width, height=20, selected=False):
+        color = Gump.theme["selectedRow"] if selected else Gump.theme["row"]
+        row = self.addColorBox(x, y, height, width, color, 0.72, withTexture=True)
+        self.addColorBox(x, y + height - 1, 1, width, "#000000", 0.45)
+        self.addColorBox(x, y, 1, width, "#ffffff", 0.04)
+        return row
+
+    def addTableFrame(self, x, y, width, height, columns=None):
+        panel = self.addPanel(x, y, width, height, withTexture=True)
+        if columns:
+            for colX in columns:
+                self.addColorBox(x + colX, y + 4, height - 8, 1, Gump.theme["panelHeaderLine"], 0.35)
+        return panel
+
+    def addChartGrid(self, x, y, width, height, yLabels=None, xLabels=None):
+        elements = []
+        frame = self.addPanel(x, y, width, height, withTexture=False)
+        elements.extend(frame["elements"])
+        gridX = x + 30
+        gridY = y + 14
+        gridWidth = width - 42
+        gridHeight = height - 36
+        for i in range(0, 6):
+            lineY = gridY + int(gridHeight * i / 5)
+            elements.append(self.addColorBox(gridX, lineY, 1, gridWidth, "#6b6b58", 0.18))
+            if yLabels and i < len(yLabels):
+                elements.append(self.addLabel(yLabels[i], x + 6, lineY - 6, hue=2406))
+        for i in range(0, 10):
+            lineX = gridX + int(gridWidth * i / 9)
+            elements.append(self.addColorBox(lineX, gridY, gridHeight, 1, "#6b6b58", 0.08))
+            if xLabels and i < len(xLabels):
+                elements.append(self.addLabel(xLabels[i], lineX - 3, gridY + gridHeight + 5, hue=2406))
+        self.addColorBox(gridX, gridY + gridHeight, 1, gridWidth, Gump.theme["frameHighlight"], 0.75)
+        return {
+            "x": gridX,
+            "y": gridY,
+            "width": gridWidth,
+            "height": gridHeight,
+            "elements": elements,
+        }
+
+    def addColorBox(
+        self,
+        x,
+        y,
+        height,
+        width,
+        colorHex=Color.defaultBlack,
+        opacity=1,
+        withTexture=False,
+    ):
+        colorBox = self._createColorBox(x, y, width, height, colorHex, opacity)
+        if withTexture and width > 20 and height > 8:
+            self._createColorBox(x + 1, y + 1, width - 2, 1, "#ffffff", 0.06)
+            self._createColorBox(x + 1, y + height - 2, width - 2, 1, "#000000", 0.25)
+        return colorBox
+
+    def addCheckbox(self, label, x, y, isChecked, callback, hue=None):
+        if hue is None:
+            hue = Gump.hues["text"]
+        checkbox = API.CreateGumpCheckbox(label, hue, isChecked)
         checkbox.SetX(x)
         checkbox.SetY(y)
         if callback:
@@ -219,47 +496,168 @@ class Gump:
         self.gump.Add(checkbox)
         return checkbox
 
-    def addButton(self, label, x, y, type, callback = None, isDarkMode = False):
-        btnDef = Gump.buttonTypes.get(type, Gump.buttonTypes["default"])
-        btn = API.CreateGumpButton(
-            "", 996, btnDef["normal"], btnDef["pressed"], btnDef["hover"]
-        )
-        btn.SetX(x)
-        btn.SetY(y)
-        API.AddControlOnClick(btn, callback)
-        self.gump.Add(btn)
+    def addRadio(self, label, x, y, group, isChecked, callback, hue=None, labelYOffset=0, boxYOffset=2):
+        if hue is None:
+            hue = Gump.hues["text"]
+        radio = API.CreateGumpRadioButton("", group, 9020, 9021, hue, isChecked)
+        radio.SetX(x)
+        radio.SetY(y)
+        radio.IsVisible = False
+        if callback:
+            API.AddControlOnClick(radio, callback)
+        boxY = y + boxYOffset
+        self.addColorBox(x, boxY, 14, 14, "#030506", 0.95)
+        self.addColorBox(x + 1, boxY + 1, 12, 12, Gump.theme["frameInner"], 0.95)
+        self.addColorBox(x + 2, boxY + 2, 10, 10, "#111b20", 1)
+        self.addColorBox(x + 3, boxY + 3, 8, 8, "#050809", 1)
+        fills = [
+            self.addColorBox(x + 4, boxY + 4, 6, 6, "#76c84a", 1),
+            self.addColorBox(x + 5, boxY + 5, 4, 4, "#b9ef80", 0.9),
+        ]
+        for fill in fills:
+            fill.IsVisible = isChecked
+        self.gump.Add(radio)
+        hitTarget = API.CreateGumpColorBox(0.01, "#000000")
+        hitTarget.SetX(x)
+        hitTarget.SetY(y)
+        hitTarget.SetWidth(18)
+        hitTarget.SetHeight(18)
+        if callback:
+            API.AddControlOnClick(hitTarget, callback)
+        self.gump.Add(hitTarget)
+        labelObj = self.addLabel(label, x + 22, y + labelYOffset, hue)
+        if callback:
+            API.AddControlOnClick(labelObj, callback)
+        return GumpRadio(radio, fills)
+
+    def addRadioRow(self, label, x, y, width, group, isChecked, callback, hue=None, selected=None):
+        if selected is None:
+            selected = isChecked
+        self.addRow(x, y, width, 20, selected)
+        return self.addRadio(label, x + 10, y + 1, group, isChecked, callback, hue, 1, 2)
+
+    def addButton(self, label, x, y, type, callback=None, isDarkMode=False, width=63, height=24, fontSize=12):
         if type == "default":
-            color = Color.defaultBlack
-            if isDarkMode:
-                color = Color.defaultWhite
-            labelObj = self.addTtfLabel(label, x, y, 63, 23, 12, color, "center", callback)
+            self.addColorBox(
+                x + 2, y + 4, height - 2, width, Gump.theme["buttonShadow"], 0.55, withTexture=False
+            )
+            self.addColorBox(
+                x, y, height, width, Gump.theme["buttonFrame"], 1, withTexture=False
+            )
+            self.addColorBox(
+                x + 1, y + 1, height - 2, width - 2, "#0a1115", 1, withTexture=False
+            )
+            self.addColorBox(
+                x + 2, y + 2, max(1, int((height - 4) / 2)), width - 4, Gump.theme["buttonHighlight"], 0.9, withTexture=True
+            )
+            self.addColorBox(
+                x + 2, y + 2 + max(1, int((height - 4) / 2)), max(1, height - 4 - max(1, int((height - 4) / 2))), width - 4, Gump.theme["buttonFill"], 0.95, withTexture=False
+            )
+            self.addColorBox(
+                x + 2, y + 2, 1, width - 4, "#ffffff", 0.14, withTexture=False
+            )
+            self.addColorBox(
+                x + 2, y + height - 2, 1, width - 4, "#000000", 0.6, withTexture=False
+            )
+            hover = self.addColorBox(
+                x + 2, y + 2, height - 4, width - 4, Gump.theme["frameHighlight"], 0.18, withTexture=False
+            )
+            hover.IsVisible = False
+            btn = API.CreateGumpColorBox(0.01, "#000000")
+            btn.SetX(x)
+            btn.SetY(y)
+            btn.SetWidth(width)
+            btn.SetHeight(height)
+            if callback:
+                API.AddControlOnClick(btn, callback)
         else:
-            labelObj = API.CreateGumpLabel(label)
-            labelObj.SetY(y)
-            labelObj.SetX(50)
-        API.AddControlOnClick(labelObj, callback)
-        self.gump.Add(labelObj)
+            btnDef = Gump.buttonTypes.get(type, Gump.buttonTypes["default"])
+            btn = API.CreateGumpButton("", 996, btnDef["normal"], btnDef["pressed"], btnDef["hover"])
+            btn.SetX(x)
+            btn.SetY(y)
+            if callback:
+                API.AddControlOnClick(btn, callback)
+            self.gump.Add(btn)
+
+        if label:
+            if type == "default":
+                color = "#efe4cd"
+                if isDarkMode:
+                    color = Color.defaultWhite
+                labelObj = self.addTtfLabel(label, x, y, width, height, fontSize, color, "center", None)
+                self.hoverControls.append({"targets": [btn, labelObj], "hover": hover})
+                self.gump.Add(btn)
+            else:
+                labelObj = API.CreateGumpLabel(label, Gump.hues["text"])
+                labelObj.SetY(y)
+                labelObj.SetX(x + 24)
+                if callback:
+                    API.AddControlOnClick(labelObj, callback)
+                self.gump.Add(labelObj)
+        elif type == "default":
+            self.hoverControls.append({"targets": [btn], "hover": hover})
+            self.gump.Add(btn)
         return btn
+
+    def addHelpButton(self, x, y, callback=None, width=20, height=20):
+        self.addColorBox(x + 6, y, 2, width - 12, "#7bd8ff", 0.9)
+        self.addColorBox(x + 3, y + 2, 2, width - 6, "#1f8bc3", 1)
+        self.addColorBox(x + 1, y + 4, height - 8, width - 2, "#0e5f8a", 1)
+        self.addColorBox(x + 3, y + height - 4, 2, width - 6, "#053650", 1)
+        self.addColorBox(x + 6, y + height - 2, 2, width - 12, "#032233", 1)
+        self.addColorBox(x + 5, y + 4, 4, width - 10, "#2fb3ef", 0.72)
+        self.addColorBox(x + 3, y + 6, height - 12, width - 6, "#0b4060", 0.38)
+        hover = self.addColorBox(x + 2, y + 2, height - 4, width - 4, "#62c6ff", 0.24)
+        hover.IsVisible = False
+        hitTarget = API.CreateGumpColorBox(0.01, "#000000")
+        hitTarget.SetX(x)
+        hitTarget.SetY(y)
+        hitTarget.SetWidth(width)
+        hitTarget.SetHeight(height)
+        if callback:
+            API.AddControlOnClick(hitTarget, callback)
+        self.addColorBox(x + 9, y + 5, 2, 2, "#f5fbff", 1, withTexture=False)
+        self.addColorBox(x + 9, y + 9, 7, 2, "#f5fbff", 1, withTexture=False)
+        self.addColorBox(x + 8, y + 16, 1, 4, "#f5fbff", 1, withTexture=False)
+        self.hoverControls.append({"targets": [hitTarget], "hover": hover})
+        self.gump.Add(hitTarget)
+        return hitTarget
+
+    def _updateHoverControls(self):
+        for item in self.hoverControls:
+            isHovered = False
+            for target in item["targets"]:
+                try:
+                    if target.MouseIsOver:
+                        isHovered = True
+                        break
+                except:
+                    pass
+            try:
+                item["hover"].IsVisible = isHovered
+            except:
+                pass
 
     def addTtfLabel(
         self, label, x, y, width, height, fontSize, fontColorHex, position, callback
     ):
         ttfLabel = API.CreateGumpTTFLabel(
-            label, fontSize, fontColorHex, maxWidth=width, aligned=position
+            label, fontSize, fontColorHex, maxWidth=width, aligned=position, applyStroke=True
         )
         centerY = y + int(height / 2) - 6
         ttfLabel.SetX(x)
         ttfLabel.SetY(centerY)
-        API.AddControlOnClick(ttfLabel, self.onClick(callback))
+        if callback:
+            API.AddControlOnClick(ttfLabel, callback)
         self.gump.Add(ttfLabel)
         return ttfLabel
 
     def addLabel(self, text, x, y, hue=None):
-        label = API.CreateGumpLabel(text)
+        if hue is None:
+            hue = Gump.hues["text"]
+        label = API.CreateGumpLabel(text, hue)
         label.SetX(x)
         label.SetY(y)
-        if hue:
-            label.Hue = hue
         self.gump.Add(label)
         return label
 
@@ -269,11 +667,16 @@ class Gump:
         clampedValue = max(minValue, min(maxValue, Decimal(defaultValue)))
         borderColor = "".join(Color.defaultWhite)
         borders = []
+
+        self.addColorBox(x - 4, y - 4, height + 8, width + 8, Gump.theme["panelOuter"], 0.95)
+        self.addColorBox(x - 3, y - 3, height + 6, width + 6, Gump.theme["panelInner"], 0.95)
+        self.addColorBox(x - 2, y - 2, height + 4, width + 4, "#1a1a1a", 0.85)
+
         for bx, by, bw, bh in [
-            (x - 2, y - 2, width + 4, 2),
-            (x - 2, y + height, width + 4, 2),
-            (x - 2, y, 2, height),
-            (x + width, y, 2, height),
+            (x - 1, y - 1, width + 2, 1),
+            (x - 1, y + height, width + 2, 1),
+            (x - 1, y, 1, height),
+            (x + width, y, 1, height),
         ]:
             border = API.CreateGumpColorBox(1, borderColor)
             border.SetX(bx)
@@ -315,14 +718,51 @@ class Gump:
             cb = self.pendingCallbacks.pop(0)
             cb()
 
+    def _createColorBox(self, x, y, width, height, colorHex, opacity=1, container=None):
+        if width <= 0 or height <= 0:
+            return None
+        colorBox = API.CreateGumpColorBox(opacity, colorHex)
+        colorBox.SetX(x)
+        colorBox.SetY(y)
+        colorBox.SetWidth(width)
+        colorBox.SetHeight(height)
+        if container:
+            container.Add(colorBox)
+        else:
+            self.gump.Add(colorBox)
+        return colorBox
+
     def _setBackground(self):
         if not self.bg:
-            self.bg = API.CreateGumpColorBox(0.75, Color.defaultBlack)
+            self.bg = API.CreateGumpColorBox(1, Gump.theme["bgOuter"])
             self.gump.Add(self.bg)
-        self.bg.SetWidth(self.width - 10)
-        self.bg.SetHeight(self.height - 10)
+
+        self.bg.SetWidth(self.width)
+        self.bg.SetHeight(self.height)
         self.bg.SetX(0)
         self.bg.SetY(0)
+
+        self._createColorBox(3, 3, self.width - 6, self.height - 6, Gump.theme["bgInner"], 0.98)
+        self._createColorBox(5, 5, self.width - 10, self.height - 10, Gump.theme["bgInset"], 0.92)
+        self._createColorBox(5, 5, self.width - 10, 26, "#1d3344", 0.28)
+        self._createColorBox(5, self.height - 34, self.width - 10, 22, "#05090d", 0.6)
+
+        for y in range(10, self.height - 10, 20):
+            self._createColorBox(8, y, self.width - 16, 1, Gump.theme["grainLine"], 0.03)
+        for x in range(16, self.width - 16, 36):
+            self._createColorBox(x, 8, 1, self.height - 16, Gump.theme["grainLine"], 0.015)
+
+    def _drawStatusArea(self):
+        self._statusPanel.extend(self.addDivider(8, self.height - 33, self.width - 16))
+        bg = self.addColorBox(
+            8, self.height - 31, 22, self.width - 16, Gump.theme["statusBg"], 0.92, withTexture=True
+        )
+        self._statusPanel.append(bg)
+
+        self.statusLabel = API.CreateGumpLabel("Ready.", Gump.hues["status"])
+        self.statusLabel.SetX(14)
+        self.statusLabel.SetY(self.height - 27)
+        self.gump.Add(self.statusLabel)
 
     def _setBorders(
         self,
@@ -359,6 +799,18 @@ class Gump:
             self.gump.Add(border)
             borders.append(border)
         return borders
+
+    def _setCornerAccents(self):
+        accentWidth = 14
+        accentHeight = 2
+        accentColor = Gump.theme["frameHighlight"]
+        for x, y in [
+            (4, 4),
+            (self.width - 18, 4),
+            (4, self.height - 6),
+            (self.width - 18, self.height - 6),
+        ]:
+            self.addColorBox(x, y, accentHeight, accentWidth, accentColor, 0.9, withTexture=False)
 
     def _setSubGumpPosition(self, gump, width, height, position):
         gx, gy = self.gump.GetX(), self.gump.GetY()
