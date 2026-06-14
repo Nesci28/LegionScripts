@@ -1,2 +1,5 @@
 .env
 *.txt
+**.pyc
+__pycache__
+*.log

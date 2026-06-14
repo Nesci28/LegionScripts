@@ -246,11 +246,14 @@ class Util:
                 return item
 
     @staticmethod
-    def isTargeting():
-        return API.WaitForTarget("any", 0)
+    def isTargeting(timeout=0):
+        return API.WaitForTarget("any", timeout)
 
     @staticmethod
-    def getTypeOfTarget():
+    def getTypeOfTarget(timeout=0.5):
+        if not API.WaitForTarget("any", timeout):
+            return None
+
         res = None
         if API.WaitForTarget("Neutral", 0):
             res = "Neutral"

@@ -8,10 +8,12 @@ LegionPath.addSubdirs()
 import Magic
 import Util
 import Math
+import Timer
 
 importlib.reload(Magic)
 importlib.reload(Util)
 importlib.reload(Math)
+importlib.reload(Timer)
 
 
 class Caster:
@@ -66,9 +68,11 @@ class Caster:
         self.magic.healCure(ceil(API.Player.HitsMax / 3) * 2, API.Player.HitsMax - 1)
 
         castInfo = self._getCastingInfo(skillLevel, spells)
-        manaCost, spellName, totalPause, nextSpell = (
+        manaCost, spellName, castTime, recoverTime, totalPause, nextSpell = (
             castInfo["manaCost"],
             castInfo["spellName"],
+            castInfo["castTime"],
+            castInfo["recoverTime"],
             castInfo["totalPause"],
             castInfo["nextSpell"],
         )
@@ -79,10 +83,15 @@ class Caster:
         startMana = API.Player.Mana
         startTime = time.time()
 
-        self.magic.cast(spellName)
-        self._target()
+        if castTime > 0:
+            Timer.Timer.create(castTime, f"Casting {spellName}", 88)
 
-        API.Pause(Magic.Magic.getFcrDelay())
+        if self.magic.cast(spellName):
+            self._target()
+
+        if recoverTime > 0:
+            Timer.Timer.create(recoverTime, f"Recovering {spellName}", 906)
+        API.Pause(recoverTime)
 
         Magic.Magic.regenMana(manaCost)
         self._checkIfGearBroken()
@@ -140,6 +149,8 @@ class Caster:
 
                 return {
                     "spellName": spellName,
+                    "castTime": castTime,
+                    "recoverTime": recoverTime,
                     "totalPause": totalPause,
                     "manaCost": manaCost,
                     "nextSpell": nextSpell,

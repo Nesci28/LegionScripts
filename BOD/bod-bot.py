@@ -162,7 +162,7 @@ class BodBot:
             )
             self.typeCheckboxes.append({"label": type, "checkbox": checkbox})
 
-        settingsPanel = g.addPanel(10, 168, width - 20, 132, "Settings")
+        settingsPanel = g.addPanel(10, 168, width - 20, 156, "Settings")
         radioX = settingsPanel["x"] + 4
         textX = settingsPanel["x"] + 26
         y = settingsPanel["y"] + 4
@@ -271,7 +271,11 @@ class BodBot:
             72,
         )
 
-        listPanel = g.addPanel(10, 308, width - 20, 280, "Fill Status & Items")
+        listPanelY = settingsPanel["y"] + settingsPanel["height"] + 8
+        listPanelBottom = 588
+        listPanel = g.addPanel(
+            10, listPanelY, width - 20, listPanelBottom - listPanelY, "Fill Status & Items"
+        )
         x = listPanel["x"]
         y = listPanel["y"] + 2
         footerHeight = 32
@@ -286,10 +290,9 @@ class BodBot:
         x += 185
         g.addLabel("Mark", x, y)
 
-        self.scrollArea = API.CreateGumpScrollArea(
+        self.scrollArea = g.addScrollArea(
             listPanel["x"], y + 18, listPanel["width"], listPanel["height"] - footerHeight - 22
         )
-        self.gump.gump.Add(self.scrollArea)
 
         footerY = listPanel["y"] + listPanel["height"] - footerHeight
         g.addColorBox(listPanel["x"], footerY, 1, listPanel["width"], Gump.theme["panelHeaderLine"], 0.85)
@@ -811,21 +814,21 @@ class BodBot:
         isPartiallyFilledIcon = 11410
         if Bod.isFilled(bod.item, False):
             isFilledIcon = 11400
-        isFilledIconButton = API.CreateGumpButton(
-            "", 996, isFilledIcon, isFilledIcon, isFilledIcon
+        isFilledIconButton = self.gump.createNativeButton(
+            "", isFilledIcon, isFilledIcon, isFilledIcon
         )
         if Bod.isPartiallyFilled(bod.item):
             isPartiallyFilledIcon = 11400
-        isPartiallyFilledIconButton = API.CreateGumpButton(
-            "", 996, isPartiallyFilledIcon, isPartiallyFilledIcon, isPartiallyFilledIcon
+        isPartiallyFilledIconButton = self.gump.createNativeButton(
+            "", isPartiallyFilledIcon, isPartiallyFilledIcon, isPartiallyFilledIcon
         )
         if Bod.isMaxed(bod.item):
             isMaxBribedIcon = 11400
-        isMaxBribedIconButton = API.CreateGumpButton(
-            "", 996, isMaxBribedIcon, isMaxBribedIcon, isMaxBribedIcon
+        isMaxBribedIconButton = self.gump.createNativeButton(
+            "", isMaxBribedIcon, isMaxBribedIcon, isMaxBribedIcon
         )
-        label = API.CreateGumpLabel(bod.itemName)
-        markButton = API.CreateGumpButton("", 996, 30083, 30084, 30085)
+        label = self.gump.createLabel(bod.itemName)
+        markButton = self.gump.createNativeButton("", 30083, 30084, 30085)
         return {
             "label": label,
             "isFilledIconButton": isFilledIconButton,

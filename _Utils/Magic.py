@@ -107,10 +107,17 @@ class Magic:
                 API.Pause(0.05)
             if spellDef["hasTarget"] and Util.Util.isTargeting():
                 return True
-            if not retry:
+
+            if spellDef["hasTarget"]:
+                if Util.Util.isTargeting(0.5):
+                    return True
+                if not retry:
+                    API.SysMsg(f"No target cursor for: {spellName}", 33)
+                    return False
+            elif not retry:
                 return True
             API.Pause(0.1)
-        return True
+        return False
 
     def healCure(self, greaterHealOffset=20, healOffset=10):
         player = API.Player

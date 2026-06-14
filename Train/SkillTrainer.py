@@ -176,7 +176,7 @@ class Trainer:
         self.gump = None
         self.schoolInputs = []
         self.startBtn = None
-        self.tabGumpWidth = 64
+        self.tabGumpWidth = 144
         self.mainGumpWidth = 400
         self.totalGumpWidth = self.tabGumpWidth + self.mainGumpWidth
 
@@ -230,6 +230,22 @@ class Trainer:
         errors = trainer.validate(skillCap)
         self.errors.extend(errors)
 
+    def _hideStartButton(self):
+        if not self.startBtn:
+            return
+
+        elements = self.startBtn.get("elements") if isinstance(self.startBtn, dict) else None
+        if elements:
+            for element in elements:
+                try:
+                    element.IsVisible = False
+                except Exception:
+                    pass
+            return
+
+        self.startBtn.SetWidth(0)
+        self.startBtn.SetHeight(0)
+
     def _onStart(self):
         try:
             if not self.gump.checkValidateForm():
@@ -254,8 +270,7 @@ class Trainer:
             if charInfo["totalPlus"] + totalNeeded > 720:
                 self.errors.append("Too many skill points selected.")
 
-            self.startBtn.SetWidth(0)
-            self.startBtn.SetHeight(0)
+            self._hideStartButton()
 
             if self.errors:
                 self.gump.setStatus("Validation failed, error detected", 33)
@@ -314,24 +329,24 @@ class Trainer:
             y += 30
 
         self.calculateSkillLabels(schoolName)
-        self.startBtn = gump.addButton(
-            "", 10, y, "okay", gump.onClick(self._onStart, "Validating...", "")
+        self.startBtn = gump.addTextButton(
+            "Start", 10, y, 63, callback=gump.onClick(self._onStart, "Validating...", "")
         )
 
     def _showGump(self):
         g = Gump(self.tabGumpWidth, 400, None, False)
         self.gump = g
 
-        casterGump = g.addTabButton("Caster", "caster", 400)
+        casterGump = g.addTabButton("Caster", "caster", 400, yOffset=52, tabStyle="list")
         self._createSchoolGump(casterGump, "Caster")
 
-        bardGump = g.addTabButton("Bard", "bard", 400)
+        bardGump = g.addTabButton("Bard", "bard", 400, yOffset=52, tabStyle="list")
         self._createSchoolGump(bardGump, "Bard")
 
-        tamerGump = g.addTabButton("Tamer", "tracking", 400)
+        tamerGump = g.addTabButton("Tamer", "tracking", 400, yOffset=52, tabStyle="list")
         self._createSchoolGump(tamerGump, "Tamer")
         
-        thiefGump = g.addTabButton("Thief", "thief", 400)
+        thiefGump = g.addTabButton("Thief", "thief", 400, yOffset=52, tabStyle="list")
         self._createSchoolGump(thiefGump, "Thief")
 
         g.createSubGump(self.totalGumpWidth, 100, withStatus=True)
