@@ -1,7 +1,8 @@
 import API
 import importlib
 import traceback
-import json
+import time
+import re
 from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
@@ -10,7 +11,6 @@ import Bod
 import Gump
 import Util
 import Math
-import Timer
 import Magic
 import Python
 import Error
@@ -22,7 +22,6 @@ importlib.reload(Bod)
 importlib.reload(Gump)
 importlib.reload(Util)
 importlib.reload(Math)
-importlib.reload(Timer)
 importlib.reload(Magic)
 importlib.reload(Python)
 importlib.reload(Error)
@@ -34,7 +33,6 @@ from Bod import Bod
 from Gump import Gump
 from Util import Util
 from Math import Math
-from Timer import Timer
 from Magic import Magic
 from Python import Python
 from Error import Error
@@ -43,6 +41,42 @@ from Item import Item
 
 from bod_skills import bodSkillsStr
 from crafting_infos import craftingInfosStr
+
+TAILORING_BOD_BOOK_GRAPHICS = [0x2259]
+TAILORING_BOD_BOOK_TEXT = "bulk order book"
+TAILORING_CLOTH_RESOURCE_GRAPHIC = 0x1766
+TAILORING_LEATHER_NAME_MARKERS = [
+    "Leather ",
+    " Leather ",
+]
+TAILORING_SORT_CATEGORIES = {
+    "Leather": [
+        "Leather Cap",
+        "Leather Gloves",
+        "Leather Gorget",
+        "Leather Leggings",
+        "Leather Sleeves",
+        "Leather Tunic",
+    ],
+    "Studded": [
+        "Studded Gorget",
+    ],
+    "Bone": [
+        "Bone Armor",
+        "Bone Arms",
+        "Bone Gloves",
+        "Bone Helmet",
+        "Bone Leggings",
+    ],
+    "Footwear": [
+        "Boots",
+        "Sandals",
+        "Shoes",
+        "Thigh Boots",
+    ],
+}
+TAILORING_FOOTWEAR_ITEMS = ["Boots", "Sandals", "Shoes", "Thigh Boots"]
+
 
 class BodBot:
     def __init__(self):
@@ -55,9 +89,12 @@ class BodBot:
         self.tailorSerial = API.GetSharedVar("BOD_BOT_TAILOR_SERIAL") or None
         self.runebookSerial = API.GetSharedVar("BOD_BOT_RUNEBOOK_SERIAL") or None
         self.beetleSerial = API.GetSharedVar("BOD_BOT_BEETLE_SERIAL") or None
+        self.sortChestSerials = API.GetSharedVar("BOD_BOT_SORT_CHEST_SERIALS") or []
         self.bodCountLabel = None
         self.totalLabel = None
+        self.clothUsedLabel = None
         self.total = 0
+        self.clothUsed = 0
         self.runebookItem = API.GetSharedVar("BOD_BOT_RUNEBOOK_ITEM") or None
         self.beetleMobile = API.GetSharedVar("BOD_BOT_BEETLE_MOBILE") or None
 
@@ -125,7 +162,7 @@ class BodBot:
             )
             self.typeCheckboxes.append({"label": type, "checkbox": checkbox})
 
-        settingsPanel = g.addPanel(10, 168, width - 20, 112, "Settings")
+        settingsPanel = g.addPanel(10, 168, width - 20, 132, "Settings")
         radioX = settingsPanel["x"] + 4
         textX = settingsPanel["x"] + 26
         y = settingsPanel["y"] + 4
@@ -206,7 +243,35 @@ class BodBot:
             72,
         )
 
-        listPanel = g.addPanel(10, 288, width - 20, 300, "Fill Status & Items")
+        y += 20
+        sortChestText = f"BOD sort chests: {len(self.sortChestSerials)}"
+        sortChestLabel = g.addLabel(sortChestText, textX, y)
+        g.addButton(
+            "",
+            radioX,
+            y,
+            "radioBlue",
+            self.gump.onClick(
+                lambda sortChestLabel=sortChestLabel: self._onSortChestSelectionClicked(
+                    sortChestLabel
+                )
+            ),
+        )
+        g.addButton(
+            "CLEAR",
+            settingsPanel["x"] + settingsPanel["width"] - 77,
+            y - 3,
+            "default",
+            self.gump.onClick(
+                lambda sortChestLabel=sortChestLabel: self._onClearSortChestsClicked(
+                    sortChestLabel
+                )
+            ),
+            True,
+            72,
+        )
+
+        listPanel = g.addPanel(10, 308, width - 20, 280, "Fill Status & Items")
         x = listPanel["x"]
         y = listPanel["y"] + 2
         footerHeight = 32
@@ -231,10 +296,13 @@ class BodBot:
         g.addColorBox(listPanel["x"], footerY + 1, footerHeight - 1, listPanel["width"], Gump.theme["statusBg"], 0.92, withTexture=True)
         g.addColorBox(listPanel["x"] + int(listPanel["width"] / 2), footerY + 4, footerHeight - 8, 1, Gump.theme["panelHeaderLine"], 0.55)
 
-        bodCountLabel = g.addLabel("BOD COUNT: 0", listPanel["x"] + 14, footerY + 9)
+        bodCountLabel = g.addLabel("BOD COUNT: 0", listPanel["x"] + 12, footerY + 9)
         self.bodCountLabel = bodCountLabel
 
-        totalLabel = g.addLabel("BRIBE TOTAL: 0", listPanel["x"] + int(listPanel["width"] / 2) + 14, footerY + 9)
+        clothUsedLabel = g.addLabel("CLOTH USED: 0", listPanel["x"] + 145, footerY + 9)
+        self.clothUsedLabel = clothUsedLabel
+
+        totalLabel = g.addLabel("BRIBE: 0", listPanel["x"] + int(listPanel["width"] / 2) + 114, footerY + 9)
         self.totalLabel = totalLabel
 
         x = 24
@@ -242,6 +310,7 @@ class BodBot:
         for actionLabel, action in [
             ("BRIBE", "Bribe"),
             ("FILL", "Fill"),
+            ("SORT", "Sort"),
             ("TURN IN", "Turn in"),
             ("RESCAN", "Rescan"),
         ]:
@@ -254,7 +323,7 @@ class BodBot:
                 True,
                 70,
             )
-            x += 86
+            x += 80
 
         self.gump.create()
         self.gump.setStatus("Opening...")
@@ -270,6 +339,8 @@ class BodBot:
             self._bribe()
         if action == "Fill":
             self._fill()
+        if action == "Sort":
+            self._sortBods()
         if action == "Turn in":
             self._turnIn()
         if action == "Rescan":
@@ -319,6 +390,250 @@ class BodBot:
             API.Pause(2)
         self.gump.setStatus("Ready")
 
+    def _sortBods(self):
+        if self.selectedProfession != "Tailoring":
+            self.gump.setStatus("BOD sorting is Tailoring-only for now.", 33)
+            return
+        if not self.sortChestSerials:
+            self.gump.setStatus("Select at least one BOD sort chest.", 33)
+            return
+
+        self.gump.setStatus("Sorting BODs...")
+        moved = 0
+        skipped = 0
+        bodItems = self._findLooseTailoringBods()
+
+        bodsByCategory = {}
+        for bodItem in bodItems:
+            category = self._getTailoringSortCategory(bodItem)
+            if category:
+                bodsByCategory.setdefault(category, []).append(bodItem)
+            else:
+                skipped += 1
+
+        for category, categoryBods in bodsByCategory.items():
+            targetBooks = self._findSortBooks(category)
+            if not targetBooks:
+                skipped += len(categoryBods)
+                API.SysMsg(f"No BOD book found for {category}.", 33)
+                continue
+
+            remainingBods = list(categoryBods)
+            for targetBook in targetBooks:
+                if not remainingBods:
+                    break
+
+                sourceChestSerial = targetBook.Container
+                self.gump.setStatus(f"Sorting {category}...")
+                Util.moveItem(targetBook.Serial, API.Backpack)
+                if not self._waitForContainer(targetBook.Serial, API.Backpack):
+                    continue
+
+                stillRemaining = []
+                storedInBook = 0
+                for bodItem in remainingBods:
+                    Util.moveItem(bodItem.Serial, targetBook.Serial)
+                    if self._waitForBodStored(bodItem.Serial, targetBook.Serial):
+                        moved += 1
+                        storedInBook += 1
+                    else:
+                        stillRemaining.append(bodItem)
+
+                Util.moveItem(targetBook.Serial, sourceChestSerial)
+                self._waitForContainer(targetBook.Serial, sourceChestSerial)
+
+                remainingBods = stillRemaining
+                if storedInBook == 0:
+                    API.SysMsg(f"{category} book accepted no BODs.", 33)
+
+            skipped += len(remainingBods)
+
+        audit = self._auditLooseTailoringBods()
+        report = (
+            f"Sorted {moved}; cloth left {audit['cloth']}; unknown {audit['unknown']}."
+        )
+        self._scan(statusOverride=report)
+
+    def _findLooseTailoringBods(self):
+        bodSkill = self.bodSkills["Tailoring"]
+        bodGraphic = bodSkill["bod"]["graphic"]
+        bodHue = bodSkill["bod"]["hue"]
+        bodItems = []
+        bodItems += Bod.findAllBodItems(bodGraphic, bodHue, True)
+        bodItems += Bod.findAllBodItems(bodGraphic, bodHue, False)
+        return bodItems
+
+    def _auditLooseTailoringBods(self):
+        audit = {
+            "total": 0,
+            "cloth": 0,
+            "classified": 0,
+            "unknown": 0,
+            "unknownNames": {},
+        }
+        for bodItem in self._findLooseTailoringBods():
+            audit["total"] += 1
+            try:
+                values = Bod._parse(bodItem)
+            except Exception:
+                if self._isTailoringClothBod(bodItem):
+                    audit["cloth"] += 1
+                else:
+                    audit["unknown"] += 1
+                    self._addUnknownBodAudit(audit, bodItem, None)
+                continue
+
+            if self._getTailoringSortCategory(bodItem):
+                audit["classified"] += 1
+            elif self._isTailoringClothBod(bodItem, values):
+                audit["cloth"] += 1
+            else:
+                audit["unknown"] += 1
+                self._addUnknownBodAudit(audit, bodItem, values)
+        return audit
+
+    def _addUnknownBodAudit(self, audit, bodItem, parsedBod):
+        itemNames = self._getTailoringBodItemNames(bodItem)
+        if parsedBod and parsedBod["itemName"] and not itemNames:
+            itemNames = [parsedBod["itemName"]]
+        label = ", ".join(itemNames) if itemNames else f"serial {bodItem.Serial}"
+        audit["unknownNames"][label] = audit["unknownNames"].get(label, 0) + 1
+        API.SysMsg(f"Unknown Tailoring BOD: {label}", 33)
+
+    def _isTailoringClothBod(self, bodItem, parsedBod=None):
+        if self._getTailoringBodMaterial(bodItem) == "cloth":
+            return True
+
+        itemNames = self._getTailoringBodItemNames(bodItem)
+        if parsedBod and parsedBod["itemName"] and not itemNames:
+            itemNames = [parsedBod["itemName"]]
+        if not itemNames:
+            return False
+
+        for itemName in itemNames:
+            itemInfo = self.bodSkills["Tailoring"]["items"].get(itemName)
+            if not itemInfo:
+                return False
+
+            resources = itemInfo.get("resources", [])
+            if not resources:
+                return False
+
+            isClothItem = all(
+                resource.get("graphic") == TAILORING_CLOTH_RESOURCE_GRAPHIC
+                for resource in resources
+            )
+            if not isClothItem:
+                return False
+
+        return True
+
+    def _getTailoringBodMaterial(self, bodItem):
+        props = API.ItemNameAndProps(bodItem.Serial).split("\n")
+        for prop in props:
+            prop = prop.strip()
+            if prop.lower().startswith("amount to make"):
+                break
+            material = Bod._getMaterial(prop)
+            if material:
+                return material
+        return None
+
+    def _getTailoringSortCategory(self, bodItem):
+        try:
+            values = Bod._parse(bodItem)
+        except Exception:
+            return None
+
+        itemNames = self._getTailoringBodItemNames(bodItem)
+        if values["itemName"] and not itemNames:
+            itemNames = [values["itemName"]]
+        if not itemNames:
+            return None
+
+        typeName = "Small" if values["isSmall"] else "Large"
+        categories = []
+        for itemName in itemNames:
+            categoryName = self._getTailoringItemCategory(itemName)
+            if not categoryName:
+                return None
+            categories.append(categoryName)
+
+        if len(set(categories)) == 1:
+            return f"{categories[0]} {typeName}"
+        if len(set(categories)) > 1:
+            return f"Mixed {typeName}"
+        return None
+
+    def _getTailoringBodItemNames(self, bodItem):
+        props = API.ItemNameAndProps(bodItem.Serial).split("\n")
+        itemNames = []
+        isReadingItems = False
+        for prop in props:
+            prop = prop.strip()
+            if prop.lower().startswith("amount to make"):
+                isReadingItems = True
+                continue
+            if not isReadingItems:
+                continue
+
+            match = re.search(r"([a-zA-Z '-]+):\s*(\d+)", prop)
+            if match:
+                itemNames.append(match.group(1).strip())
+
+        return itemNames
+
+    def _getTailoringItemCategory(self, itemName):
+        if itemName in TAILORING_FOOTWEAR_ITEMS:
+            return "Footwear"
+        if itemName.startswith("Bone "):
+            return "Bone"
+        if itemName.startswith("Studded "):
+            return "Studded"
+        if any(marker in itemName for marker in TAILORING_LEATHER_NAME_MARKERS):
+            return "Leather"
+        return None
+
+    def _findSortBooks(self, category):
+        categoryWords = category.lower().split()
+        books = []
+        for chestSerial in self.sortChestSerials:
+            chest = API.FindItem(chestSerial)
+            if not chest:
+                continue
+            Util.openContainer(chest)
+            for item in Util.itemsInContainer(chestSerial):
+                props = API.ItemNameAndProps(item.Serial, True).lower()
+                if not self._isBodBook(item, props):
+                    continue
+                if all(word in props for word in categoryWords):
+                    books.append(item)
+        return books
+
+    def _isBodBook(self, item, props):
+        return (
+            item.Graphic in TAILORING_BOD_BOOK_GRAPHICS
+            or TAILORING_BOD_BOOK_TEXT in props
+        )
+
+    def _waitForContainer(self, itemSerial, containerSerial, timeout=3):
+        start = time.time()
+        while time.time() - start < timeout:
+            item = API.FindItem(itemSerial)
+            if item and item.Container == containerSerial:
+                return True
+            API.Pause(0.1)
+        return False
+
+    def _waitForBodStored(self, bodSerial, bookSerial, timeout=3):
+        start = time.time()
+        while time.time() - start < timeout:
+            item = API.FindItem(bodSerial)
+            if not item or item.Container == bookSerial or item.Container != API.Backpack:
+                return True
+            API.Pause(0.1)
+        return False
+
     def _fill(self):
         if not self.containerSerial:
             return
@@ -327,20 +642,48 @@ class BodBot:
         if distance > 1:
             return
         self.gump.setStatus("Filling...")
+        self.clothUsed = 0
+        self._setClothUsedLabel()
         counter = 0
         for bodInfo in self.bodInfos:
             isFilled = Bod.isFilled(bodInfo["bod"].item)
             if not isFilled:
                 counter += 1
         currentCounter = 0
+        lastClothCount = self._countAvailableCloth(resourceChest)
+
+        def updateClothUsed():
+            nonlocal lastClothCount
+            currentClothCount = self._countAvailableCloth(resourceChest)
+            self.clothUsed += max(0, lastClothCount - currentClothCount)
+            lastClothCount = currentClothCount
+            self._setClothUsedLabel()
+
         for bodInfo in self.bodInfos:
             isFilled = Bod.isFilled(bodInfo["bod"].item)
             if not isFilled:
                 currentCounter += 1
                 self.gump.setStatus(f"Filling... {currentCounter}/{counter}")
-                bodInfo["bod"].fill()
+                bodInfo["bod"].fill(updateClothUsed)
+                updateClothUsed()
             self._resetScrollAreaElement(bodInfo)
         self.gump.setStatus("Ready")
+
+    def _setClothUsedLabel(self):
+        if self.clothUsedLabel:
+            self.clothUsedLabel.Text = f"CLOTH USED: {self.clothUsed}"
+
+    def _countAvailableCloth(self, resourceChest):
+        containers = [API.Backpack]
+        if resourceChest:
+            containers.append(resourceChest.Serial)
+
+        total = 0
+        for container in containers:
+            for item in Util.itemsInContainer(container):
+                if item.Graphic == TAILORING_CLOTH_RESOURCE_GRAPHIC and item.Hue == 0:
+                    total += item.Amount
+        return total
 
     def _bribe(self):
         if not self.runebookSerial:
@@ -366,7 +709,7 @@ class BodBot:
                         runeIndex += 1
                         continue
                     self.total += total
-                    self.totalLabel.Text = f"BRIBE TOTAL: {str(self.total)}"
+                    self.totalLabel.Text = f"BRIBE: {str(self.total)}"
             self._resetScrollAreaElement(bodInfo)
         self.gump.setStatus("Ready")
 
@@ -384,10 +727,11 @@ class BodBot:
         bodInfo["label"] = labels["label"]
         self._appendToScrollArea(bodInfo)
 
-    def _scan(self):
+    def _scan(self, statusOverride=None):
         if not self.scrollArea:
             return
-        self.gump.setStatus("Scanning BODs...")
+        if not statusOverride:
+            self.gump.setStatus("Scanning BODs...")
         self.scrollArea.Clear()
         self.bodInfos = []
 
@@ -434,7 +778,7 @@ class BodBot:
 
             if self.bodCountLabel:
                 self.bodCountLabel.Text = f"BOD COUNT: {len(self.bodInfos)}"
-            self.gump.setStatus("Ready.")
+            self.gump.setStatus(statusOverride or "Ready.")
         except Exception as e:
             API.SysMsg(str(e))
             API.SysMsg(traceback.format_exc())
@@ -564,6 +908,20 @@ class BodBot:
         API.SetSharedVar("BOD_BOT_CONTAINER_SERIAL", targetSerial)
         resourceLabel.Text = f"Selected resource container ({targetSerial})"
         self._scan()
+
+    def _onSortChestSelectionClicked(self, sortChestLabel):
+        targetSerial = API.RequestTarget()
+        if not targetSerial:
+            return
+        if targetSerial not in self.sortChestSerials:
+            self.sortChestSerials.append(targetSerial)
+        API.SetSharedVar("BOD_BOT_SORT_CHEST_SERIALS", self.sortChestSerials)
+        sortChestLabel.Text = f"BOD sort chests: {len(self.sortChestSerials)}"
+
+    def _onClearSortChestsClicked(self, sortChestLabel):
+        self.sortChestSerials = []
+        API.SetSharedVar("BOD_BOT_SORT_CHEST_SERIALS", self.sortChestSerials)
+        sortChestLabel.Text = "BOD sort chests: 0"
 
     def _onTypeClicked(self, type):
         for checkbox in self.typeCheckboxes:

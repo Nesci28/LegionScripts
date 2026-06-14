@@ -20,6 +20,9 @@ import SpiritSpeak
 import Meditation
 import Musicianship
 import Peacemaking
+import SkillTrainerAnimalLore
+import SkillTrainerLockpicking
+import SkillTrainerRemoveTrap
 
 importlib.reload(Gump)
 importlib.reload(Util)
@@ -35,6 +38,9 @@ importlib.reload(SpiritSpeak)
 importlib.reload(Meditation)
 importlib.reload(Musicianship)
 importlib.reload(Peacemaking)
+importlib.reload(SkillTrainerAnimalLore)
+importlib.reload(SkillTrainerLockpicking)
+importlib.reload(SkillTrainerRemoveTrap)
 
 from Gump import Gump
 from Util import Util
@@ -50,6 +56,9 @@ from SpiritSpeak import SpiritSpeak
 from Meditation import Meditation
 from Musicianship import Musicianship
 from Peacemaking import Peacemaking
+from SkillTrainerAnimalLore import AnimalLore
+from SkillTrainerLockpicking import Lockpicking
+from SkillTrainerRemoveTrap import RemoveTrap
 
 
 class Trainer:
@@ -124,6 +133,14 @@ class Trainer:
                 "capLabel": None,
             },
         ],
+        "Tamer": [
+            {
+                "skillName": "Animal Lore",
+                "trainer": AnimalLore,
+                "skillLabel": None,
+                "capLabel": None,
+            },
+        ],
         "Thief": [
             {
                 "skillName": "Hiding",
@@ -136,6 +153,19 @@ class Trainer:
                 "trainer": None,
                 "skillLabel": None,
                 "capLabel": None,
+            },
+            {
+                "skillName": "Lockpicking",
+                "trainer": Lockpicking,
+                "skillLabel": None,
+                "capLabel": None,
+            },
+            {
+                "skillName": "Remove Trap",
+                "trainer": RemoveTrap,
+                "skillLabel": None,
+                "capLabel": None,
+                "useStatus": True,
             },
         ]
     }
@@ -175,8 +205,6 @@ class Trainer:
             return
         self._running = False
         if self.gump:
-            for subGump in self.gump.subGumps:
-                subGump.destroy()
             self.gump.destroy()
             self.gump = None
         API.Stop()
@@ -188,8 +216,18 @@ class Trainer:
             school["skillLabel"].Text = Math.truncateDecimal(info["value"], 1)
             school["capLabel"].Text = Math.truncateDecimal(info["cap"], 1)
 
+    def _getTrainer(self, school):
+        if school["skillName"] == "Remove Trap":
+            importlib.reload(SkillTrainerRemoveTrap)
+            school["trainer"] = SkillTrainerRemoveTrap.RemoveTrap
+        return school["trainer"]
+
     def _validate(self, school, skillCap):
-        errors = school["trainer"].validate(skillCap)
+        trainer = self._getTrainer(school)
+        if not trainer:
+            self.errors.append(f"{school['skillName']} - Training not implemented.")
+            return
+        errors = trainer.validate(skillCap)
         self.errors.extend(errors)
 
     def _onStart(self):
@@ -213,8 +251,8 @@ class Trainer:
                 for school, box, *_ in workingSkills
             )
             charInfo = Util.getCharSkillInfo()
-            if charInfo["totalPlus"] + totalNeeded - charInfo["totalMinus"] > 720:
-                self.errors.append("Too many distributed skill point")
+            if charInfo["totalPlus"] + totalNeeded > 720:
+                self.errors.append("Too many skill points selected.")
 
             self.startBtn.SetWidth(0)
             self.startBtn.SetHeight(0)
@@ -229,7 +267,13 @@ class Trainer:
             else:
                 for school, box, lbl, skillLbl in workingSkills:
                     skillCap = Decimal(box.Text)
-                    trainer = school["trainer"](skillCap, lbl, skillLbl)
+                    trainerClass = self._getTrainer(school)
+                    if school.get("useStatus"):
+                        trainer = trainerClass(
+                            skillCap, lbl, skillLbl, self.gump.setStatus
+                        )
+                    else:
+                        trainer = trainerClass(skillCap, lbl, skillLbl)
                     self.gump.setStatus(f"Training {school['skillName']}...")
                     trainer.train(lambda shcoolName=school["name"]: self.calculateSkillLabels(shcoolName))
         except Exception as e:
@@ -283,6 +327,9 @@ class Trainer:
 
         bardGump = g.addTabButton("Bard", "bard", 400)
         self._createSchoolGump(bardGump, "Bard")
+
+        tamerGump = g.addTabButton("Tamer", "tracking", 400)
+        self._createSchoolGump(tamerGump, "Tamer")
         
         thiefGump = g.addTabButton("Thief", "thief", 400)
         self._createSchoolGump(thiefGump, "Thief")
@@ -294,17 +341,6 @@ class Trainer:
 
     def _isRunning(self):
         return self._running
-
-    def tick(self):
-        if not self._running:
-            return False
-        if self.gump:
-            trainer.gump.tick()
-            trainer.gump.tickSubGumps()
-            if self.gump.gump.IsDisposed:
-                self._onClose()
-                return False
-        return True
 
 
 trainer = Trainer()

@@ -14,9 +14,21 @@ from Util import Util
 
 
 class Peacemaking(Music):
-    def __init__(self, running=None, skillCap=None):
-        self.running = running
-        self.skillCap = skillCap or API.GetSkill("Peacemaking").Cap
+    @staticmethod
+    def validate(skillCap=None):
+        return Music.validate()
+
+    def __init__(self, skillCap=None, label=None, skillLevelLabel=None, running=None):
+        if callable(skillCap):
+            running = skillCap
+            skillCap = label
+            label = None
+            skillLevelLabel = None
+
+        self.running = running or (lambda: True)
+        self.skillCap = skillCap if skillCap is not None else API.GetSkill("Peacemaking").Cap
+        self.label = label
+        self.skillLevelLabel = skillLevelLabel
         self.instruments = self._findInstruments()
         self.skillName = "Peacemaking"
         self._done = False
@@ -25,20 +37,23 @@ class Peacemaking(Music):
     def trainOnce(self):
         errors = Music.validate()
         if errors:
-            Util.error(f"{self.skillName} - Missing instruments")
+            API.SysMsg(f"{self.skillName} - Missing instruments", 33)
+            API.Stop()
+            return
         self.use(API.Player.Serial)
         API.Pause(6)
 
     def train(self, calculateSkillLabels=None):
-        if not self.running() or self._done:
-            return True
-        if Util.getSkillInfo(self.skillName)["value"] >= self.skillCap:
-            self._done = True
-            return True
-        self.trainOnce()
-        if calculateSkillLabels:
-            calculateSkillLabels()
-        return False
+        while (
+            self.running()
+            and Util.getSkillInfo(self.skillName)["value"] < self.skillCap
+        ):
+            self.trainOnce()
+            if calculateSkillLabels:
+                calculateSkillLabels()
+
+        self._done = Util.getSkillInfo(self.skillName)["value"] >= self.skillCap
+        return self._done
 
     def use(self, targetSerial):
         API.ClearJournal()

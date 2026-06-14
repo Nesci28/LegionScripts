@@ -236,7 +236,7 @@ class Bod:
                     API.Pause(0.1)
                 return total
 
-    def fill(self):
+    def fill(self, onCraftAttempt=None):
         self._fillBod()
         Bod.isFilled(self.item)
         if not self.isSmall:
@@ -255,6 +255,8 @@ class Bod:
                 self.resourceHue,
                 self.material,
             )
+            if onCraftAttempt:
+                onCraftAttempt()
             if isValidItem:
                 self.count += 1
         self._fillBod()
@@ -283,7 +285,7 @@ class Bod:
         API.Pause(1)
 
     def _findBridePrice(self):
-        return API.InJournal("$\d gold")
+        return API.InJournal(r"$\d gold")
 
     def _update(self):
         values = Bod._parse(self.item, self.craftingInfo)

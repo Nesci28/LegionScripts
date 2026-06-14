@@ -33,7 +33,8 @@ class Meditation(Caster):
     def trainOnce(self):
         self.magic.cast("Clumsy")
 
-    def train(self):
-        value = API.GetSkill("Meditation").Value
-        while value < self.skillCap:
+    def train(self, calculateSkillLabels=None):
+        while Util.Util.getSkillInfo("Meditation")["value"] < self.skillCap:
             self.trainOnce()
+            if calculateSkillLabels:
+                calculateSkillLabels()

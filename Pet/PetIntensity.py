@@ -280,18 +280,18 @@ class PetIntensity:
         }
 
     def _showGump(self):
-        self.GUMP_WIDTH = 455
-        self.GUMP_HEIGHT = 525
+        self.GUMP_WIDTH = 475
+        self.GUMP_HEIGHT = 735
         self.gump = Gump(self.GUMP_WIDTH, self.GUMP_HEIGHT, self._onClose, False, gumpId=0xBEE701)
         self.petTypeRadios = []
         self.metricHighlights = {}
         self.currentHighlights = {}
 
         self.gump.addTitle("PET INTENSITY CALCULATOR")
-        self.gump.addHelpButton(338, 7, self.gump.onClick(lambda: self._help()))
+        self.gump.addHelpButton(self.GUMP_WIDTH - 120, 7, self.gump.onClick(lambda: self._help()))
 
-        statPanel = self.gump.addPanel(14, 42, 207, 96, "Stats")
-        resistPanel = self.gump.addPanel(234, 42, 207, 96, "Resists")
+        statPanel = self.gump.addPanel(14, 42, 217, 112, "Stats")
+        resistPanel = self.gump.addPanel(244, 42, 217, 112, "Resists")
 
         self.statLabels = {}
         self._addMetricCells(
@@ -315,14 +315,14 @@ class PetIntensity:
         )
 
         intensityPanel = self.gump.addPanel(
-            14, 152, self.GUMP_WIDTH - 28, 160, "Intensity Distribution"
+            14, 168, self.GUMP_WIDTH - 28, 166, "Intensity Distribution"
         )
         self.totalPetLabel = self.gump.addLabel("", 0, 0)
         chart = self.gump.addChartGrid(
-            intensityPanel["x"] + 4,
-            intensityPanel["y"] + 8,
-            intensityPanel["width"] - 8,
-            intensityPanel["height"] - 12,
+            intensityPanel["x"] + 10,
+            intensityPanel["y"] + 12,
+            intensityPanel["width"] - 22,
+            intensityPanel["height"] - 26,
             ["25%", "20%", "15%", "10%", "5%", ""],
             ["0", "10", "20", "30", "40", "50", "60", "70", "80", "90"],
         )
@@ -333,16 +333,16 @@ class PetIntensity:
         self._drawHistoryIntensityChart()
 
         resistHistoryPanel = self.gump.addPanel(
-            14, 326, self.GUMP_WIDTH - 28, 62, "Elite Resist History"
+            14, 350, self.GUMP_WIDTH - 28, 78, "Elite Resist History"
         )
-        self._resistChartX = resistHistoryPanel["x"] + 8
-        self._resistChartWidth = resistHistoryPanel["width"] - 16
-        self._resistChartY = resistHistoryPanel["y"] + 14
+        self._resistChartX = resistHistoryPanel["x"] + 16
+        self._resistChartWidth = resistHistoryPanel["width"] - 32
+        self._resistChartY = resistHistoryPanel["y"] + 42
         self._drawHistoryResistChart()
 
-        selectPanel = self.gump.addPanel(14, 402, 198, 88, "Select Pet Type")
+        selectPanel = self.gump.addPanel(14, 444, 208, 132, "Select Pet Type")
         for i, (label, key) in enumerate([("Cu Sidhe", "cu sidhe"), ("Lesser Hiryu", "lesser hiryu")]):
-            rowY = selectPanel["y"] + 5 + i * 28
+            rowY = selectPanel["y"] + 20 + i * 32
             self.gump.addRow(
                 selectPanel["x"] + 2,
                 rowY - 3,
@@ -360,47 +360,74 @@ class PetIntensity:
             )
             self.petTypeRadios.append({"key": key, "radio": radio})
 
-        detailsPanel = self.gump.addPanel(226, 402, self.GUMP_WIDTH - 240, 88, "Current Pet")
-        self.nameLabel = self.gump.addLabel("No pet analyzed", detailsPanel["x"] + 8, detailsPanel["y"] + 14)
-        self.currentHighlights["slots"] = self._addRatingHighlight(detailsPanel["x"] + 4, detailsPanel["y"] + 32, detailsPanel["width"] - 8, 16)
-        self.currentHighlights["rating"] = self._addRatingHighlight(detailsPanel["x"] + 4, detailsPanel["y"] + 50, detailsPanel["width"] - 8, 16)
-        self.slotLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 32)
-        self.ratingLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 50)
-        self.templateLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 68)
-        self.colorLabel = self.gump.addLabel("", detailsPanel["x"] + 104, detailsPanel["y"] + 70)
+        detailsPanel = self.gump.addPanel(236, 444, self.GUMP_WIDTH - 250, 132, "Current Pet")
+        self.nameLabel = self.gump.addLabel("No pet analyzed", detailsPanel["x"] + 10, detailsPanel["y"] + 20)
+        self.currentHighlights["slots"] = self._addRatingHighlight(detailsPanel["x"] + 4, detailsPanel["y"] + 38, detailsPanel["width"] - 8, 16)
+        self.currentHighlights["rating"] = self._addRatingHighlight(detailsPanel["x"] + 4, detailsPanel["y"] + 58, detailsPanel["width"] - 8, 16)
+        self.slotLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 38)
+        self.ratingLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 58)
+        self.templateLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 78)
+        self.colorLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 98)
+
+        decisionPanel = self.gump.addPanel(14, 588, self.GUMP_WIDTH - 28, 96, "Final Decision")
+        self.currentHighlights["decision"] = self._addRatingHighlight(decisionPanel["x"] + 4, decisionPanel["y"] + 34, decisionPanel["width"] - 8, 24)
+        self.finalDecisionLabel = self.gump.addTtfLabel(
+            "Scan a pet to evaluate taming value.",
+            decisionPanel["x"] + 16,
+            decisionPanel["y"] + 40,
+            decisionPanel["width"] - 32,
+            26,
+            13,
+            "#efe4cd",
+            "center",
+            None,
+        )
+        self.finalDecisionDetailLabel = self.gump.addTtfLabel(
+            "",
+            decisionPanel["x"] + 16,
+            decisionPanel["y"] + 70,
+            decisionPanel["width"] - 32,
+            18,
+            11,
+            "#d8c6a0",
+            "center",
+            None,
+        )
         self.webLabel = self.gump.addLabel("", 0, 0)
 
-        self.totalPetLabel.SetX(self.GUMP_WIDTH - 138)
-        self.totalPetLabel.SetY(370)
+        self.totalPetLabel.SetX(self.GUMP_WIDTH - 150)
+        self.totalPetLabel.SetY(408)
 
         self.gump.create()
 
     def _addMetricCells(self, panel, rows, labels, colors=None):
         colors = colors or {}
-        cellHeight = 29
-        cellWidth = int(panel["width"] / 3)
+        cellWidth = 62
+        cellHeight = 22
+        cellGap = 5
+        rowGap = 12
+        totalHeight = len(rows) * cellHeight + (len(rows) - 1) * rowGap
+        startY = panel["y"] + 26 + max(0, (panel["height"] - 38 - totalHeight) // 2)
+
         for rowIndex, row in enumerate(rows):
-            y = panel["y"] + 14 + rowIndex * cellHeight
-            self.gump.addColorBox(panel["x"], y, 1, panel["width"], Gump.theme["panelHeaderLine"], 0.22)
-            if rowIndex > 0:
-                self.gump.addColorBox(panel["x"], y - 1, 1, panel["width"], "#000000", 0.35)
-            for colIndex, name in enumerate(row):
-                x = panel["x"] + colIndex * cellWidth
-                if colIndex > 0:
-                    self.gump.addColorBox(x, y, cellHeight, 1, Gump.theme["panelHeaderLine"], 0.25)
-                self.metricHighlights[name] = self._addRatingHighlight(x + 2, y + 2, cellWidth - 4, cellHeight - 4)
+            rowWidth = len(row) * cellWidth + (len(row) - 1) * cellGap
+            x = panel["x"] + (panel["width"] - rowWidth) // 2
+            y = startY + rowIndex * (cellHeight + rowGap)
+            for name in row:
+                self.metricHighlights[name] = self._addRatingHighlight(x, y, cellWidth, cellHeight)
                 labelColor = colors.get(name, "#efe4cd")
                 labels[name] = self.gump.addTtfLabel(
                     f"{name}: --",
-                    x + 8,
-                    y + 4,
-                    cellWidth - 10,
-                    20,
+                    x + 2,
+                    y,
+                    cellWidth - 4,
+                    cellHeight,
                     12,
                     labelColor,
-                    "left",
+                    "center",
                     None,
                 )
+                x += cellWidth + cellGap
 
     def _addRatingHighlight(self, x, y, width, height):
         highlights = {}
@@ -457,7 +484,21 @@ class PetIntensity:
             )
 
     def _updateGump(self):
+        self._updateStatsSection()
+        self._updateResistSection()
+
         if not self.state["petKey"] and not self.state["undefined"]:
+            self.nameLabel.Text = "No pet analyzed"
+            self.slotLabel.Text = ""
+            self.ratingLabel.Text = ""
+            self.templateLabel.Text = ""
+            self.colorLabel.Text = ""
+            self.totalPetLabel.Text = ""
+            self.finalDecisionLabel.Text = "Scan a pet to evaluate taming value."
+            self.finalDecisionDetailLabel.Text = ""
+            self._setRatingHighlight(self.currentHighlights.get("slots", {}), None)
+            self._setRatingHighlight(self.currentHighlights.get("rating", {}), None)
+            self._setRatingHighlight(self.currentHighlights.get("decision", {}), None)
             return
 
         if self.state["undefined"]:
@@ -465,33 +506,61 @@ class PetIntensity:
             self.slotLabel.Text = ""
             self.ratingLabel.Text = ""
             self.templateLabel.Text = ""
+            self.colorLabel.Text = ""
+            self.totalPetLabel.Text = ""
+            self.finalDecisionLabel.Text = "Not worth taming for this tool."
+            self.finalDecisionDetailLabel.Text = "This pet type is not supported by the calculator."
+            self._setRatingHighlight(self.currentHighlights.get("slots", {}), None)
+            self._setRatingHighlight(self.currentHighlights.get("rating", {}), None)
+            self._setRatingHighlight(self.currentHighlights.get("decision", {}), "below")
             return
 
-        self.nameLabel.Text = f"Name:    {self.state['name'].strip()}"
-        self.slotLabel.Text = (
-            f"Slot:    {self.state['oldSlots']} → {self.state['newSlots']}"
-        )
-        self.ratingLabel.Text = f"Rating:   {self.state['pctRating']}"
+        self.nameLabel.Text = f"Name: {self.state['name'].strip()}"
+        self.slotLabel.Text = f"Slot: {self.state['oldSlots']} -> {self.state['newSlots']}"
+        self.ratingLabel.Text = f"Rating: {self.state['pctRating']}"
+        ratingKey = self._ratingColorKey(self._rateIntensity())
+        self._setRatingHighlight(self.currentHighlights.get("rating", {}), ratingKey)
+
         self._setRatingHighlight(
-            self.currentHighlights["slots"],
+            self.currentHighlights.get("slots", {}),
             self._ratingColorKey(self._rateSlots()),
         )
-        self._setRatingHighlight(
-            self.currentHighlights["rating"],
-            self._ratingColorKey(self._rateIntensity()),
-        )
-        if self.state["cuColor"]:
-            self.colorLabel.Text = (
-                f"Color:   {self.state['cuColor']} ({self.state['cuRarity']})"
-            )
+
+        if self.state["petKey"] == "cu sidhe":
+            self.templateLabel.Text = f"Elite: {self.state['cuTemplate'] or 'No elite template'}"
+            self.colorLabel.Text = f"Color: {self.state['cuColor'] or 'Unknown'}"
         else:
+            self.templateLabel.Text = ""
             self.colorLabel.Text = ""
-        if self.state["cuTemplate"]:
-            self.templateLabel.Text = f"Elite:    {self.state['cuTemplate']}"
-        else:
-            self.templateLabel.Text = f"Elite:    None"
-        self._updateStatsSection()
-        self._updateResistSection()
+
+        self.totalPetLabel.Text = f"Total pets: {self._historyCount()}"
+
+        isWorth = self._isWorthTaming()
+        self.finalDecisionLabel.Text = "Worth taming" if isWorth else "Not worth taming"
+        self.finalDecisionDetailLabel.Text = self._decisionReason(isWorth)
+        self._setRatingHighlight(
+            self.currentHighlights.get("decision", {}),
+            "perfect" if isWorth else "below",
+        )
+
+    def _isWorthTaming(self):
+        if not self.state["petKey"]:
+            return False
+        if Decimal(str(self.state["pctValue"])) < Decimal("70"):
+            return False
+        if self.state["petKey"] == "cu sidhe" and not self.state["isEliteResists"]:
+            return False
+        return True
+
+    def _decisionReason(self, isWorth):
+        petKey = self.state["petKey"]
+        if isWorth:
+            if petKey == "cu sidhe":
+                return "70%+ intensity with elite resist template."
+            return "70%+ intensity for the selected pet type."
+        if petKey == "cu sidhe" and not self.state["isEliteResists"]:
+            return "Cu Sidhe is missing an elite resist template."
+        return "Intensity is below the 70% taming target."
 
     def _normalizedStatValue(self, metric, value):
         if metric not in ["Hits", "Str"]:
@@ -739,7 +808,7 @@ class PetIntensity:
             chartX = self._resistChartX or 10
             chartY = self._resistChartY
             chartWidth = self._resistChartWidth or self.GUMP_WIDTH - 30
-            chartHeight = 20
+            chartHeight = 18
 
             # Remove old bars
             if hasattr(self, "resistChartElements"):
@@ -787,6 +856,16 @@ class PetIntensity:
         except Exception as e:
             API.SysMsg(f"[PetIntensity] Resist chart error: {e}")
 
+    def _historyCount(self):
+        try:
+            if not os.path.exists(self.SAVE_FILE):
+                return 0
+            with open(self.SAVE_FILE, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return len(data) if isinstance(data, list) else 0
+        except Exception:
+            return 0
+
     def _drawHistoryIntensityChart(self):
         try:
             if not os.path.exists(self.SAVE_FILE):
@@ -832,7 +911,7 @@ class PetIntensity:
                 bar = self.gump.addColorBox(x, y, height, bar_width, "#b8b8b8")
                 self.chartBars.append(bar)
 
-            self.totalPetLabel.Text = f"Total pets: {len(intensities)}"
+            self.totalPetLabel.Text = f"Total pets: {self._historyCount()}"
         except Exception as e:
             API.SysMsg(f"[PetIntensity] Chart error: {e}")
 

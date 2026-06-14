@@ -57,7 +57,7 @@ class Ninjitsu(Caster):
         super().__init__(
             "Ninjitsu", skillCap, label, skillLevelLabel, spellLabel, runningLabel
         )
-        self.spells = Ninjitsu.Spells
+        self.spells = Ninjitsu.spells
 
     def _target(self):
         API.TargetSelf()
