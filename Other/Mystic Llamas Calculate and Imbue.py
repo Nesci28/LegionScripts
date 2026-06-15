@@ -12,6 +12,17 @@ import importlib
 import API
 from LegionPath import LegionPath
 
+try:
+    _SCRIPT_DIR = os.path.dirname(os.path.abspath(__file__))
+except Exception:
+    _SCRIPT_DIR = os.getcwd()
+for _IMPORT_ROOT in (_SCRIPT_DIR, os.path.join(os.getcwd(), "Other")):
+    if (
+        os.path.isdir(os.path.join(_IMPORT_ROOT, "_Presets"))
+        or os.path.isdir(os.path.join(_IMPORT_ROOT, "_Utils"))
+    ) and _IMPORT_ROOT not in sys.path:
+        sys.path.insert(0, _IMPORT_ROOT)
+
 LegionPath.addSubdirs()
 
 import Util as UtilModule
@@ -25,40 +36,20 @@ importlib.reload(CraftModule)
 from Util import Util
 from Gump import Gump
 from Craft import Craft
+from _Utils.GumpControlMixin import GumpControlMixin
+from _Utils.LegionApiCompat import (
+    Gumps,
+    Items,
+    Journal,
+    Misc,
+    Player,
+    Target,
+    configure_legion_api_compat,
+    _item_amount,
+    _serial,
+)
 
-
-class _ItemProxy:
-    def __init__(self, item):
-        self._item = item
-
-    @property
-    def ItemID(self):
-        return getattr(self._item, "Graphic", 0)
-
-    def __getattr__(self, name):
-        return getattr(self._item, name)
-
-
-def _serial(obj):
-    if obj is None:
-        return 0
-    return getattr(obj, "Serial", obj)
-
-
-def _as_item(obj):
-    if obj is None:
-        return None
-    if isinstance(obj, _ItemProxy):
-        return obj
-    return _ItemProxy(obj)
-
-
-def _item_amount(item):
-    try:
-        amount = int(getattr(item, "Amount", 1) or 1)
-    except Exception:
-        amount = 1
-    return max(1, amount)
+configure_legion_api_compat(API, Util)
 
 
 DEBUG_IMBUING = True
@@ -119,155 +110,6 @@ def _debug_item(item):
         _debug_hex(getattr(item, "Container", 0))
     )
 
-
-def _count_matching_items(container, graphic_data, hue, recursive=False):
-    graphics = graphic_data if isinstance(graphic_data, (tuple, list)) else (graphic_data,)
-    try:
-        contents = API.ItemsInContainer(container, recursive) or []
-    except Exception:
-        contents = []
-
-    total = 0
-    for item in contents:
-        if getattr(item, "Graphic", 0) in graphics and getattr(item, "Hue", 0) == hue:
-            total += _item_amount(item)
-    return total
-
-
-class Misc:
-    @staticmethod
-    def SendMessage(message, hue=946):
-        API.SysMsg(str(message), hue)
-
-    @staticmethod
-    def Pause(milliseconds):
-        API.Pause(float(milliseconds) / 1000.0)
-
-
-class _BackpackProxy:
-    @property
-    def Serial(self):
-        return API.Backpack
-
-    @property
-    def Contains(self):
-        return [_as_item(item) for item in (API.ItemsInContainer(API.Backpack, False) or [])]
-
-
-class Player:
-    Backpack = _BackpackProxy()
-
-    @property
-    def Serial(self):
-        return API.Player.Serial
-
-    @staticmethod
-    def UseSkill(skill):
-        API.UseSkill(skill)
-
-
-class Target:
-    @staticmethod
-    def PromptTarget(message):
-        API.SysMsg(message, 55)
-        target = API.RequestTarget(30)
-        return target if target else -1
-
-    @staticmethod
-    def WaitForTarget(timeout=5000, harmful=False):
-        return API.WaitForTarget("any", float(timeout) / 1000.0)
-
-    @staticmethod
-    def TargetExecute(serial):
-        API.Target(serial)
-
-
-class Items:
-    @staticmethod
-    def FindBySerial(serial):
-        return _as_item(API.FindItem(serial))
-
-    @staticmethod
-    def FindAllByID(graphic, hue=0, container=0, recursive=False):
-        graphics = graphic if isinstance(graphic, (tuple, list)) else (graphic,)
-        found_items = []
-
-        if container:
-            try:
-                Items.WaitForContents(container, 400)
-                contents = API.ItemsInContainer(container, recursive) or []
-            except Exception:
-                contents = []
-
-            for item in contents:
-                if getattr(item, "Graphic", 0) in graphics and getattr(item, "Hue", 0) == hue:
-                    found_items.append(_as_item(item))
-
-            return found_items
-
-        for item_graphic in graphics:
-            found = API.FindType(item_graphic, container, hue=hue)
-            if found:
-                found_items.append(_as_item(found))
-        return found_items
-
-    @staticmethod
-    def FindByID(graphic, hue=0, container=0):
-        found_items = Items.FindAllByID(graphic, hue, container, recursive=False)
-        if found_items:
-            return found_items[0]
-        return None
-
-    @staticmethod
-    def Move(item, destination, amount=0):
-        return Util.moveItem(_serial(item), destination, amount)
-
-    @staticmethod
-    def WaitForContents(container, timeout=1000):
-        API.UseObject(container)
-        API.Pause(float(timeout) / 1000.0)
-
-    @staticmethod
-    def WaitForProps(item, timeout=1000):
-        API.ItemNameAndProps(_serial(item), True, max(1, int(float(timeout) / 1000.0)))
-
-    @staticmethod
-    def GetPropStringList(item):
-        props = API.ItemNameAndProps(_serial(item), True, 2)
-        if not props:
-            return []
-        return [line.strip() for line in str(props).splitlines() if line.strip()]
-
-
-class Gumps:
-    @staticmethod
-    def WaitForGump(gump_id, timeout=5000):
-        return API.WaitForGump(gump_id, float(timeout) / 1000.0)
-
-    @staticmethod
-    def SendAction(gump_id, button_id):
-        return API.ReplyGump(button_id, gump_id)
-
-    @staticmethod
-    def GetLineList(gump_id):
-        contents = API.GetGumpContents(gump_id)
-        if not contents:
-            return []
-        return [line.strip() for line in str(contents).splitlines() if line.strip()]
-
-    @staticmethod
-    def CloseGump(gump_id):
-        return API.CloseGump(gump_id)
-
-
-class Journal:
-    @staticmethod
-    def Clear():
-        API.ClearJournal()
-
-    @staticmethod
-    def Search(text):
-        return API.InJournal(text)
 
 # ---------------------------------------------------------
 # UI SETTINGS & HUES
@@ -938,7 +780,6 @@ SUIT_PRESET_BASIC = "Basic LRC Training"
 SUIT_PRESET_MAGE = "Mage 70 Resists"
 SUIT_PRESET_LUCK = "Luck"
 SUIT_PRESET_SAMPIRE = "Sampire"
-SUIT_PLACEHOLDER_PRESETS = (SUIT_PRESET_LUCK, SUIT_PRESET_SAMPIRE)
 SUIT_BODIES = ("Male", "Female", "Gargoyle")
 SUIT_RESISTS = (
     "Physical Resist",
@@ -1035,6 +876,7 @@ SUIT_BODY_ITEMS = {
         "Gargish Leather Talons",
     ),
 }
+
 SUIT_GEAR_FALLBACK_GRAPHICS = (
     0x1DB9,
     0x13C7,
@@ -1055,6 +897,39 @@ SUIT_MAGE_REQUIRED_ROWS = [
     {"Prop": "Lower Reagent Cost", "Val": 17},
     {"Prop": "Lower Mana Cost", "Val": 7},
 ]
+SUIT_MAGE_STAT_CAPS = {
+    "Lower Reagent Cost": 100,
+    "Lower Mana Cost": 40,
+}
+
+
+from _Presets import (
+    BasicLrcSuitPreset,
+    Mage70ResistsSuitPreset,
+    LuckSuitPreset,
+    SampireSuitPreset,
+)
+
+
+SUIT_PRESETS = (
+    BasicLrcSuitPreset(globals()),
+    Mage70ResistsSuitPreset(globals()),
+    LuckSuitPreset(globals()),
+    SampireSuitPreset(globals()),
+)
+SUIT_PRESETS_BY_KEY = dict((preset.key, preset) for preset in SUIT_PRESETS)
+
+
+def _suit_preset_for_key(preset_key):
+    return SUIT_PRESETS_BY_KEY.get(preset_key, SUIT_PRESETS_BY_KEY[SUIT_PRESET_BASIC])
+
+
+def _suit_current_preset():
+    preset = _suit_preset_for_key(state.get("SuitPreset", SUIT_PRESET_BASIC))
+    if state.get("SuitPreset") != preset.key:
+        state["SuitPreset"] = preset.key
+    return preset
+
 
 state = {
     "Category": "Armor",
@@ -1808,27 +1683,37 @@ def AutoImbue():
                                 current_val = int(match.group())
                                 break
 
-                    if current_val is None:
-                        if not fallback_used:
-                            fallback_used = True
-                            start_val = BASE_PROPS.get(target_prop, {}).get("Step", 1)
-                            steps = abs(target_val - start_val)
-                            direction = 312 if target_val > start_val else 311
+                if current_val is None:
+                    if not fallback_used:
+                        fallback_used = True
+                        start_val = BASE_PROPS.get(target_prop, {}).get("Step", 1)
+                        steps = abs(target_val - start_val)
+                        direction = 312 if target_val > start_val else 311
+                        DebugLog(
+                            "Could not read intensity for {}; using fallback start={} target={} steps={}".format(
+                                target_prop,
+                                start_val,
+                                target_val,
+                                steps
+                            ),
+                            55
+                        )
+                        for step_index in range(steps):
                             DebugLog(
-                                "Could not read intensity for {}; using fallback start={} target={} steps={}".format(
+                                "Fallback intensity click {} {}/{} for {}.".format(
+                                    "up" if direction == 312 else "down",
+                                    step_index + 1,
+                                    steps,
                                     target_prop,
-                                    start_val,
-                                    target_val,
-                                    steps
                                 ),
-                                55
+                                55,
                             )
-                            for _ in range(steps):
-                                Gumps.SendAction(0xf3e90, direction)
-                                Gumps.WaitForGump(0xf3e90, 800)
-                            intensity_confirmed = True
-                            break
-                        continue
+                            Gumps.SendAction(0xf3e90, direction)
+                            Misc.Pause(350)
+                        DebugLog("Fallback intensity complete for {}.".format(target_prop), 55)
+                        intensity_confirmed = True
+                        break
+                    continue
 
                     if current_val == target_val:
                         intensity_confirmed = True
@@ -1859,49 +1744,74 @@ def AutoImbue():
             # Execute Imbue & Retry Loop
             imbuing = True
             is_retry = False
+            imbue_attempts = 0
             
             while imbuing:
+                imbue_attempts += 1
+                if imbue_attempts > 20:
+                    DebugLog("Too many imbue attempts for {}; aborting property.".format(target_prop), 33)
+                    Misc.SendMessage("Too many imbue attempts for {}.".format(target_prop), 33)
+                    abort_sequence = True
+                    imbuing = False
+                    break
                 Journal.Clear()
                 
+                DebugLog("Imbue attempt {} for {} retry={}.".format(imbue_attempts, target_prop, is_retry), 55)
                 if is_retry:
                     Gumps.SendAction(0xf3e93, 4) # Click "Reimbue Last"
-                    Gumps.WaitForGump(0xf3e93, 3000)
+                    DebugLog("Waiting for reimbue result gump for {}.".format(target_prop), 55)
+                    waited = Gumps.WaitForGump(0xf3e93, 3000)
                 else:
                     Gumps.SendAction(0xf3e90, 302) # Click "Imbue Item"
-                    Gumps.WaitForGump(0xf3e93, 5000) 
+                    DebugLog("Waiting for imbue result gump for {}.".format(target_prop), 55)
+                    waited = Gumps.WaitForGump(0xf3e93, 5000)
+                DebugLog("Imbue result gump wait for {} returned {}.".format(target_prop, waited), 55)
                 
-                Misc.Pause(1000) 
-                
+            outcome = None
+            for _ in range(16):
                 if Journal.Search("successfully imbue"):
-                    Misc.SendMessage("Successfully imbued {}!".format(target_prop), 69)
-                    
-                    if _suit_row_is_additive_resist(row):
-                        state["ScannedProps"][target_prop] = state["ScannedProps"].get(target_prop, 0) + target_val
-                    else:
-                        state["ScannedProps"][target_prop] = target_val
+                    outcome = "success"
+                    break
+                if Journal.Search("attempt to imbue the item, but fail"):
+                    outcome = "fail"
+                    break
+                if Journal.Search("do not have enough resources"):
+                    outcome = "resources"
+                    break
+                Misc.Pause(250)
 
+            if outcome == "success":
+                Misc.SendMessage("Successfully imbued {}!".format(target_prop), 69)
+                DebugLog("Journal reported success for {}.".format(target_prop), 69)
+                if _suit_row_is_additive_resist(row):
+                    state["ScannedProps"][target_prop] = state["ScannedProps"].get(target_prop, 0) + target_val
+                else:
+                    state["ScannedProps"][target_prop] = target_val
+
+                imbuing = False
+                property_completed = True
+
+            elif outcome == "fail":
+                Misc.SendMessage("Failed imbue. Retrying...", 33)
+                DebugLog("Journal reported imbue failure for {}; retrying.".format(target_prop), 33)
+                is_retry = True
+
+            elif outcome == "resources":
+                DebugLog("Journal reported missing resources during imbue. Running PullItems again.", 55)
+                Misc.SendMessage("Out of buffer! Pulling safely...", 55)
+                Gumps.SendAction(0xf3e93, 0)
+                Gumps.SendAction(0xf3e90, 0)
+                Misc.Pause(500)
+                if not PullItems():
+                    DebugLog("PullItems failed after journal missing-resource message.", 33)
+                    abort_sequence = True
                     imbuing = False
-                    property_completed = True
-                    
-                elif Journal.Search("attempt to imbue the item, but fail"):
-                    Misc.SendMessage("Failed to imbue. Retrying...", 33)
-                    is_retry = True
-                    
-                elif Journal.Search("do not have enough resources"):
-                    DebugLog("Journal reported missing resources during imbue. Running PullItems again.", 55)
-                    Misc.SendMessage("Out of buffer! Pulling safely...", 55)
-                    Gumps.SendAction(0xf3e93, 0)
-                    Gumps.SendAction(0xf3e90, 0)
-                    Misc.Pause(500)
-                    if not PullItems():
-                        DebugLog("PullItems failed after journal missing-resource message.", 33)
-                        abort_sequence = True
-                    imbuing = False
-                    
-        else:
-            Misc.SendMessage("Imbuing halted. Check materials or caps.", 33)
-            imbuing = False
-            abort_sequence = True
+
+            else:
+                DebugLog("No journal outcome after imbue click for {} retry={}.".format(target_prop, is_retry), 33)
+                Misc.SendMessage("Imbuing halted. Check journal/materials.", 33)
+                imbuing = False
+                abort_sequence = True
 
     return not abort_sequence
 
@@ -2428,11 +2338,71 @@ def _suit_plan_text(rows):
     return ", ".join(parts)
 
 
+def _suit_parse_plan_rows(plan_text):
+    rows = []
+    if not plan_text or str(plan_text).strip() == "-":
+        return rows
+    aliases = {
+        "lmc": "Lower Mana Cost",
+        "lrc": "Lower Reagent Cost",
+        "mr": "Mana Regeneration",
+        "mi": "Mana Increase",
+        "phys": "Physical Resist",
+        "fire": "Fire Resist",
+        "cold": "Cold Resist",
+        "pois": "Poison Resist",
+        "poison": "Poison Resist",
+        "ener": "Energy Resist",
+        "energy": "Energy Resist",
+    }
+    for token in str(plan_text).split(","):
+        token = token.strip()
+        match = re.match(r"([A-Za-z ]+)([+-]?\d+)$", token)
+        if not match:
+            continue
+        prop = aliases.get(match.group(1).strip().lower())
+        if not prop:
+            continue
+        raw_value = match.group(2)
+        row = {"Prop": prop, "Val": int(raw_value)}
+        if prop in SUIT_RESISTS and raw_value.startswith("+"):
+            row["Mode"] = "Add"
+        rows.append(row)
+    return rows
+
+
+def _suit_plan_extra_texts(rows):
+    extras = []
+    for row in rows:
+        prop = row.get("Prop", "None")
+        val = int(row.get("Val", 0) or 0)
+        if prop == "None" or prop in SUIT_RESISTS or not val:
+            continue
+        extras.append("{} {}".format(_suit_prop_short_name(prop), val))
+    return extras
+
+
+def _suit_expected_plan_totals(rows):
+    totals = {}
+    for row in rows:
+        for plan_row in _suit_parse_plan_rows(row.get("Plan", "")):
+            prop = plan_row.get("Prop", "None")
+            if prop == "None" or prop in SUIT_RESISTS:
+                continue
+            totals[prop] = totals.get(prop, 0) + int(plan_row.get("Val", 0) or 0)
+    return totals
+
+
 def _suit_set_msg(message, hue=55):
     state["SuitMsg"] = message
     state["Msg"] = message
     Misc.SendMessage(message, hue)
     send_calculator()
+
+
+def _suit_store_msg(message):
+    state["SuitMsg"] = message
+    state["Msg"] = message
 
 
 def _suit_should_stop():
@@ -2614,29 +2584,65 @@ def _suit_try_add_row(rows, prop, val, exceptional=True, mode=None):
 
 def _suit_choose_optional(rows, exceptional=True):
     active_rows = [row for row in rows if row.get("Prop") != "None" and row.get("Val", 0)]
-    if len(active_rows) >= SUIT_MAX_ROWS:
-        return active_rows
-    best = None
-    for prop, max_val, prefer in (("Mana Increase", 8, 0), ("Mana Regeneration", 2, 1)):
-        for val in range(max_val, 0, -1):
-            candidate = active_rows + [{"Prop": prop, "Val": val}]
-            weight = _suit_rows_weight(candidate)
-            if weight > _suit_max_weight(exceptional):
+    optional_props = (("Mana Increase", 8, 0), ("Mana Regeneration", 2, 1))
+    while len(active_rows) < SUIT_MAX_ROWS:
+        existing_props = set(row.get("Prop") for row in active_rows)
+        best = None
+        for prop, max_val, prefer in optional_props:
+            if prop in existing_props:
                 continue
-            diff = abs(_suit_max_weight(exceptional) - weight)
-            score = (diff, prefer, -val)
-            if best is None or score < best[0]:
-                best = (score, {"Prop": prop, "Val": val})
-    if best:
+            for val in range(max_val, 0, -1):
+                candidate = active_rows + [{"Prop": prop, "Val": val}]
+                weight = _suit_rows_weight(candidate)
+                if weight > _suit_max_weight(exceptional):
+                    continue
+                diff = abs(_suit_max_weight(exceptional) - weight)
+                score = (diff, prefer, -val)
+                if best is None or score < best[0]:
+                    best = (score, {"Prop": prop, "Val": val})
+        if not best:
+            break
         active_rows.append(best[1])
     return active_rows
 
 
+def _suit_distribute_values(total, count, preferred_value):
+    if count <= 0:
+        return []
+    total = max(0, int(total or 0))
+    preferred_value = max(0, int(preferred_value or 0))
+    values = [min(preferred_value, total // count) for _ in range(count)]
+    remaining = total - sum(values)
+    index = 0
+    while remaining > 0 and values:
+        if values[index] < preferred_value:
+            values[index] += 1
+            remaining -= 1
+        index = (index + 1) % len(values)
+        if all(value >= preferred_value for value in values):
+            break
+    return values
+
+
+def _suit_mage_required_rows_by_piece(count):
+    rows_by_piece = [[] for _ in range(count)]
+    for row in SUIT_MAGE_REQUIRED_ROWS:
+        prop = row.get("Prop")
+        preferred_value = int(row.get("Val", 0) or 0)
+        total = SUIT_MAGE_STAT_CAPS.get(prop, preferred_value * count)
+        values = _suit_distribute_values(total, count, preferred_value)
+        for index, value in enumerate(values):
+            if value > 0:
+                rows_by_piece[index].append({"Prop": prop, "Val": value})
+    return rows_by_piece
+
+
 def _suit_allocate_mage_rows(candidates):
     planned = []
+    required_rows_by_piece = _suit_mage_required_rows_by_piece(len(candidates))
     totals = dict((name, 0) for name in SUIT_RESISTS)
-    for candidate in candidates:
-        candidate["Rows"] = [dict(row) for row in SUIT_MAGE_REQUIRED_ROWS]
+    for index, candidate in enumerate(candidates):
+        candidate["Rows"] = [dict(row) for row in required_rows_by_piece[index]]
         for resist_name in SUIT_RESISTS:
             totals[resist_name] += candidate["Resists"].get(resist_name, 0)
         planned.append(candidate)
@@ -3232,97 +3238,23 @@ def ScanSuitGoodPieces():
         return
 
     body = state.get("SuitBody", "Male")
-    preset = state.get("SuitPreset", SUIT_PRESET_BASIC)
-    require_mage_piece = preset == SUIT_PRESET_MAGE
+    preset = _suit_current_preset()
     keep_serial = state.get("SuitKeepCont", 0)
-    SuitLog("manual scan start: body={} preset={} keep={} require_mage_piece={}".format(
+    SuitLog("manual scan start: body={} preset={} preset_class={} keep={}".format(
         body,
-        preset,
+        preset.key,
+        preset.__class__.__name__,
         _debug_hex(keep_serial),
-        require_mage_piece,
     ))
 
     try:
         _suit_get_keep_container(required=True)
         _suit_init_rows(body)
-        if require_mage_piece:
-            selected_by_slot, candidates_by_slot, loaded, plan = _suit_scan_saved_mage_plan(
-                body,
-                update_rows=True,
-                required=True,
-            )
-            selected_count = len(selected_by_slot)
-            missing_slots = [
-                slot_name for slot_name in SUIT_BODY_ITEMS.get(body, ())
-                if not selected_by_slot.get(slot_name)
-            ]
-            SuitLog("manual mage scan complete: selected={} loaded={} missing={} counts=[{}]".format(
-                selected_count,
-                loaded,
-                ",".join(missing_slots) if missing_slots else "none",
-                _suit_log_slot_counts(candidates_by_slot),
-            ))
-            if plan:
-                _suit_set_msg(
-                    "Scan selected README-valid Mage suit from {} saved piece{}.".format(
-                        loaded,
-                        "" if loaded == 1 else "s",
-                    ),
-                    69,
-                )
-            elif loaded:
-                _suit_set_msg(
-                    _suit_mage_incomplete_message(candidates_by_slot, loaded),
-                    55,
-                )
-            else:
-                _suit_set_msg("No saved Mage suit candidates found.", 33)
-            return
-
-        selected_by_slot, candidates_by_slot, loaded = _suit_scan_good_pieces(
-            body,
-            require_exceptional=False,
-            require_high_resists=False,
-            update_rows=True,
-            required=True,
-        )
-        selected_count = len(selected_by_slot)
-        missing_slots = [
-            slot_name for slot_name in SUIT_BODY_ITEMS.get(body, ())
-            if not selected_by_slot.get(slot_name)
-        ]
-        SuitLog("manual scan complete: selected={} loaded={} missing={} counts=[{}]".format(
-            selected_count,
-            loaded,
-            ",".join(missing_slots) if missing_slots else "none",
-            _suit_log_slot_counts(candidates_by_slot),
-        ))
-
-        if selected_count and missing_slots:
-            _suit_set_msg(
-                "Scan selected {} saved piece{}; missing {} slot{}.".format(
-                    selected_count,
-                    "" if selected_count == 1 else "s",
-                    len(missing_slots),
-                    "" if len(missing_slots) == 1 else "s",
-                ),
-                55,
-            )
-        elif selected_count:
-            _suit_set_msg("Scan selected all {} saved suit pieces.".format(selected_count), 69)
-        elif loaded:
-            _suit_set_msg(
-                "Scanned {} saved piece{}; none matched the suit.".format(
-                    loaded,
-                    "" if loaded == 1 else "s",
-                ),
-                33,
-            )
-        else:
-            _suit_set_msg("No saved suit pieces found in good-piece container.", 33)
+        preset.scan_good_pieces(body, required=True, notify=True)
     except Exception as exc:
         SuitLog("manual scan error: {}".format(exc))
         _suit_set_msg(str(exc), 33)
+
 
 
 def CraftSuit():
@@ -3332,237 +3264,24 @@ def CraftSuit():
         return
 
     body = state.get("SuitBody", "Male")
-    preset = state.get("SuitPreset", SUIT_PRESET_BASIC)
-    recraft_slots = []
-    reason = ""
-    SuitLog("craft suit start: body={} preset={} keep={} resource={}".format(
+    preset = _suit_current_preset()
+    SuitLog("craft suit start: body={} preset={} preset_class={} keep={} resource={}".format(
         body,
-        preset,
+        preset.key,
+        preset.__class__.__name__,
         _debug_hex(state.get("SuitKeepCont", 0)),
         _debug_hex(state.get("MatCont", 0)),
     ))
-    if preset in SUIT_PLACEHOLDER_PRESETS:
-        _suit_init_rows(body)
-        SuitLog("craft suit stopped: placeholder preset {}".format(preset))
-        _suit_set_msg("{} preset is a placeholder.".format(preset), 33)
+
+    if preset.placeholder:
+        preset.craft(body)
         return
 
     state["SuitRunning"] = True
     state["SuitStop"] = False
     _suit_init_rows(body)
-
     try:
-        craft = None
-        if preset == SUIT_PRESET_BASIC:
-            plan = []
-            SuitLog("basic start")
-            saved_by_slot, _, loaded = _suit_scan_good_pieces(
-                body,
-                require_exceptional=False,
-                require_high_resists=False,
-                update_rows=True,
-                required=False,
-            )
-            if loaded:
-                _suit_set_msg("Selected {} saved Basic piece{}.".format(len(saved_by_slot), "" if len(saved_by_slot) == 1 else "s"), 55)
-            SuitLog("basic saved scan: loaded={} selected={}".format(loaded, len(saved_by_slot)))
-            for slot_name in SUIT_BODY_ITEMS[body]:
-                if _suit_should_stop():
-                    SuitLog("basic stopped before slot={}".format(slot_name))
-                    _suit_set_msg("Suit crafting stopped.", 33)
-                    return
-                saved = saved_by_slot.get(slot_name)
-                if saved:
-                    saved["Rows"] = [dict(row) for row in SUIT_BASIC_ROWS]
-                    plan.append(saved)
-                    SuitLog("basic reuse saved: {}".format(_suit_log_candidate(saved)))
-                    _suit_update_slot(
-                        slot_name,
-                        saved["Serial"],
-                        "Chosen: Saved",
-                        _suit_resist_text(saved["Resists"]),
-                        _suit_plan_text(saved["Rows"]),
-                )
-                continue
-                _suit_update_slot(slot_name, status="Crafting")
-                if craft is None:
-                    craft = _suit_get_craft()
-                    SuitLog("basic acquired crafting resource container")
-                candidate = _suit_craft_piece(craft, slot_name, False)
-                if not candidate:
-                    SuitLog("basic craft failed: slot={}".format(slot_name))
-                    _suit_update_slot(slot_name, status="Craft failed")
-                    _suit_set_msg("Could not craft {}.".format(slot_name), 33)
-                    return
-                candidate["Rows"] = [dict(row) for row in SUIT_BASIC_ROWS]
-                plan.append(candidate)
-                SuitLog("basic crafted: {}".format(_suit_log_candidate(candidate)))
-                _suit_update_slot(
-                    slot_name,
-                    candidate["Serial"],
-                    "Crafted",
-                    _suit_resist_text(candidate["Resists"]),
-                    _suit_plan_text(candidate["Rows"]),
-                )
-            if not _suit_imbue_plan(plan):
-                SuitLog("basic failed during imbue plan")
-                return
-            SuitLog("basic complete: plan={}".format(" | ".join(_suit_log_candidate(piece) for piece in plan)))
-            _suit_set_msg("Basic LRC suit complete.", 69)
-            return
-
-        _suit_get_keep_container(required=True)
-        SuitLog("mage start: good-piece container present")
-        candidates_by_slot = dict((slot_name, []) for slot_name in SUIT_BODY_ITEMS[body])
-        active_by_slot = dict((slot_name, None) for slot_name in SUIT_BODY_ITEMS[body])
-        plan = None
-        slot_names = list(SUIT_BODY_ITEMS[body])
-        loaded = _suit_load_kept_candidates(body, candidates_by_slot)
-        SuitLog("mage saved scan: loaded={} counts=[{}]".format(loaded, _suit_log_slot_counts(candidates_by_slot)))
-        for slot_name in slot_names:
-            active = _suit_best_candidate(candidates_by_slot.get(slot_name, []))
-            if not active:
-                SuitLog("mage initial active: slot={} none".format(slot_name))
-                continue
-            active_by_slot[slot_name] = active
-            SuitLog("mage initial active: slot={} {}".format(slot_name, _suit_log_candidate(active)))
-            _suit_update_slot(
-                slot_name,
-                active["Serial"],
-                "Saved candidate",
-                _suit_resist_text(active["Resists"]),
-                _suit_high_text(active.get("HighResists", ())),
-            )
-            if loaded:
-                _suit_set_msg("Selected {} saved Mage candidate{} from good-piece container.".format(loaded, "" if loaded == 1 else "s"), 55)
-        _suit_refresh_active_mage_combo(candidates_by_slot, active_by_slot, slot_names)
-        plan = _suit_solve_mage(candidates_by_slot)
-        if plan:
-            _suit_select_plan(plan, active_by_slot)
-            SuitLog("mage selected saved-only plan")
-            _suit_set_msg("Selected saved Mage suit pieces from good-piece container.", 69)
-
-        while not plan:
-            target_slot, craft_reason = _suit_choose_next_mage_craft_slot(
-                candidates_by_slot,
-                active_by_slot,
-                slot_names,
-            )
-            missing_slots = [target_slot] if target_slot else []
-            SuitLog("mage loop: missing={} active={} counts=[{}]".format(
-                ",".join(missing_slots),
-                ",".join(slot for slot in slot_names if active_by_slot.get(slot)),
-                _suit_log_slot_counts(candidates_by_slot),
-            ))
-            SuitLog("mage next craft: slot={} reason={}".format(target_slot, craft_reason))
-            if not target_slot:
-                _suit_set_msg("Could not choose next Mage suit slot.", 33)
-                return
-            _suit_set_msg("Searching Mage suit: crafting {} ({})".format(target_slot, craft_reason), 55)
-            for slot_name in missing_slots:
-                if _suit_should_stop():
-                    SuitLog("mage stopped before slot={}".format(slot_name))
-                    _suit_set_msg("Suit crafting stopped.", 33)
-                    return
-                _suit_update_slot(slot_name, status="Crafting", plan=craft_reason)
-                if craft is None:
-                    craft = _suit_get_craft()
-                    SuitLog("mage acquired crafting resource container")
-                candidate = _suit_craft_piece(craft, slot_name, True)
-                if not candidate:
-                    SuitLog("mage craft returned no candidate: slot={}".format(slot_name))
-                    _suit_update_slot(slot_name, status="Rejected")
-                    continue
-
-                high_resists = candidate.get("HighResists", ())
-                if len(high_resists) != SUIT_HIGH_RESIST_COUNT:
-                    SuitLog("mage reject: high-resist count mismatch {}".format(_suit_log_candidate(candidate)))
-                    _suit_update_slot(
-                        slot_name,
-                        candidate["Serial"],
-                        "Flat rejected",
-                        _suit_resist_text(candidate["Resists"]),
-                        _suit_high_text(high_resists),
-                    )
-                    craft.dispose_item(candidate.get("Item"), SUIT_ITEM_DEFS[slot_name])
-                    continue
-
-                if not _suit_keep_candidate(candidate):
-                    SuitLog("mage keep failed: {}".format(_suit_log_candidate(candidate)))
-                    _suit_update_slot(
-                        slot_name,
-                        candidate["Serial"],
-                        "Keep failed",
-                        _suit_resist_text(candidate["Resists"]),
-                        _suit_high_text(high_resists),
-                    )
-                    _suit_set_msg("Could not move {} to good-piece container.".format(slot_name), 33)
-                    return
-
-                candidates_by_slot[slot_name].append(candidate)
-                _suit_refresh_active_mage_combo(candidates_by_slot, active_by_slot, slot_names)
-                SuitLog("mage accept crafted: {}".format(_suit_log_candidate(candidate)))
-                _suit_update_slot(
-                    slot_name,
-                    candidate["Serial"],
-                    "Good {}".format(len(candidates_by_slot[slot_name])),
-                    _suit_resist_text(candidate["Resists"]),
-                    _suit_high_text(high_resists),
-                )
-                plan = _suit_solve_mage(candidates_by_slot)
-                if plan:
-                    _suit_select_plan(plan, active_by_slot)
-                    SuitLog("mage plan found after slot={}".format(slot_name))
-                    break
-
-            if plan:
-                break
-
-            still_missing = [slot_name for slot_name in slot_names if not active_by_slot.get(slot_name)]
-            if still_missing:
-                SuitLog("mage still missing after pass: {}".format(", ".join(still_missing)))
-                _suit_set_msg("Filling Mage suit slots: {}".format(", ".join(still_missing)), 55)
-                Misc.Pause(250)
-                continue
-
-            plan = _suit_solve_mage(candidates_by_slot)
-            if plan:
-                _suit_select_plan(plan, active_by_slot)
-                SuitLog("mage plan found before recraft")
-                break
-
-            next_slot, reason = _suit_choose_next_mage_craft_slot(
-                candidates_by_slot,
-                active_by_slot,
-                slot_names,
-            )
-            SuitLog("mage no plan yet: next slot={} reason={}".format(next_slot, reason))
-            _suit_set_msg(
-                "No Mage plan yet. Next: {} ({})".format(next_slot or "unknown", reason),
-                55,
-            )
-            Misc.Pause(250)
-            continue
-
-        if not plan:
-            next_slot, reason = _suit_choose_next_mage_craft_slot(
-                candidates_by_slot,
-                active_by_slot,
-                slot_names,
-            )
-            SuitLog("mage no plan exit: next slot={} reason={}".format(next_slot, reason))
-            _suit_set_msg(
-                "No Mage plan yet. Next craft: {} ({})".format(next_slot or "unknown", reason),
-                55,
-            )
-            return
-
-        _suit_select_plan(plan, active_by_slot)
-        if not _suit_imbue_plan(plan, verify_resist_target=True):
-            SuitLog("mage failed during imbue plan")
-            return
-        SuitLog("mage complete: plan={}".format(" | ".join(_suit_log_candidate(piece) for piece in plan)))
-        _suit_set_msg("Mage suit complete.", 69)
+        preset.craft(body)
     finally:
         SuitLog("craft suit end: running reset")
         state["SuitRunning"] = False
@@ -3576,15 +3295,16 @@ def StopSuitCraft():
     send_calculator()
 
 
-class MysticLlamasCalculator:
+class MysticLlamasCalculator(GumpControlMixin):
+    Gump = Gump
     GUMP_ID = 998880
     WEAPON_CATEGORIES = ["One-Handed Melee", "Two-Handed Melee", "Ranged Weapon"]
     TAB_WIDTH = 144
-    PAGE_WIDTH = 584
+    PAGE_WIDTH = 656
     PANEL_WIDTH = PAGE_WIDTH - 16
     MATERIAL_ROWS_VISIBLE = 3
     WIDTH = TAB_WIDTH
-    HEIGHT = 706
+    HEIGHT = 772
 
     def __init__(self):
         self.gump = None
@@ -3717,18 +3437,8 @@ class MysticLlamasCalculator:
         )
 
 
-    def _callback(self, fn):
-        return self.gump.onClick(lambda: self._run_action(fn))
 
-    def _set_status(self, text):
-        if not self.gump:
-            return
-        self.gump.setStatus(text)
-        for tabGump in self.gump.tabGumps.values():
-            tabGump.setStatus(text)
 
-    def _ui_gump(self):
-        return self._drawGump or self.gump
 
     def _run_action(self, fn):
         try:
@@ -3740,104 +3450,20 @@ class MysticLlamasCalculator:
             API.SysMsg(traceback.format_exc(), 33)
         self.updateControls()
 
-    def _resize(self, width, height):
-        try:
-            self.gump.gump.SetWidth(width)
-            self.gump.gump.SetHeight(height)
-        except Exception:
-            pass
-
-    def _remember(self, obj, group):
-        controls = list(self._iter_controls(obj))
-        if group == "main":
-            self.mainControls.extend(controls)
-        elif group == "picker":
-            self.pickerControls.extend(controls)
-        return obj
-
-    def _iter_controls(self, obj):
-        if obj is None:
-            return
-        if isinstance(obj, dict):
-            for value in obj.values():
-                for control in self._iter_controls(value):
-                    yield control
-            return
-        if isinstance(obj, (list, tuple)):
-            for value in obj:
-                for control in self._iter_controls(value):
-                    yield control
-            return
-        if hasattr(obj, "IsVisible"):
-            yield obj
-
-    def _set_visible(self, obj, visible):
-        for control in self._iter_controls(obj):
-            try:
-                control.IsVisible = visible
-            except Exception:
-                pass
-
-    def _set_text(self, control, text):
-        if not control:
-            return
-        text = str(text)
-        try:
-            if hasattr(control, "SetText"):
-                control.SetText(text)
-            else:
-                control.Text = text
-        except Exception:
-            try:
-                control.Text = text
-            except Exception:
-                pass
-
-    def _set_hue(self, control, hue):
-        if not control:
-            return
-        try:
-            control.Hue = hue
-        except Exception:
-            pass
-
-    def _set_checked(self, control, checked):
-        if not control:
-            return
-        try:
-            if hasattr(control, "SetIsChecked"):
-                control.SetIsChecked(checked)
-            else:
-                control.IsChecked = checked
-        except Exception:
-            try:
-                control.IsChecked = checked
-            except Exception:
-                pass
-
-    def _set_input_text(self, control, text):
-        self._set_text(control, text)
 
 
 
-    def _addLabel(self, text, x, y, hue=None, group="main"):
-        return self._remember(self._ui_gump().addLabel(text, x, y, hue), group)
 
 
-    def _addBoundedLabel(self, text, x, y, width, height=16, fontSize=9, color=None, group="main", align="let"):
-        if color is None:
-            color = Gump.theme["buttonText"]
-        control = self._ui_gump().addTtfLabel(str(text), x, y, width, height, fontSize, color, align, None)
-        return self._remember(control, group) if group else control
 
 
-    def _truncate_text(self, text, max_chars):
-        text = str(text or "")
-        if len(text) <= max_chars:
-            return text
-        if max_chars <= 3:
-            return text[:max_chars]
-        return text[:max_chars - 3].rstrip() + "..."
+
+
+
+
+
+
+
 
 
     def _suit_status_display(self, status):
@@ -3954,6 +3580,197 @@ class MysticLlamasCalculator:
             self._set_text(labels.get(resist_name), text)
 
 
+    def _add_suit_resist_column_table(self, x, y, width, height):
+        ui = self._ui_gump()
+        elements = []
+        labels = {}
+        row_h = 19
+        row_gap = 4
+        start_y = y + 4
+        for index, (resist_name, _, color, display_name) in enumerate(SUIT_RESIST_DISPLAY):
+            row_y = start_y + index * (row_h + row_gap)
+            elements.append(ui.addColorBox(x, row_y, row_h, width, Gump.theme["row"], 0.55, withTexture=False))
+            elements.append(ui.addColorBox(x, row_y + row_h - 1, 1, width, "#000000", 0.46, withTexture=False))
+            labels[resist_name] = self._addBoundedLabel(
+                "",
+                x + 2,
+                row_y,
+                width - 4,
+                row_h,
+                9,
+                color,
+                group="suit",
+                align="center",
+            )
+        return {"elements": elements, "labels": labels}
+
+    def _add_suit_resist_value_group(self, x, y, width, height):
+        ui = self._ui_gump()
+        elements = []
+        labels = {}
+        cell_gap = 2
+        cell_h = max(18, min(22, height))
+        cell_w = max(18, (width - (len(SUIT_RESIST_DISPLAY) - 1) * cell_gap) // len(SUIT_RESIST_DISPLAY))
+        row_w = len(SUIT_RESIST_DISPLAY) * cell_w + (len(SUIT_RESIST_DISPLAY) - 1) * cell_gap
+        cell_x = x + max(0, (width - row_w) // 2)
+        for resist_name, _, color, _ in SUIT_RESIST_DISPLAY:
+            elements.append(ui.addColorBox(cell_x, y, cell_h, cell_w, Gump.theme["row"], 0.55, withTexture=False))
+            elements.append(ui.addColorBox(cell_x, y + cell_h - 1, 1, cell_w, "#000000", 0.46, withTexture=False))
+            labels[resist_name] = self._addBoundedLabel(
+                "",
+                cell_x,
+                y + 1,
+                cell_w,
+                cell_h - 2,
+                9,
+                color,
+                group="suit",
+                align="center",
+            )
+            cell_x += cell_w + cell_gap
+        return {"elements": elements, "labels": labels}
+
+    def _set_suit_resist_value_group(self, labels, resists, empty=False, mode="value"):
+        if not labels:
+            return
+        for resist_name, _, _, _ in SUIT_RESIST_DISPLAY:
+            value = int(resists.get(resist_name, 0) or 0)
+            if empty:
+                text = "--"
+            elif mode == "add":
+                text = "+{}".format(value)
+            else:
+                text = str(value)
+            self._set_text(labels.get(resist_name), text)
+
+    def _suit_resist_summary_text(self, resists, empty=False):
+        if empty:
+            return "P-- F-- C-- Po-- E--"
+        return "P{} F{} C{} Po{} E{}".format(
+            resists.get("Physical Resist", 0),
+            resists.get("Fire Resist", 0),
+            resists.get("Cold Resist", 0),
+            resists.get("Poison Resist", 0),
+            resists.get("Energy Resist", 0),
+        )
+
+    def _add_suit_expected_outcome_panel(self, x, y, width, height):
+        ui = self._ui_gump()
+        elements = [
+            ui.addColorBox(x - 2, y - 2, height + 4, width + 4, Gump.theme["frameOuter"], 1, withTexture=False),
+            ui.addColorBox(x, y, height, width, Gump.theme["bgInset"], 0.98, withTexture=True),
+            ui.addColorBox(x + 2, y + 2, 1, width - 4, "#ffffff", 0.12, withTexture=False),
+            ui.addColorBox(x + 2, y + height - 2, 1, width - 4, "#000000", 0.56, withTexture=False),
+            ui.addColorBox(x + 10, y + 24, 1, width - 20, Gump.theme["grainLine"], 0.28, withTexture=False),
+        ]
+        title = self._addBoundedLabel("Expected Outcome", x + 8, y + 5, width - 16, 16, 14, Gump.theme["buttonText"], group="suit", align="center")
+        table_x = x + 10
+        table_w = width - 20
+        col_gap = 3
+        resist_w = 42
+        current_w = 34
+        final_w = 42
+        delta_w = table_w - resist_w - current_w - final_w - col_gap * 3
+        resist_x = table_x
+        current_x = resist_x + resist_w + col_gap
+        final_x = current_x + current_w + col_gap
+        delta_x = final_x + final_w + col_gap
+        header_y = y + 30
+        self._addBoundedLabel("Resist", resist_x, header_y, resist_w, 12, 12, "#9e9483", group="suit", align="left")
+        self._addBoundedLabel("Cur", current_x, header_y, current_w, 12, 12, "#9e9483", group="suit", align="center")
+        self._addBoundedLabel("Final", final_x, header_y, final_w, 12, 12, "#9e9483", group="suit", align="center")
+        self._addBoundedLabel("+/-", delta_x, header_y, delta_w, 12, 12, "#9e9483", group="suit", align="center")
+
+        resist_labels = {}
+        row_h = 19
+        row_gap = 1
+        first_row_y = y + 46
+        for row_index, (resist_name, short_name, color, _) in enumerate(SUIT_RESIST_DISPLAY):
+            row_y = first_row_y + row_index * (row_h + row_gap)
+            elements.append(ui.addColorBox(table_x - 2, row_y, row_h, table_w + 4, Gump.theme["row"], 0.42, withTexture=False))
+            elements.append(ui.addColorBox(table_x - 2, row_y + row_h - 1, 1, table_w + 4, "#000000", 0.32, withTexture=False))
+            self._addBoundedLabel(short_name, resist_x, row_y + 1, resist_w, row_h - 2, 13, color, group="suit", align="left")
+            resist_labels[resist_name] = {
+                "current": self._addBoundedLabel("", current_x, row_y + 1, current_w, row_h - 2, 13, color, group="suit", align="center"),
+                "final": self._addBoundedLabel("", final_x, row_y + 1, final_w, row_h - 2, 13, color, group="suit", align="center"),
+                "delta": self._addBoundedLabel("", delta_x, row_y + 1, delta_w, row_h - 2, 13, color, group="suit", align="center"),
+            }
+
+        stats_y = first_row_y + len(SUIT_RESIST_DISPLAY) * (row_h + row_gap) + 8
+        elements.append(ui.addColorBox(x + 10, stats_y - 3, 1, width - 20, Gump.theme["grainLine"], 0.24, withTexture=False))
+        self._addBoundedLabel("Planned Stats", x + 10, stats_y + 3, width - 20, 14, 13, "#9e9483", group="suit", align="center")
+        prop_labels = []
+        for index in range(8):
+            row_y = stats_y + 23 + index * 17
+            elements.append(ui.addColorBox(table_x - 2, row_y, 16, table_w + 4, Gump.theme["row"], 0.32, withTexture=False))
+            prop_labels.append(self._addBoundedLabel("", table_x, row_y + 1, table_w, 14, 13, "#c9bea7", group="suit", align="center"))
+
+        note = self._addBoundedLabel("", x + 10, y + height - 20, width - 20, 14, 12, "#f6f2cf", group="suit", align="center")
+        return {"elements": elements, "title": title, "resists": resist_labels, "props": prop_labels, "note": note}
+
+    def _set_suit_expected_outcome(self, controls, rows):
+        if not controls:
+            return
+        current_total = _suit_empty_resists()
+        final_total = _suit_empty_resists()
+        has_current_total = False
+        for row in rows:
+            if not row.get("Resists"):
+                continue
+            has_current_total = True
+            current_row = _suit_parse_resist_text(row.get("Resists", ""))
+            final_row = _suit_expected_row_resists(row)
+            for resist_name in SUIT_RESISTS:
+                current_total[resist_name] += current_row.get(resist_name, 0)
+                final_total[resist_name] += final_row.get(resist_name, 0)
+
+        for resist_name, _, _, _ in SUIT_RESIST_DISPLAY:
+            row_controls = controls.get("resists", {}).get(resist_name, {})
+            if has_current_total:
+                current_value = current_total.get(resist_name, 0)
+                final_value = final_total.get(resist_name, 0)
+                delta_value = final_value - current_value
+                self._set_text(row_controls.get("current"), current_value)
+                self._set_text(row_controls.get("final"), final_value)
+                self._set_text(row_controls.get("delta"), "{:+d}".format(delta_value))
+            else:
+                self._set_text(row_controls.get("current"), "--")
+                self._set_text(row_controls.get("final"), "--")
+                self._set_text(row_controls.get("delta"), "--")
+
+        prop_totals = _suit_expected_plan_totals(rows)
+        prop_order = ["Lower Reagent Cost", "Lower Mana Cost", "Mana Increase", "Mana Regeneration"]
+        ordered_props = [prop for prop in prop_order if prop_totals.get(prop)]
+        ordered_props.extend(sorted(prop for prop in prop_totals if prop not in ordered_props))
+        prop_texts = ["{} {}".format(_suit_prop_short_name(prop), prop_totals[prop]) for prop in ordered_props]
+        for index, label in enumerate(controls.get("props", [])):
+            self._set_text(label, prop_texts[index] if index < len(prop_texts) else "")
+        if has_current_total:
+            self._set_text(controls.get("note"), "Outcome from selected pieces")
+        else:
+            self._set_text(controls.get("note"), "Scan or select suit pieces first")
+
+    def _set_suit_plan_details(self, controls, plan_rows):
+        prop_labels = controls.get("props") or []
+        extras = _suit_plan_extra_texts(plan_rows)
+        for index, label in enumerate(prop_labels):
+            self._set_text(label, extras[index] if index < len(extras) else "")
+        if controls.get("plan"):
+            if extras:
+                plan_text = " ".join(extras)
+            elif plan_rows:
+                plan_text = "Resists only"
+            else:
+                plan_text = "--"
+            self._set_text(controls.get("plan"), self._truncate_text(plan_text, 24))
+        if plan_rows:
+            self._set_text(
+                controls.get("weight"),
+                "Wt {}/{}".format(_suit_rows_weight(plan_rows), _suit_max_weight(True)),
+            )
+        else:
+            self._set_text(controls.get("weight"), "Wt --")
+
     def _set_suit_icon_graphic(self, control, graphic):
         if not control:
             return
@@ -3967,19 +3784,21 @@ class MysticLlamasCalculator:
         status_text = str(status or "Pending")
         lower = status_text.lower()
         if lower == "done":
-            return "Chosen: Complete", "chosen"
+            return "Complete", "chosen"
+        if "saved" in lower:
+            return "Saved", "chosen"
         if "chosen" in lower or "select" in lower or lower.startswith("good "):
-            return status_text, "chosen"
+            return self._suit_status_display(status_text), "chosen"
         if "fail" in lower or "reject" in lower:
-            return "Issue: Failed", "failed"
+            return "Failed", "failed"
         if "imbu" in lower:
-            return "Working: Imbuing", "working"
+            return "Imbuing", "working"
         if "craft" in lower:
-            return "Working: Crafting", "working"
-        return "Idle: {}".format(self._suit_status_display(status_text)), "idle"
+            return "Crafting", "working"
+        return self._suit_status_display(status_text), "idle"
 
 
-    def _add_suit_gear_slot(self, x, y, width, height, index):
+    def _add_suit_gear_slot_card(self, x, y, width, height, index):
         ui = self._ui_gump()
         frame = [
             ui.addColorBox(x - 4, y - 4, height + 8, width + 8, Gump.theme["frameOuter"], 1, withTexture=False),
@@ -3988,7 +3807,7 @@ class MysticLlamasCalculator:
             ui.addColorBox(x + 3, y + 3, 1, width - 6, "#ffffff", 0.12, withTexture=False),
             ui.addColorBox(x + 3, y + height - 4, 1, width - 6, "#000000", 0.56, withTexture=False),
         ]
-        table = self._add_suit_resist_table(x, y, width, height, compact=True)
+        table = self._add_suit_resist_value_group(x + 6, y + 34, width - 12, 22)
         icon = None
         selected = [
             ui.addColorBox(x - 5, y - 5, 2, width + 10, "#69be37", 0.94, withTexture=False),
@@ -4009,6 +3828,15 @@ class MysticLlamasCalculator:
             for border in borders:
                 border.IsVisible = False
             status_borders[key] = borders
+        detail_y = y + height - 48
+        detail_w = (width - 18) // 2
+        props = [
+            self._addBoundedLabel("", x + 7, detail_y, detail_w, 10, 8, "#c9bea7", group="suit", align="left"),
+            self._addBoundedLabel("", x + 11 + detail_w, detail_y, detail_w, 10, 8, "#c9bea7", group="suit", align="left"),
+            self._addBoundedLabel("", x + 7, detail_y + 11, detail_w, 10, 8, "#c9bea7", group="suit", align="left"),
+            self._addBoundedLabel("", x + 11 + detail_w, detail_y + 11, detail_w, 10, 8, "#c9bea7", group="suit", align="left"),
+        ]
+        weight = self._addBoundedLabel("", x + 8, detail_y + 24, width - 16, 10, 8, "#f0d080", group="suit", align="center")
         status = self._addBoundedLabel("", x + 8, y + height - 13, width - 16, 12, 8, "#f6f2cf", group="suit", align="center")
         name = self._addBoundedLabel("", x - 10, y - 18, width + 20, 14, 8, Gump.theme["buttonText"], group="suit", align="center")
         selector = self._addNativeCircleButton("radioBlue", x + 2, y + 2, lambda idx=index: self._mark_suit_slot(idx), group=None)
@@ -4017,10 +3845,167 @@ class MysticLlamasCalculator:
             "table": table,
             "icon": icon,
             "name": name,
+            "props": props,
             "statusBorders": status_borders,
             "selected": selected,
             "select": selector,
             "status": status,
+            "weight": weight,
+        }
+
+    def _add_suit_gear_slot_table(self, x, y, width, height, index):
+        ui = self._ui_gump()
+        frame = [
+            ui.addColorBox(x - 2, y - 2, height + 4, width + 4, Gump.theme["frameOuter"], 1, withTexture=False),
+            ui.addColorBox(x, y, height, width, Gump.theme["bgInset"], 0.98, withTexture=True),
+            ui.addColorBox(x + 2, y + 2, 1, width - 4, "#ffffff", 0.12, withTexture=False),
+            ui.addColorBox(x + 2, y + height - 2, 1, width - 4, "#000000", 0.56, withTexture=False),
+        ]
+        selected = [
+            ui.addColorBox(x - 3, y - 3, 2, width + 6, "#69be37", 0.94, withTexture=False),
+            ui.addColorBox(x - 3, y + height + 1, 2, width + 6, "#69be37", 0.94, withTexture=False),
+            ui.addColorBox(x - 3, y - 3, height + 6, 2, "#69be37", 0.94, withTexture=False),
+            ui.addColorBox(x + width + 1, y - 3, height + 6, 2, "#69be37", 0.94, withTexture=False),
+        ]
+        for element in selected:
+            element.IsVisible = False
+
+        status_borders = {}
+        for key, color in (("chosen", "#69be37"), ("working", "#2da8ff"), ("failed", "#d35c4c")):
+            borders = [
+                ui.addColorBox(x - 2, y - 2, 2, width + 4, color, 0.95, withTexture=False),
+                ui.addColorBox(x - 2, y + height, 2, width + 4, color, 0.95, withTexture=False),
+                ui.addColorBox(x - 2, y - 2, height + 4, 2, color, 0.95, withTexture=False),
+                ui.addColorBox(x + width, y - 2, height + 4, 2, color, 0.95, withTexture=False),
+            ]
+            for border in borders:
+                border.IsVisible = False
+            status_borders[key] = borders
+
+        piece_w = 144
+        plan_w = 130
+        group_gap = 6
+        group_w = max(100, (width - piece_w - plan_w - group_gap * 4) // 3)
+        current_x = x + piece_w + group_gap
+        add_x = current_x + group_w + group_gap
+        final_x = add_x + group_w + group_gap
+        plan_x = final_x + group_w + group_gap
+        value_y = y + max(10, (height - 22) // 2)
+
+        selector = self._addNativeCircleButton(
+            "radioBlue",
+            x + 6,
+            y + height // 2 - 9,
+            lambda idx=index: self._mark_suit_slot(idx),
+            group=None,
+        )
+        name = self._addBoundedLabel("", x + 30, y + 4, piece_w - 34, 13, 9, Gump.theme["buttonText"], group="suit")
+        status = self._addBoundedLabel("", x + 30, y + 19, piece_w - 34, 12, 8, "#f6f2cf", group="suit")
+        serial = self._addBoundedLabel("", x + 30, y + 32, piece_w - 34, 10, 8, "#9e9483", group="suit")
+        current = self._add_suit_resist_value_group(current_x, value_y, group_w, 22)
+        added = self._add_suit_resist_value_group(add_x, value_y, group_w, 22)
+        final = self._add_suit_resist_value_group(final_x, value_y, group_w, 22)
+        plan = self._addBoundedLabel("", plan_x, y + 8, plan_w, 14, 8, "#c9bea7", group="suit")
+        weight = self._addBoundedLabel("", plan_x, y + 25, plan_w, 13, 8, "#f0d080", group="suit")
+
+        return {
+            "row": frame,
+            "current": current,
+            "add": added,
+            "final": final,
+            "name": name,
+            "serial": serial,
+            "plan": plan,
+            "statusBorders": status_borders,
+            "selected": selected,
+            "select": selector,
+            "status": status,
+            "weight": weight,
+        }
+
+
+    def _add_suit_gear_slot(self, x, y, width, height, index):
+        ui = self._ui_gump()
+        frame = [
+            ui.addColorBox(x - 2, y - 2, height + 4, width + 4, Gump.theme["frameOuter"], 1, withTexture=False),
+            ui.addColorBox(x, y, height, width, Gump.theme["bgInset"], 0.98, withTexture=True),
+            ui.addColorBox(x + 2, y + 2, 1, width - 4, "#ffffff", 0.12, withTexture=False),
+            ui.addColorBox(x + 2, y + height - 2, 1, width - 4, "#000000", 0.56, withTexture=False),
+            ui.addColorBox(x + 10, y + 23, 1, width - 20, Gump.theme["grainLine"], 0.26, withTexture=False),
+            ui.addColorBox(x + 10, y + height - 21, 1, width - 20, Gump.theme["grainLine"], 0.22, withTexture=False),
+        ]
+
+        status_borders = {}
+        for key, color in (("chosen", "#69be37"), ("working", "#2da8ff"), ("failed", "#d35c4c")):
+            borders = [
+                ui.addColorBox(x - 2, y - 2, 2, width + 4, color, 0.95, withTexture=False),
+                ui.addColorBox(x - 2, y + height, 2, width + 4, color, 0.95, withTexture=False),
+                ui.addColorBox(x - 2, y - 2, height + 4, 2, color, 0.95, withTexture=False),
+                ui.addColorBox(x + width, y - 2, height + 4, 2, color, 0.95, withTexture=False),
+            ]
+            for border in borders:
+                border.IsVisible = False
+            status_borders[key] = borders
+
+        table_w = width - 20
+        table_x = x + (width - table_w) // 2
+        col_gap = 2
+        resist_w = 30
+        current_w = 34
+        add_w = 42
+        final_w = table_w - resist_w - current_w - add_w - col_gap * 3
+        resist_x = table_x
+        current_x = resist_x + resist_w + col_gap
+        add_x = current_x + current_w + col_gap
+        final_x = add_x + add_w + col_gap
+
+        name = self._addBoundedLabel("", x + 8, y + 4, width - 16, 16, 14, Gump.theme["buttonText"], group="suit", align="center")
+        header_y = y + 23
+        self._addBoundedLabel("R", resist_x, header_y, resist_w, 12, 12, "#9e9483", group="suit", align="center")
+        self._addBoundedLabel("Cur", current_x, header_y, current_w, 12, 12, "#9e9483", group="suit", align="center")
+        self._addBoundedLabel("Add", add_x, header_y, add_w, 12, 12, "#9e9483", group="suit", align="center")
+        self._addBoundedLabel("Final", final_x, header_y, final_w, 12, 12, "#9e9483", group="suit", align="center")
+
+        current_labels = {}
+        add_labels = {}
+        final_labels = {}
+        row_h = 13
+        row_gap = 0
+        first_row_y = y + 36
+        for row_index, (resist_name, short_name, color, _) in enumerate(SUIT_RESIST_DISPLAY):
+            row_y = first_row_y + row_index * (row_h + row_gap)
+            frame.append(ui.addColorBox(table_x - 2, row_y, row_h, table_w + 4, Gump.theme["row"], 0.42, withTexture=False))
+            frame.append(ui.addColorBox(table_x - 2, row_y + row_h - 1, 1, table_w + 4, "#000000", 0.32, withTexture=False))
+            self._addBoundedLabel(short_name, resist_x, row_y, resist_w, row_h, 13, color, group="suit", align="center")
+            current_labels[resist_name] = self._addBoundedLabel("", current_x, row_y, current_w, row_h, 13, color, group="suit", align="center")
+            add_labels[resist_name] = self._addBoundedLabel("", add_x, row_y, add_w, row_h, 13, color, group="suit", align="center")
+            final_labels[resist_name] = self._addBoundedLabel("", final_x, row_y, final_w, row_h, 13, color, group="suit", align="center")
+
+        plan = self._addBoundedLabel("", x + 10, y + height - 19, width - 20, 10, 12, "#c9bea7", group="suit", align="center")
+        weight = self._addBoundedLabel("", x + 10, y + height - 9, (width - 24) // 2, 9, 12, "#f0d080", group="suit", align="center")
+        status = self._addBoundedLabel("", x + width // 2, y + height - 9, (width - 24) // 2, 9, 12, "#f6f2cf", group="suit", align="center")
+
+        hit_target = API.CreateGumpColorBox(0.01, "#000000")
+        hit_target.SetX(x)
+        hit_target.SetY(y)
+        hit_target.SetWidth(width)
+        hit_target.SetHeight(height)
+        API.AddControlOnClick(hit_target, self._callback(lambda idx=index: self._mark_suit_slot(idx)))
+        ui.gump.Add(hit_target)
+
+        return {
+            "row": frame,
+            "current": {"labels": current_labels},
+            "add": {"labels": add_labels},
+            "final": {"labels": final_labels},
+            "name": name,
+            "serial": None,
+            "plan": plan,
+            "statusBorders": status_borders,
+            "selected": [],
+            "select": hit_target,
+            "status": status,
+            "weight": weight,
         }
 
 
@@ -4108,7 +4093,7 @@ class MysticLlamasCalculator:
             self._set_button_text(controls["select"], select_label)
             self._set_text(controls["locked"], "{} (Locked)".format(row["Prop"]))
             self._set_input_text(controls["input"], row["Val"])
-        self._set_text(controls["weight"], GetRowWeight(i))
+            self._set_text(controls["weight"], GetRowWeight(i))
         self._set_text(self.controls["totalWeightLabel"], str(GetTotalWeight()) + " / " + str(GetMaxWeight()))
         selected_preset = state.get("SelectedPreset", PRESET_CUSTOM)
         self._set_checked(self.controls.get("presetCustom"), selected_preset == PRESET_CUSTOM)
@@ -4128,7 +4113,7 @@ class MysticLlamasCalculator:
 
 
     def _set_suit_preset(self, preset):
-        state["SuitPreset"] = preset
+        state["SuitPreset"] = _suit_preset_for_key(preset).key
 
 
     def _update_speed_calc(self):
@@ -4143,10 +4128,9 @@ class MysticLlamasCalculator:
         self._set_checked(self.controls.get("suitBodyMale"), state.get("SuitBody") == "Male")
         self._set_checked(self.controls.get("suitBodyFemale"), state.get("SuitBody") == "Female")
         self._set_checked(self.controls.get("suitBodyGargoyle"), state.get("SuitBody") == "Gargoyle")
-        self._set_checked(self.controls.get("suitPresetBasic"), state.get("SuitPreset") == SUIT_PRESET_BASIC)
-        self._set_checked(self.controls.get("suitPresetMage"), state.get("SuitPreset") == SUIT_PRESET_MAGE)
-        self._set_checked(self.controls.get("suitPresetLuck"), state.get("SuitPreset") == SUIT_PRESET_LUCK)
-        self._set_checked(self.controls.get("suitPresetSampire"), state.get("SuitPreset") == SUIT_PRESET_SAMPIRE)
+        selected_preset = _suit_current_preset().key
+        for preset in SUIT_PRESETS:
+            self._set_checked(self.controls.get(preset.control_key), selected_preset == preset.key)
         self._set_button_text(
             self.controls.get("suitMatButton"),
             self._container_text("Resource", state.get("MatCont", 0)),
@@ -4166,12 +4150,8 @@ class MysticLlamasCalculator:
             ]
         for index, controls in enumerate(self.suitRowControls):
             has_row = index < len(rows)
-            self._set_visible(controls["row"], has_row)
-            self._set_visible(controls.get("table"), has_row)
-            self._set_visible(controls.get("icon"), has_row)
-            self._set_visible(controls.get("name"), has_row)
-            self._set_visible(controls.get("select"), has_row)
-            self._set_visible(controls["status"], has_row)
+            for key in ("row", "current", "add", "final", "name", "serial", "plan", "select", "status", "weight"):
+                self._set_visible(controls.get(key), has_row)
             for borders in controls.get("statusBorders", {}).values():
                 self._set_visible(borders, False)
             if not has_row:
@@ -4180,29 +4160,40 @@ class MysticLlamasCalculator:
             row = rows[index]
             serial = int(row.get("Serial", 0) or 0)
             resists_text = row.get("Resists", "")
-            self._set_suit_resist_table(
-                controls.get("table", {}).get("labels"),
-                _suit_parse_resist_text(resists_text),
+            plan_text = row.get("Plan", "")
+            plan_rows = _suit_parse_plan_rows(plan_text)
+            current_resists = _suit_parse_resist_text(resists_text)
+            additions = _suit_plan_resist_additions(plan_text)
+            final_resists = _suit_expected_row_resists(row) if resists_text else _suit_empty_resists()
+            has_plan = bool(plan_rows) or _suit_plan_has_final_expectation(plan_text)
+            self._set_suit_resist_value_group(
+                controls.get("current", {}).get("labels"),
+                current_resists,
                 empty=not bool(resists_text),
             )
-            self._set_suit_icon_graphic(controls.get("icon"), self._suit_slot_graphic(row.get("Slot", ""), index))
-            self._set_text(controls.get("name"), self._truncate_text(row.get("Slot", ""), 22))
+            self._set_suit_resist_value_group(
+                controls.get("add", {}).get("labels"),
+                additions,
+                empty=not has_plan,
+                mode="add",
+            )
+            self._set_suit_resist_value_group(
+                controls.get("final", {}).get("labels"),
+                final_resists,
+                empty=not bool(resists_text),
+            )
+            self._set_suit_plan_details(controls, plan_rows)
+            self._set_text(controls.get("name"), self._truncate_text(row.get("Slot", ""), 20))
+            self._set_text(controls.get("serial"), "0x{:X}".format(serial) if serial else "No item")
             status_text, status_key = self._suit_card_status(row.get("Status", ""))
             is_marked = bool(serial and serial == state.get("SuitMarkedSerial", 0))
             if is_marked and status_key not in ("working", "failed"):
-                status_text, status_key = "Chosen: Marked", "chosen"
+                status_text, status_key = "Marked", "chosen"
             self._set_visible(controls.get("selected"), bool(serial and status_key == "chosen"))
             self._set_text(controls["status"], status_text)
             self._set_visible(controls.get("statusBorders", {}).get(status_key), True)
 
-        expected_ready = _suit_rows_have_final_expectation(rows)
-        expected = _suit_expected_total_resists(rows) if expected_ready else _suit_empty_resists()
-        self._set_suit_resist_table(
-            self.suitExpectedControls.get("labels"),
-            expected,
-            empty=not expected_ready,
-            expected=True,
-        )
+        self._set_suit_expected_outcome(self.suitExpectedControls, rows)
 
 
     def _update_picker(self):
@@ -4344,51 +4335,15 @@ class MysticLlamasCalculator:
             state["Msg"] = "{} set.".format(prompt.replace("Select ", ""))
             if key == "SuitKeepCont" and not state.get("SuitRunning"):
                 body = state.get("SuitBody", "Male")
-                require_mage_piece = state.get("SuitPreset") == SUIT_PRESET_MAGE
-                SuitLog("ui scan trigger: selected good-piece container={} body={} preset={} require_mage_piece={}".format(
+                preset = _suit_current_preset()
+                SuitLog("ui scan trigger: selected good-piece container={} body={} preset={} preset_class={}".format(
                     _debug_hex(target),
                     body,
-                    state.get("SuitPreset"),
-                    require_mage_piece,
+                    preset.key,
+                    preset.__class__.__name__,
                 ))
                 _suit_init_rows(body)
-                if require_mage_piece:
-                    selected_by_slot, candidates_by_slot, loaded, plan = _suit_scan_saved_mage_plan(
-                        body,
-                        update_rows=True,
-                        required=False,
-                    )
-                    count = len(selected_by_slot)
-                    if plan:
-                        state["SuitMsg"] = "Selected README-valid Mage suit from {} saved piece{}.".format(
-                            loaded,
-                            "" if loaded == 1 else "s",
-                        )
-                    elif loaded:
-                        state["SuitMsg"] = _suit_mage_incomplete_message(candidates_by_slot, loaded)
-                    else:
-                        state["SuitMsg"] = "Good-piece container scanned; no Mage candidates found."
-                    state["Msg"] = state["SuitMsg"]
-                    send_calculator()
-                    return
-
-                selected_by_slot, _, loaded = _suit_scan_good_pieces(
-                    body,
-                    require_exceptional=False,
-                    require_high_resists=False,
-                    update_rows=True,
-                    required=False,
-                )
-                count = len(selected_by_slot)
-                if count:
-                    state["SuitMsg"] = "Selected {} saved good piece{}.".format(count, "" if count == 1 else "s")
-                    state["Msg"] = state["SuitMsg"]
-                elif loaded:
-                    state["SuitMsg"] = "Scanned {} saved piece{}; none selected.".format(loaded, "" if loaded == 1 else "s")
-                    state["Msg"] = state["SuitMsg"]
-                else:
-                    state["SuitMsg"] = "Good-piece container scanned; no matching gear found."
-                    state["Msg"] = state["SuitMsg"]
+                preset.scan_good_pieces(body, required=False, notify=False)
                 send_calculator()
         else:
             state["Msg"] = "Targeting canceled."
@@ -4562,82 +4517,16 @@ class MysticLlamasCalculator:
         )
 
 
-    def _addPanel(self, x, y, width, height, title=None, group="main"):
-        ui = self._ui_gump()
-        panel = ui.addSectionPanel("", title, x, y, width, height) if title else ui.addPanel(x, y, width, height, None, withTexture=True)
-        self._remember(panel["elements"], group)
-        return panel
-
-    def _addSectionPanel(self, number, title, x, y, width, height, group="main"):
-        panel = self._ui_gump().addSectionPanel(number, title, x, y, width, height)
-        self._remember(panel["elements"], group)
-        return panel
-
-    def _addSectionTitle(self, number, title, x, y, width, group="main"):
-        control = self._ui_gump().addSectionTitle(number, title, x, y, width)
-        self._remember(control, group)
-        return control
-
-    def _addFlatRow(self, x, y, width, height, group="main"):
-        control = self._ui_gump().addFlatRow(x, y, width, height)
-        return self._remember(control, group) if group else control
-
-    def _addButton(self, text, x, y, width, height=24, callback=None, fontSize=11, group="main"):
-        cb = self._callback(callback) if callback else None
-        control = self._ui_gump().addTextButton(text, x, y, width, height, cb, fontSize)
-        return self._remember(control, group) if group else control
-
-    def _addGemDot(self, x, y, color, group="main", callback=None):
-        cb = self._callback(callback) if callback else None
-        control = self._ui_gump().addGemDot(x, y, color, cb)
-        return self._remember(control, group) if group else control
 
 
 
-    def _addInput(self, defaultValue, x, y, minValue=0, maxValue=120, width=60, height=24, group="main"):
-        control = self._ui_gump().addSkillTextBox(defaultValue, x, y, minValue, maxValue, width, height)
-        return self._remember(control, group) if group else control
 
-    def _addRadio(self, label, x, y, isChecked, callback, hue=None, group="main", hitWidth=110):
-        cb = self._callback(callback) if callback else None
-        control = self._ui_gump().addRadio(
-            label,
-            x,
-            y,
-            6200,
-            isChecked,
-            cb,
-            hue,
-            labelYOffset=3,
-            boxYOffset=2,
-            boxSize=18,
-            labelGap=28,
-            hitWidth=hitWidth,
-            hitHeight=22,
-            fillColor="#69be37",
-        )
-        return self._remember(control, group) if group else control
 
-    def _addReadOnlyRadio(self, label, x, y, isChecked, hue=None, group="main"):
-        if hue is None:
-            hue = Gump.hues["muted"]
-        control = self._ui_gump().addRadio(
-            label,
-            x,
-            y,
-            6201,
-            isChecked,
-            None,
-            hue,
-            labelYOffset=3,
-            boxYOffset=2,
-            boxSize=18,
-            labelGap=28,
-            hitWidth=110,
-            hitHeight=22,
-            fillColor="#69be37",
-        )
-        return self._remember(control, group) if group else control
+
+
+
+
+
 
     def _draw_item_properties(self, g):
         panel = self._addSectionPanel(1, "Select Item", 8, 44, self.PANEL_WIDTH, 124)
@@ -4713,12 +4602,17 @@ class MysticLlamasCalculator:
         px = presets["x"] + 10
         py = presets["y"] + 36
         prow_w = presets["width"] - 20
-        for row_y in (py - 2, py + 22, py + 46, py + 70):
+        for index, preset in enumerate(SUIT_PRESETS):
+            row_y = py - 2 + index * 24
             self._addFlatRow(px - 6, row_y, prow_w, 22, "suit")
-        self.controls["suitPresetBasic"] = self._addRadio("Basic LRC", px + 4, py, state.get("SuitPreset") == SUIT_PRESET_BASIC, lambda: self._set_suit_preset(SUIT_PRESET_BASIC), group="suit")
-        self.controls["suitPresetMage"] = self._addRadio("Mage 70", px + 4, py + 24, state.get("SuitPreset") == SUIT_PRESET_MAGE, lambda: self._set_suit_preset(SUIT_PRESET_MAGE), group="suit")
-        self.controls["suitPresetLuck"] = self._addRadio("Luck", px + 4, py + 48, state.get("SuitPreset") == SUIT_PRESET_LUCK, lambda: self._set_suit_preset(SUIT_PRESET_LUCK), group="suit")
-        self.controls["suitPresetSampire"] = self._addRadio("Sampire", px + 4, py + 72, state.get("SuitPreset") == SUIT_PRESET_SAMPIRE, lambda: self._set_suit_preset(SUIT_PRESET_SAMPIRE), group="suit")
+            self.controls[preset.control_key] = self._addRadio(
+                preset.label,
+                px + 4,
+                py + index * 24,
+                state.get("SuitPreset") == preset.key,
+                lambda preset_key=preset.key: self._set_suit_preset(preset_key),
+                group="suit",
+            )
 
         settings = self._addSectionPanel(3, "Settings", 8, 202, self.PANEL_WIDTH, 74, group="suit")
         settings_x = settings["x"] + 10
@@ -4741,57 +4635,37 @@ class MysticLlamasCalculator:
             width=settings_w,
         )
 
-        gear = self._addSectionPanel(4, "Pieces", 8, 284, self.PANEL_WIDTH, 306, group="suit")
+        gear = self._addSectionPanel(4, "Pieces", 8, 284, self.PANEL_WIDTH, 420, group="suit")
         gear_x = gear["x"]
         gear_y = gear["y"] + 30
         gear_w = gear["width"]
-        expected_w = 120
-        column_gap = 8
-        slot_w = 128
-        slot_h = 98
-        current_x = gear_x
-        current_w = gear_w - expected_w - column_gap
-        expected_x = current_x + current_w + column_gap
-        expected_y = gear_y + 20
-        current_center_x = current_x + current_w // 2 - slot_w // 2
-        left_x = current_x + 8
-        right_x = current_x + current_w - 8 - slot_w
-        top_y = gear_y
-        mid_y = gear_y + 76
-        chest_y = gear_y + 120
-        bottom_y = gear_y + 170
+        content_x = gear_x + 8
+        content_w = gear_w - 16
+        expected_w = 216
+        expected_gap = 10
+        card_gap = 8
+        card_h = 126
+        card_w = (content_w - expected_w - expected_gap - card_gap) // 2
+        expected_x = content_x + card_w * 2 + card_gap + expected_gap
+        row_gap = 6
         self.suitRowControls = []
 
-        ui = self._ui_gump()
-        self._addBoundedLabel("Current", current_x, gear_y - 20, current_w, 14, 8, "#9e9483", group="suit", align="center")
-        self._addBoundedLabel("Expected", expected_x, gear_y - 20, expected_w, 14, 8, "#9e9483", group="suit", align="center")
-        ui.addColorBox(expected_x - column_gap // 2, gear_y - 10, 248, 1, Gump.theme["grainLine"], 0.28, withTexture=False)
-        ui.addColorBox(current_center_x + slot_w // 2, top_y + slot_h + 5, chest_y - top_y - slot_h - 8, 1, Gump.theme["grainLine"], 0.18, withTexture=False)
-        ui.addColorBox(left_x + slot_w + 6, mid_y + slot_h // 2, 1, current_center_x - left_x - slot_w - 12, Gump.theme["grainLine"], 0.18, withTexture=False)
-        ui.addColorBox(current_center_x + slot_w + 6, mid_y + slot_h // 2, 1, right_x - current_center_x - slot_w - 12, Gump.theme["grainLine"], 0.18, withTexture=False)
-        ui.addColorBox(current_center_x + slot_w // 2, chest_y + slot_h + 4, bottom_y - chest_y - slot_h - 8, 1, Gump.theme["grainLine"], 0.18, withTexture=False)
+        max_slots = max(len(items) for items in SUIT_BODY_ITEMS.values())
+        for index in range(max_slots):
+            slot_x = content_x + (index % 2) * (card_w + card_gap)
+            slot_y = gear_y + (index // 2) * (card_h + row_gap)
+            self.suitRowControls.append(self._add_suit_gear_slot(slot_x, slot_y, card_w, card_h, index))
 
-        slot_specs = (
-            (current_center_x, top_y),
-            (left_x, mid_y),
-            (right_x, mid_y),
-            (left_x, bottom_y),
-            (current_center_x, chest_y),
-            (right_x, bottom_y),
-        )
-
-        for index, (slot_x, slot_y) in enumerate(slot_specs):
-            self.suitRowControls.append(self._add_suit_gear_slot(slot_x, slot_y, slot_w, slot_h, index))
-
-        self.suitExpectedControls = self._add_suit_resist_table(expected_x, expected_y, expected_w, 150, compact=False)
+        outcome_h = max_slots // 2 * card_h + (max_slots // 2 - 1) * row_gap
+        self.suitExpectedControls = self._add_suit_expected_outcome_panel(expected_x, gear_y, expected_w, outcome_h)
 
         ax = 16 + (self.PANEL_WIDTH - 32 - 304) // 2
-        ay = 638
+        ay = 730
         self._addFlatRow(ax - 8, ay - 6, 304, 34, "suit")
         self._addButton("Scan", ax, ay, 70, height=24, callback=ScanSuitGoodPieces, group="suit")
         self._addButton("Start", ax + 82, ay, 116, height=24, callback=CraftSuit, group="suit")
         self._addButton("Stop", ax + 216, ay, 74, height=24, callback=StopSuitCraft, group="suit")
-        self.controls["suitStatusLabel"] = self._addBoundedLabel("", 16, 606, self.PANEL_WIDTH - 32, 20, 9, "#f6f2cf", group="suit")
+        self.controls["suitStatusLabel"] = self._addBoundedLabel("", 16, 704, self.PANEL_WIDTH - 32, 20, 10, "#f6f2cf", group="suit")
 
     def _draw_picker(self, g):
         self.pickerSlots = []
@@ -4868,18 +4742,8 @@ class MysticLlamasCalculator:
         except Exception:
             pass
 
-    def _addNativeCircleButton(self, button_type, x, y, callback=None, group="main"):
-        cb = self._callback(callback) if callback else None
-        button = self._ui_gump().addButton("", x, y, button_type, cb)
-        return self._remember(button, group) if group else button
 
-    def _addMaxButton(self, x, y, callback, group="main"):
-        return self._addNativeCircleButton("radioGreen", x, y, callback, group)
 
-    def _addSettingAction(self, text, x, y, callback, group="main", width=286):
-        cb = self._callback(callback) if callback else None
-        control = self._ui_gump().addSettingAction(text, x, y, cb, width)
-        return self._remember(control, group) if group else control
 
     def _draw_rows(self, g):
         panel = self._addSectionPanel(3, "Properties", 8, 286, self.PANEL_WIDTH, 206)
