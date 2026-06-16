@@ -1,4 +1,5 @@
 from LegionPath import LegionPath
+import time
 
 LegionPath.addSubdirs()
 
@@ -14,10 +15,15 @@ class Craft:
         self.selectedMaterialButton = None
         self.hasChangedTool = True
         self.isBlocked = False
+        self.lastCraftedItem = None
+        self.toolBufferCount = 3
+        self.tinkerToolGraphic = 0x1EB9
+        self.tinkerToolButtonId = 11
 
     def craft(self, isExceptional, bodSkillItem, resourceHue, material):
         if self.isBlocked:
             return None
+        self.lastCraftedItem = None
         item = self.craft_item(
             bodSkillItem,
             resourceHue,
@@ -25,6 +31,8 @@ class Craft:
             require_exceptional=isExceptional,
             recycle_rejected=True,
         )
+        if item:
+            self.lastCraftedItem = item
         if self.isBlocked:
             return None
         return item is not None
@@ -84,6 +92,8 @@ class Craft:
         return self._disposeItem(item, item_def)
 
     def _stopCrafting(self, message, hue=33):
+        API.CancelTarget()
+        API.CloseContextMenus()
         API.SysMsg(message, hue)
         self.isBlocked = True
         return False
@@ -233,9 +243,9 @@ class Craft:
             if resourceInBackpack:
                 amountInBackpack = resourceInBackpack.Amount
 
-            targetNeed = max(0, resourceAmount - amountInBackpack)
             requiredNeed = max(0, resourceMinAmount - amountInBackpack)
-            if targetNeed:
+            if requiredNeed:
+                targetNeed = max(requiredNeed, resourceAmount - amountInBackpack)
                 resourceInChest = self._findResourceStack(
                     resourceId,
                     self._container_serial(self.resourceChest),
@@ -243,7 +253,7 @@ class Craft:
                     targetNeed,
                 )
                 moveAmount = targetNeed
-                if not resourceInChest and requiredNeed:
+                if not resourceInChest:
                     resourceInChest = self._findResourceStack(
                         resourceId,
                         self._container_serial(self.resourceChest),
@@ -254,12 +264,11 @@ class Craft:
                         moveAmount = min(resourceInChest.Amount, targetNeed)
                         moveAmount = max(moveAmount, requiredNeed)
                 if not resourceInChest:
-                    if requiredNeed:
-                        return self._stopCrafting(
-                            "Missing resources: graphic {} hue {} amount {}".format(
-                                resourceId, resourceHueForItem, requiredNeed
-                            )
+                    return self._stopCrafting(
+                        "Missing resources: graphic {} hue {} amount {}".format(
+                            resourceId, resourceHueForItem, requiredNeed
                         )
+                    )
                 else:
                     if not Util.Util.moveItem(
                         resourceInChest.Serial, API.Backpack, moveAmount
@@ -291,47 +300,143 @@ class Craft:
         if self.resourceChest:
             Util.Util.openContainer(self.resourceChest)
 
+    def _closeCraftGump(self):
+        API.CancelTarget()
+        for _ in range(10):
+            if not API.HasGump(460):
+                return True
+            API.CloseGump(460)
+            API.Pause(0.25)
+        return not API.HasGump(460)
+
+    def _openCraftGumpWithItem(self, item, label):
+        if not item:
+            return self._stopCrafting("No {} found!".format(label), 32)
+
+        API.CancelTarget()
+        for attempt in range(2):
+            API.UseObject(item.Serial, False)
+            if API.WaitForGump(460, 3):
+                return True
+            API.CancelTarget()
+            API.Pause(1)
+        return self._stopCrafting("Could not open {} gump.".format(label), 33)
+
+    def _findTool(self, toolId):
+        tools = Util.Util.findTypeAll(API.Backpack, toolId)
+        if tools:
+            return tools[0]
+        return API.FindType(toolId, API.Backpack)
+
+    def _toolCount(self, toolId):
+        return len(Util.Util.findTypeAll(API.Backpack, toolId))
+
+    def _waitForToolCount(self, toolId, minCount, timeout=5):
+        start = time.time()
+        while time.time() - start < timeout:
+            if self._toolCount(toolId) >= minCount:
+                return True
+            API.Pause(0.25)
+        return False
+
+    def _ensureToolBuffer(
+        self, toolId, toolButtonId, label, requiresExistingTool=False
+    ):
+        tools = self._toolCount(toolId)
+        if tools >= self.toolBufferCount:
+            return True
+        if requiresExistingTool and tools <= 0:
+            return self._stopCrafting("No {} tool found!".format(label), 32)
+        if self._checkToolsResource() is False:
+            return False
+
+        attempts = 0
+        maxAttempts = self.toolBufferCount * 4
+        while tools < self.toolBufferCount and attempts < maxAttempts:
+            attempts += 1
+            result = self._craftTool(toolId, toolButtonId, tools + 1)
+            if result is False:
+                return False
+
+            currentTools = self._toolCount(toolId)
+            if currentTools > tools:
+                tools = currentTools
+                continue
+            if currentTools <= 0:
+                return self._stopCrafting("No {} tool found!".format(label), 32)
+
+            API.Pause(0.5)
+            tools = currentTools
+
+        if tools < self.toolBufferCount:
+            return self._stopCrafting(
+                "Could not top up {} tools to {}.".format(
+                    label, self.toolBufferCount
+                ),
+                33,
+            )
+        return True
+
+    def _ensureTinkerTools(self):
+        return self._ensureToolBuffer(
+            self.tinkerToolGraphic,
+            self.tinkerToolButtonId,
+            "tinker",
+            True,
+        )
+
     def _useTool(self):
         toolId = self._tool_graphic()
-        tool = API.FindType(toolId, API.Backpack, hue=0)
+        tool = self._findTool(toolId)
         if not tool:
-            return self._stopCrafting("No tool found!", 32)
+            if self._checkTools() is False:
+                return False
+            tool = self._findTool(toolId)
+            if not tool:
+                return self._stopCrafting("No tool found!", 32)
 
-        API.UseObject(tool)
-        if API.HasGump(460) and not self.hasChangedTool:
-            return True
+        if API.HasGump(460):
+            if not self.hasChangedTool:
+                return True
+            if not self._closeCraftGump():
+                return self._stopCrafting("Could not close old crafting gump.", 33)
 
-        while not API.HasGump(460):
-            API.UseObject(tool)
-            API.Pause(0.1)
+        if not self._openCraftGumpWithItem(tool, "crafting tool"):
+            return False
         self.hasChangedTool = False
         return True
 
     def _checkTools(self):
         self._openContainers()
+        if self._ensureTinkerTools() is False:
+            return False
+
         toolId = self._tool_graphic()
         toolButtonId = self.craftingInfo["tool"]["buttonId"]
-        tools = len(Util.Util.findTypeAll(API.Backpack, toolId))
-        if tools:
-            return True
+        return self._ensureToolBuffer(toolId, toolButtonId, "crafting")
 
-        if self._checkToolsResource() is False:
-            return False
-        return self._craftTool(toolId, toolButtonId) is not False
-
-    def _craftTool(self, toolId, toolButtonId):
+    def _craftTool(self, toolId, toolButtonId, expectedToolCount=None):
         self._openContainers()
+        if expectedToolCount is None:
+            expectedToolCount = self._toolCount(toolId) + 1
         tinkerTool = API.FindType(0x1EB9, API.Backpack)
         if not tinkerTool:
             return self._stopCrafting("No tinker tool found!", 32)
 
-        API.UseObject(tinkerTool)
-        while not API.HasGump(460):
-            API.UseObject(tinkerTool)
-            API.Pause(0.1)
+        if API.HasGump(460) and not self._closeCraftGump():
+            return self._stopCrafting("Could not close old crafting gump.", 33)
+        if not self._openCraftGumpWithItem(tinkerTool, "tinker tool"):
+            return False
 
         API.ReplyGump(toolButtonId, 460)
         API.Pause(3)
+        if not self._waitForToolCount(toolId, expectedToolCount):
+            if not self._closeCraftGump():
+                return self._stopCrafting("Could not close tinker gump.", 33)
+            self.hasChangedTool = True
+            return None
+        if not self._closeCraftGump():
+            return self._stopCrafting("Could not close tinker gump.", 33)
         self.hasChangedTool = True
         return True
 

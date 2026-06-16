@@ -269,19 +269,22 @@ class Bod:
 
     def fill(self, onCraftAttempt=None):
         self._fillBod()
-        Bod.isFilled(self.item)
+        if Bod.isFilled(self.item):
+            return True
         if not self.isSmall:
-            return
+            return True
+        pendingAcceptedItems = 0
 
         if not self.craft or not self.craftingInfo:
             API.SysMsg(
                 "A Craft Class and craftingInfo must be defined to fill a bod", 33
             )
             API.Stop()
+            return False
         if hasattr(self.craft, "isBlocked"):
             self.craft.isBlocked = False
         # self.item.Hue = 18
-        while not Bod.hasEnoughItem(self.item, self.count):
+        while not Bod.hasEnoughItem(self.item, pendingAcceptedItems):
             isValidItem = self.craft.craft(
                 self.isExceptional,
                 self.bodSkillItem,
@@ -291,12 +294,23 @@ class Bod:
             if onCraftAttempt:
                 onCraftAttempt()
             if isValidItem is None:
-                return
+                self.craft.emptyResource()
+                return False
             if isValidItem:
-                self.count += 1
-        self._fillBod()
+                craftedItem = getattr(self.craft, "lastCraftedItem", None)
+                beforeFilledCount = self._amountAlreadyFilled()
+                if not self._fillCraftedItem(craftedItem):
+                    self.craft.emptyResource()
+                    return False
+                afterFilledCount = self._amountAlreadyFilled()
+                if afterFilledCount > beforeFilledCount:
+                    pendingAcceptedItems = 0
+                else:
+                    pendingAcceptedItems += 1
+                self.count = pendingAcceptedItems
         Bod.isFilled(self.item)
         self.craft.emptyResource()
+        return True
 
     def _acceptBod(self, npcs):
         for npc in npcs:
@@ -310,14 +324,49 @@ class Bod:
                 API.Pause(0.1)
             API.ReplyGump(1, 455)
 
-    def _fillBod(self):
+    def _amountAlreadyFilled(self):
+        try:
+            values = Bod._parse(self.item, self.craftingInfo)
+            return values["amountAlreadyFilled"]
+        except ValueError:
+            return self.amountAlreadyFilled
+
+    def _craftedItemAccepted(self, craftedItem):
+        if not craftedItem:
+            return None
+        item = API.FindItem(craftedItem.Serial)
+        return not item or item.Container != API.Backpack
+
+    def _fillCraftedItem(self, craftedItem):
+        self._fillBod()
+        if self._craftedItemAccepted(craftedItem):
+            return True
+
+        if craftedItem:
+            self._fillBod(craftedItem.Serial)
+            if self._craftedItemAccepted(craftedItem):
+                return True
+
+        API.SysMsg(
+            "Crafted {} but the BOD did not accept it; stopping fill.".format(
+                self.itemName
+            ),
+            33,
+        )
+        if hasattr(self.craft, "isBlocked"):
+            self.craft.isBlocked = True
+        return False
+
+    def _fillBod(self, targetSerial=None):
         while not API.HasGump(456):
             API.UseObject(self.item.Serial)
             API.Pause(0.1)
         API.ReplyGump(11, 456)
-        API.WaitForTarget()
-        API.Target(API.Backpack)
+        if not API.WaitForTarget("any", 3):
+            return False
+        API.Target(targetSerial or API.Backpack)
         API.Pause(1)
+        return True
 
     def _findBridePrice(self):
         return API.InJournal(r"$\d gold")

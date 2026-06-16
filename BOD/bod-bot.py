@@ -671,8 +671,12 @@ class BodBot:
             if not isFilled:
                 currentCounter += 1
                 self.gump.setStatus(f"Filling... {currentCounter}/{counter}")
-                bodInfo["bod"].fill(updateClothUsed)
+                fillResult = bodInfo["bod"].fill(updateClothUsed)
                 updateClothUsed()
+                if fillResult is False:
+                    self._resetScrollAreaElement(bodInfo)
+                    self.gump.setStatus("Fill stopped; see journal.")
+                    return
             self._resetScrollAreaElement(bodInfo)
         self.gump.setStatus("Ready")
 
