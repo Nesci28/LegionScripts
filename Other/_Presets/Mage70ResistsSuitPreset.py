@@ -61,7 +61,14 @@ class Mage70ResistsSuitPreset(SuitPresetBase):
         active_by_slot = dict((slot_name, None) for slot_name in self.SUIT_BODY_ITEMS[body])
         plan = None
         slot_names = list(self.SUIT_BODY_ITEMS[body])
-        loaded = self._suit_load_kept_candidates(body, candidates_by_slot)
+        self.SuitLog("mage saved scan starting: allow_started_mage=True")
+        loaded = self._suit_load_kept_candidates(
+            body,
+            candidates_by_slot,
+            require_exceptional=True,
+            require_high_resists=True,
+            allow_started_mage=True,
+        )
         self.SuitLog("mage saved scan: loaded={} counts=[{}]".format(loaded, self._suit_log_slot_counts(candidates_by_slot)))
         for slot_name in slot_names:
             active = self._suit_best_candidate(candidates_by_slot.get(slot_name, []))
@@ -93,6 +100,7 @@ class Mage70ResistsSuitPreset(SuitPresetBase):
             self._suit_set_msg("Selected saved Mage suit pieces from good-piece container.", 69)
 
         while not plan:
+            pool_changed = False
             target_slot, craft_reason = self._suit_choose_next_mage_craft_slot(
                 candidates_by_slot,
                 active_by_slot,
@@ -150,6 +158,7 @@ class Mage70ResistsSuitPreset(SuitPresetBase):
                     return
 
                 candidates_by_slot[slot_name].append(candidate)
+                pool_changed = True
                 self._suit_refresh_active_mage_combo(candidates_by_slot, active_by_slot, slot_names)
                 self.SuitLog("mage accept crafted: {}".format(self._suit_log_candidate(candidate)))
                 self._suit_update_slot(
@@ -160,6 +169,7 @@ class Mage70ResistsSuitPreset(SuitPresetBase):
                     self._suit_high_text(high_resists),
                 )
                 plan = self._suit_solve_mage(candidates_by_slot)
+                pool_changed = False
                 if plan:
                     self._suit_select_plan(plan, active_by_slot)
                     self.SuitLog("mage plan found after slot={}".format(slot_name))
@@ -175,11 +185,14 @@ class Mage70ResistsSuitPreset(SuitPresetBase):
                 self.Misc.Pause(250)
                 continue
 
-            plan = self._suit_solve_mage(candidates_by_slot)
-            if plan:
-                self._suit_select_plan(plan, active_by_slot)
-                self.SuitLog("mage plan found before recraft")
-                break
+            if pool_changed:
+                plan = self._suit_solve_mage(candidates_by_slot)
+                if plan:
+                    self._suit_select_plan(plan, active_by_slot)
+                    self.SuitLog("mage plan found before recraft")
+                    break
+            else:
+                self.SuitLog("mage solve skipped: no new good pieces crafted")
 
             next_slot, reason = self._suit_choose_next_mage_craft_slot(
                 candidates_by_slot,
@@ -205,9 +218,12 @@ class Mage70ResistsSuitPreset(SuitPresetBase):
                 "No Mage plan yet. Next craft: {} ({})".format(next_slot or "unknown", reason),
                 55,
             )
-            return
+        return
 
         self._suit_select_plan(plan, active_by_slot)
+        if not self._suit_fortify_plan(plan):
+            self.SuitLog("mage failed during fortification plan")
+            return
         if not self._suit_imbue_plan(plan, verify_resist_target=True):
             self.SuitLog("mage failed during imbue plan")
             return

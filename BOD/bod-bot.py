@@ -17,6 +17,8 @@ import Error
 import Craft
 import Item
 import Debug
+import bod_skills
+import crafting_infos
 
 importlib.reload(Bod)
 importlib.reload(Gump)
@@ -28,6 +30,8 @@ importlib.reload(Error)
 importlib.reload(Craft)
 importlib.reload(Item)
 importlib.reload(Debug)
+importlib.reload(bod_skills)
+importlib.reload(crafting_infos)
 
 from Bod import Bod
 from Gump import Gump
@@ -747,7 +751,11 @@ class BodBot:
         selectedBodHue = self.bodSkill["bod"]["hue"]
         isSmall = self.selectedType == "Small"
 
-        bodItems = Bod.findAllBodItems(selectedBodGraphic, selectedBodHue, isSmall)
+        smallBodItems = Bod.findAllBodItems(selectedBodGraphic, selectedBodHue, True)
+        largeBodItems = Bod.findAllBodItems(selectedBodGraphic, selectedBodHue, False)
+        bodItems = smallBodItems if isSmall else largeBodItems
+        totalBodItems = len(smallBodItems) + len(largeBodItems)
+        skippedBods = 0
         craft = None
         if resourceChest:
             craftingInfo = self.craftingInfos[self.selectedProfession]
@@ -772,8 +780,12 @@ class BodBot:
                             "elements": [],
                         }
                     )
-                except:
-                    pass
+                except Exception as e:
+                    skippedBods += 1
+                    API.SysMsg(
+                        f"Skipped {self.selectedProfession} BOD {bodItem.Serial}: {e}",
+                        33,
+                    )
             for i, bodInfo in enumerate(self.bodInfos):
                 yOffset = i * 18
                 bodInfo["yOffset"] = yOffset
@@ -781,7 +793,16 @@ class BodBot:
 
             if self.bodCountLabel:
                 self.bodCountLabel.Text = f"BOD COUNT: {len(self.bodInfos)}"
-            self.gump.setStatus(statusOverride or "Ready.")
+            if statusOverride:
+                self.gump.setStatus(statusOverride)
+            else:
+                status = (
+                    f"Ready. Showing {len(self.bodInfos)}/{totalBodItems} "
+                    f"{self.selectedProfession} BODs ({self.selectedType})."
+                )
+                if skippedBods:
+                    status = f"{status} Skipped {skippedBods}; see journal."
+                self.gump.setStatus(status)
         except Exception as e:
             API.SysMsg(str(e))
             API.SysMsg(traceback.format_exc())

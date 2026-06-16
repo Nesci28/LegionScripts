@@ -278,9 +278,9 @@ class Util:
 
     @staticmethod
     def itemsInContainer(containerSerial):
-        allItems = API.ItemsInContainer(containerSerial, True)
+        allItems = API.ItemsInContainer(containerSerial, True) or []
         if len(allItems) == 1 and allItems[0].Graphic == 8198:
-            allItems = API.ItemsInContainer(allItems[0].Serial, True)
+            allItems = API.ItemsInContainer(allItems[0].Serial, True) or []
         return allItems
 
     @staticmethod

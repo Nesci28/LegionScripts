@@ -1,51 +1,816 @@
 bodSkillsStr = {
-    "Blacksmithy": {
-        "bod": {"graphic": 8792, "hue": 1102},
-        "items": {
-            "Bronze Shield": {
-                "buttonId": 34,
-                "disposeMethod": "Salvage Bag",
-                "graphic": 7026,
-                "resources": [{"amount": 12, "graphic": 7154, "hasSpecialHue": True}],
+            "Blacksmithy": {
+            "bod": {
+                "graphic": 8792,
+                "hue": 1102
+            },
+            "items": {
+                "Ringmail Gloves": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 10,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5099,
+                    "buttonId": 1,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Ringmail Leggings": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 16,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5104,
+                    "buttonId": 2,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Ringmail Sleeves": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 14,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5103,
+                    "buttonId": 3,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Ringmail Tunic": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 18,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5100,
+                    "buttonId": 4,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Chainmail Coif": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 10,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5051,
+                    "buttonId": 5,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Chainmail Leggings": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 18,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5054,
+                    "buttonId": 6,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Chainmail Tunic": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 20,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5055,
+                    "buttonId": 7,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Platemail Arms": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 18,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5136,
+                    "buttonId": 8,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Platemail Gloves": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 12,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5140,
+                    "buttonId": 9,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Platemail Gorget": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 10,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5139,
+                    "buttonId": 10,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Platemail Legs": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 20,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5137,
+                    "buttonId": 11,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Platemail Tunic": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 25,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5141,
+                    "buttonId": 12,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Female Plate": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 20,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 7172,
+                    "buttonId": 13,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Bascinet": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 15,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5132,
+                    "buttonId": 20,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Close Helmet": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 15,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5128,
+                    "buttonId": 21,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Helmet": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 15,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5130,
+                    "buttonId": 22,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Norse Helm": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 15,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5134,
+                    "buttonId": 23,
+                    "disposeMethod": "Salvage Bag"
+                },
+            "Plate Helm": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 15,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                "graphic": 5138,
+                "buttonId": 24,
+                "disposeMethod": "Salvage Bag"
+            },
+            "Platemail Helm": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 15,
+                        "hasSpecialHue": True
+                    }
+                ],
+                "graphic": 5138,
+                "buttonId": 24,
+                "disposeMethod": "Salvage Bag"
             },
             "Buckler": {
-                "buttonId": 33,
-                "disposeMethod": "Salvage Bag",
-                "graphic": 7027,
-                "resources": [{"amount": 10, "graphic": 7154, "hasSpecialHue": True}],
+                "resources": [
+                    {
+                        "graphic": 7154,
+                            "amount": 10,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 7027,
+                    "buttonId": 33,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Bronze Shield": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 12,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 7026,
+                    "buttonId": 34,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Heater Shield": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 18,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 7030,
+                    "buttonId": 35,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Metal Shield": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 14,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 7035,
+                    "buttonId": 36,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Metal Kite Shield": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 16,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 7028,
+                    "buttonId": 37,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Tear Kite Shield": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 8,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 7032,
+                    "buttonId": 38,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Broadsword": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 10,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 3934,
+                    "buttonId": 42,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Cutlass": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 8,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5185,
+                    "buttonId": 44,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Dagger": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 3,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 3921,
+                    "buttonId": 45,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Katana": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 8,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5119,
+                    "buttonId": 46,
+                    "disposeMethod": "Salvage Bag"
+                },
+            "Kryss": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 8,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                "graphic": 5121,
+                "buttonId": 47,
+                "disposeMethod": "Salvage Bag"
             },
-            "Close Helmet": {
-                "buttonId": 21,
-                "disposeMethod": "Salvage Bag",
-                "graphic": 5128,
-                "resources": [{"amount": 15, "graphic": 7154, "hasSpecialHue": True}],
+            "Longsword": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 12,
+                        "hasSpecialHue": True
+                    }
+                ],
+                "graphic": 3937,
+                "buttonId": 48,
+                "disposeMethod": "Salvage Bag"
             },
-            "Heater Shield": {
-                "buttonId": 35,
-                "disposeMethod": "Salvage Bag",
-                "graphic": 7030,
-                "resources": [{"amount": 18, "graphic": 7154, "hasSpecialHue": True}],
+            "Scimitar": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 10,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5046,
+                    "buttonId": 49,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Viking Sword": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 14,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5049,
+                    "buttonId": 50,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Axe": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 14,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 3913,
+                    "buttonId": 59,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Battle Axe": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 14,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 3911,
+                    "buttonId": 60,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Double Axe": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 12,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 3915,
+                    "buttonId": 61,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Executioner's Axe": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 14,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 3909,
+                    "buttonId": 62,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Large Battle Axe": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 12,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5115,
+                    "buttonId": 63,
+                    "disposeMethod": "Salvage Bag"
+                },
+            "Two Handed Axe": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 16,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                "graphic": 5187,
+                "buttonId": 64,
+                "disposeMethod": "Salvage Bag"
             },
-            "Metal Kite Shield": {
-                "buttonId": 37,
-                "disposeMethod": "Salvage " "Bag",
-                "graphic": 7028,
-                "resources": [{"amount": 16, "graphic": 7154, "hasSpecialHue": True}],
+            "Two-Handed Axe": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                        "amount": 16,
+                        "hasSpecialHue": True
+                    }
+                ],
+                "graphic": 5187,
+                "buttonId": 64,
+                "disposeMethod": "Salvage Bag"
             },
-            "Metal Shield": {
-                "buttonId": 36,
-                "disposeMethod": "Salvage Bag",
-                "graphic": 7035,
-                "resources": [{"amount": 14, "graphic": 7154, "hasSpecialHue": True}],
-            },
-            "Tear Kite Shield": {
-                "buttonId": 38,
-                "disposeMethod": "Salvage " "Bag",
-                "graphic": 7032,
-                "resources": [{"amount": 8, "graphic": 7154, "hasSpecialHue": True}],
-            },
+            "War Axe": {
+                "resources": [
+                    {
+                        "graphic": 7154,
+                            "amount": 16,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5040,
+                    "buttonId": 65,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Bardiche": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 18,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 3917,
+                    "buttonId": 66,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Halberd": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 20,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5182,
+                    "buttonId": 69,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Short Spear": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 6,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5123,
+                    "buttonId": 72,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Spear": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 12,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 3938,
+                    "buttonId": 74,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "War Fork": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 12,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5125,
+                    "buttonId": 75,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Hammer Pick": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 16,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5181,
+                    "buttonId": 76,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Mace": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 6,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 3932,
+                    "buttonId": 77,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Maul": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 10,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5179,
+                    "buttonId": 78,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "War Mace": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 14,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5127,
+                    "buttonId": 80,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "War Hammer": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 16,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5177,
+                    "buttonId": 81,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Ringmail Arms": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 14,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5103,
+                    "buttonId": 3,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Ringmail Chest": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 18,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5100,
+                    "buttonId": 4,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Chainmail Legs": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 18,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5054,
+                    "buttonId": 6,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Chainmail Chest": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 20,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5055,
+                    "buttonId": 7,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Plate Arms": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 18,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5136,
+                    "buttonId": 8,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Plate Gloves": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 12,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5140,
+                    "buttonId": 9,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Plate Gorget": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 10,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5139,
+                    "buttonId": 10,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Plate Legs": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 20,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5137,
+                    "buttonId": 11,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Plate Chest": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 25,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5141,
+                    "buttonId": 12,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Plate Tunic": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 25,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5141,
+                    "buttonId": 12,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Female Plate Armor": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 20,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 7172,
+                    "buttonId": 13,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Close Helm": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 15,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5128,
+                    "buttonId": 21,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Wooden Kite Shield": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 8,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 7032,
+                    "buttonId": 38,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Executioners Axe": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 14,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 3909,
+                    "buttonId": 62,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Two-handed Axe": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 16,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5187,
+                    "buttonId": 64,
+                    "disposeMethod": "Salvage Bag"
+                },
+                "Hammerpick": {
+                    "resources": [
+                        {
+                            "graphic": 7154,
+                            "amount": 16,
+                            "hasSpecialHue": True
+                        }
+                    ],
+                    "graphic": 5181,
+                    "buttonId": 76,
+                    "disposeMethod": "Salvage Bag"
+                }
+            }
         },
-    },
     "Tailoring": {
         "bod": {"graphic": "0x2258", "hue": "0x0483"},
         "items": {

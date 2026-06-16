@@ -1,6 +1,7 @@
 import API
 import re
 import importlib
+import traceback
 from decimal import Decimal
 import urllib.request
 from urllib.parse import urlencode
@@ -21,6 +22,159 @@ from Gump import Gump
 from Util import Util
 
 
+
+class PetIntensityProfile:
+    key = ""
+    displayName = ""
+    historySlug = ""
+    canSaveHistory = False
+    modeLabel = "Pet"
+
+    def __init__(self, owner):
+        self.owner = owner
+
+    def calculate(self, state, cfg):
+        s = state["stats"][:]
+        r = state["resists"][:]
+
+        if cfg.get("reduce") and state["isWild"]:
+            s[0] = s[0] / 2
+            s[1] = s[1] / 2
+            s[3] = s[3] / 2
+            s[4] = s[4] / 2
+
+        wStats = [
+            Decimal("3"),
+            Decimal("0.5"),
+            Decimal("0.5"),
+            Decimal("3"),
+            Decimal("0.1"),
+            Decimal("0.5"),
+        ]
+        wResists = [Decimal("3")] * 5
+
+        total = sum(s[i] * wStats[i] for i in range(6))
+        total += sum(r[i] * wResists[i] for i in range(5))
+        total += (
+            Decimal(cfg.get("dmg", 0))
+            + Decimal(cfg.get("magical", 0))
+            + Decimal(cfg.get("ability", 0))
+        )
+
+        state["intensityValue"] = float(total)
+        den = Decimal(cfg["max"]) - Decimal(cfg["min"])
+        pctValue = (
+            ((total - Decimal(cfg["min"])) / den * Decimal(100))
+            if den > 0
+            else Decimal(0)
+        )
+        pctValue = max(Decimal(0), min(Decimal(100), pctValue))
+        if self.canSaveHistory:
+            state["pctValue"] = float(pctValue)
+            state["pctRating"] = f"{pctValue:.2f}%"
+            state["trainedIntensityComplete"] = True
+        else:
+            state["pctValue"] = 0
+            state["pctRating"] = "N/A"
+            state["trainedIntensityComplete"] = False
+
+    def analyzeDetails(self, state, pet):
+        return
+
+    def historyFile(self):
+        return f"{Util.getPlayerName()}_pet_intensity_{self.historySlug}_history.json"
+
+    def readHistory(self):
+        try:
+            path = self.historyFile()
+            if not os.path.exists(path):
+                return []
+            with open(path, "r", encoding="utf-8") as f:
+                data = json.load(f)
+            return data if isinstance(data, list) else []
+        except Exception as e:
+            API.SysMsg(f"[PetIntensity] History read error: {e}")
+            return []
+
+    def historyCount(self):
+        return len(self.readHistory())
+
+    def saveHistory(self, state):
+        if not self.canSaveHistory:
+            return
+        try:
+            data = self.readHistory()
+
+            def convert(obj):
+                if isinstance(obj, Decimal):
+                    return float(obj)
+                if isinstance(obj, list):
+                    return [convert(x) for x in obj]
+                if isinstance(obj, dict):
+                    return {k: convert(v) for k, v in obj.items()}
+                return obj
+
+            cleaned_state = convert(state)
+            now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
+            entry = {"timestamp": now_str, "profile": self.__class__.__name__, **cleaned_state}
+            data.append(entry)
+            with open(self.historyFile(), "w", encoding="utf-8") as f:
+                json.dump(data, f, indent=2)
+        except Exception as e:
+            API.SysMsg(f"[PetIntensity] History save error: {e}")
+
+
+class WildCuSidhe(PetIntensityProfile):
+    key = "cu sidhe"
+    displayName = "Cu Sidhe"
+    historySlug = "wild_cu_sidhe"
+    canSaveHistory = True
+    modeLabel = "Wild"
+
+    def analyzeDetails(self, state, pet):
+        petHue = pet.Hue
+        colorInfo = self.owner.cuSidheColors.get(
+            petHue, ("Unknown Color", "Rarity not listed")
+        )
+        state["cuColor"], state["cuRarity"] = colorInfo
+        resists = {
+            "Physical": state["resists"][0],
+            "Fire": state["resists"][1],
+            "Cold": state["resists"][2],
+            "Poison": state["resists"][3],
+            "Energy": state["resists"][4],
+        }
+        matched = None
+        for i, template in enumerate(self.owner.resistTemplates):
+            trained = self.owner._getPossibleTrainedResists(resists.copy(), template)
+            if self.owner._isWithinTemplateRange(trained, template):
+                matched = f"Template #{i + 1} +/-5"
+                break
+        state["cuTemplate"] = matched
+        state["isEliteResists"] = bool(matched)
+        self.owner._setTameableIcon(state["isEliteResists"] and state["pctValue"] > 70)
+
+
+class TamedCuSidhe(WildCuSidhe):
+    historySlug = "tamed_cu_sidhe"
+    canSaveHistory = False
+    modeLabel = "Tamed"
+
+
+class WildLesserHiryu(PetIntensityProfile):
+    key = "lesser hiryu"
+    displayName = "Lesser Hiryu"
+    historySlug = "wild_lesser_hiryu"
+    canSaveHistory = True
+    modeLabel = "Wild"
+
+
+class TamedLesserHiryu(WildLesserHiryu):
+    historySlug = "tamed_lesser_hiryu"
+    canSaveHistory = False
+    modeLabel = "Tamed"
+
+
 class PetIntensity:
     SAVE_FILE = f"{Util.getPlayerName()}_pet_intensity_history.json"
     RATING_COLORS = {
@@ -32,6 +186,10 @@ class PetIntensity:
     }
 
     loreGumpId = 0x1DB
+    mobileGraphicPetKeys = {
+        0x0115: "cu sidhe",
+        0x00F3: "lesser hiryu",
+    }
     statRe = re.compile(
         r"<div align=right>(\d+(?:\.\d+)?)(?:/\d+)?%?</div>", re.IGNORECASE
     )
@@ -143,6 +301,7 @@ class PetIntensity:
             "dmg": 80,
             "magical": 0,
             "ability": 200,
+            "reduce": True,
         },
         "rune beetle": {
             "min": 5111,
@@ -253,30 +412,58 @@ class PetIntensity:
         self._resistChartWidth = None
         self._ratingThresholdTextBox = None
         self.selectedPetKey = "cu sidhe"
+        self.petClasses = self._createPetClasses()
+        self.currentPetClass = self._petClassFor(self.selectedPetKey, True)
         self.petTypeRadios = []
 
-    def _emptyState(self):
+    def _createPetClasses(self):
+        return {
+            "cu sidhe": {
+                True: WildCuSidhe(self),
+                False: TamedCuSidhe(self),
+            },
+            "lesser hiryu": {
+                True: WildLesserHiryu(self),
+                False: TamedLesserHiryu(self),
+            },
+        }
+
+    def _petClassFor(self, key, isWild=True):
+        return self.petClasses.get(key, {}).get(bool(isWild))
+
+    def _historyPetClass(self):
+        return self._petClassFor(self.selectedPetKey, True)
+
+    def _setTameableIcon(self, isTameable):
         if self._isTameableIcon:
             self._isTameableIcon.Dispose()
+        icon = "isTameable"
+        iconY = 10
+        if not isTameable:
+            icon = "isNotTameable"
+            iconY = 30
+        self._isTameableIcon = self.gump.addButton("", round(self.GUMP_WIDTH / 2 + 10), iconY, icon)
 
+    def _emptyState(self):
         return {
             "petKey": None,
+            "profile": None,
+            "name": "",
             "stats": [],
             "resists": [],
+            "isWild": False,
             "pretame": False,
             "pctValue": 0,
             "pctRating": "0%",
             "intensityValue": 0,
-            "oldSlots": "?",
-            "newSlots": "?",
-            "name": None,
+            "trainedIntensityComplete": False,
+            "oldSlots": 0,
+            "newSlots": 0,
+            "cuColor": "",
+            "cuRarity": "",
+            "cuTemplate": "",
+            "isEliteResists": False,
             "undefined": None,
-            "isWild": None,
-            "cuColor": None,
-            "cuRarity": None,
-            "cuTemplate": None,
-            "cuWebRating": None,
-            "isEliteResists": None,
         }
 
     def _showGump(self):
@@ -361,13 +548,15 @@ class PetIntensity:
             self.petTypeRadios.append({"key": key, "radio": radio})
 
         detailsPanel = self.gump.addPanel(236, 444, self.GUMP_WIDTH - 250, 132, "Current Pet")
-        self.nameLabel = self.gump.addLabel("No pet analyzed", detailsPanel["x"] + 10, detailsPanel["y"] + 20)
-        self.currentHighlights["slots"] = self._addRatingHighlight(detailsPanel["x"] + 4, detailsPanel["y"] + 38, detailsPanel["width"] - 8, 16)
-        self.currentHighlights["rating"] = self._addRatingHighlight(detailsPanel["x"] + 4, detailsPanel["y"] + 58, detailsPanel["width"] - 8, 16)
-        self.slotLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 38)
-        self.ratingLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 58)
-        self.templateLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 78)
-        self.colorLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 98)
+        self.nameLabel = self.gump.addLabel("No pet analyzed", detailsPanel["x"] + 8, detailsPanel["y"] + 4)
+        self.currentHighlights["slots"] = self._addRatingHighlight(detailsPanel["x"] + 4, detailsPanel["y"] + 22, detailsPanel["width"] - 8, 16)
+        self.currentHighlights["rating"] = self._addRatingHighlight(detailsPanel["x"] + 4, detailsPanel["y"] + 40, detailsPanel["width"] - 8, 16)
+        self.slotLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 22)
+        self.ratingLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 40)
+        self.intensityLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 58)
+        self.templateLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 76)
+        self.colorLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 94)
+        self.rarityLabel = self.gump.addLabel("", detailsPanel["x"] + 8, detailsPanel["y"] + 112)
 
         decisionPanel = self.gump.addPanel(14, 588, self.GUMP_WIDTH - 28, 96, "Final Decision")
         self.currentHighlights["decision"] = self._addRatingHighlight(decisionPanel["x"] + 4, decisionPanel["y"] + 34, decisionPanel["width"] - 8, 24)
@@ -448,8 +637,10 @@ class PetIntensity:
 
     def _onPetTypeClicked(self, key):
         self.selectedPetKey = key
-        for item in self.petTypeRadios:
-            item["radio"].IsChecked = item["key"] == key
+        self.currentPetClass = self._petClassFor(key, True)
+        self._drawHistoryIntensityChart()
+        self._drawHistoryResistChart()
+        self._updateGump()
 
     def _updateStatsSection(self):
         if not self.state["stats"]:
@@ -489,11 +680,13 @@ class PetIntensity:
 
         if not self.state["petKey"] and not self.state["undefined"]:
             self.nameLabel.Text = "No pet analyzed"
-            self.slotLabel.Text = ""
-            self.ratingLabel.Text = ""
-            self.templateLabel.Text = ""
-            self.colorLabel.Text = ""
-            self.totalPetLabel.Text = ""
+            self.slotLabel.Text = "Slot: -"
+            self.ratingLabel.Text = "Rating: -"
+            self.intensityLabel.Text = "Intensity: -"
+            self.templateLabel.Text = "Elite: -"
+            self.colorLabel.Text = "Color: -"
+            self.rarityLabel.Text = "Rarity: -"
+            self.totalPetLabel.Text = f"Total pets: {self._historyCount()}"
             self.finalDecisionLabel.Text = "Scan a pet to evaluate taming value."
             self.finalDecisionDetailLabel.Text = ""
             self._setRatingHighlight(self.currentHighlights.get("slots", {}), None)
@@ -503,11 +696,13 @@ class PetIntensity:
 
         if self.state["undefined"]:
             self.nameLabel.Text = f"Unsupported: {self.state['undefined']}"
-            self.slotLabel.Text = ""
-            self.ratingLabel.Text = ""
-            self.templateLabel.Text = ""
-            self.colorLabel.Text = ""
-            self.totalPetLabel.Text = ""
+            self.slotLabel.Text = "Slot: -"
+            self.ratingLabel.Text = "Rating: -"
+            self.intensityLabel.Text = "Intensity: -"
+            self.templateLabel.Text = "Elite: -"
+            self.colorLabel.Text = "Color: -"
+            self.rarityLabel.Text = "Rarity: -"
+            self.totalPetLabel.Text = f"Total pets: {self._historyCount()}"
             self.finalDecisionLabel.Text = "Not worth taming for this tool."
             self.finalDecisionDetailLabel.Text = "This pet type is not supported by the calculator."
             self._setRatingHighlight(self.currentHighlights.get("slots", {}), None)
@@ -515,36 +710,50 @@ class PetIntensity:
             self._setRatingHighlight(self.currentHighlights.get("decision", {}), "below")
             return
 
-        self.nameLabel.Text = f"Name: {self.state['name'].strip()}"
-        self.slotLabel.Text = f"Slot: {self.state['oldSlots']} -> {self.state['newSlots']}"
-        self.ratingLabel.Text = f"Rating: {self.state['pctRating']}"
-        ratingKey = self._ratingColorKey(self._rateIntensity())
-        self._setRatingHighlight(self.currentHighlights.get("rating", {}), ratingKey)
-
-        self._setRatingHighlight(
-            self.currentHighlights.get("slots", {}),
-            self._ratingColorKey(self._rateSlots()),
-        )
-
-        if self.state["petKey"] == "cu sidhe":
-            self.templateLabel.Text = f"Elite: {self.state['cuTemplate'] or 'No elite template'}"
-            self.colorLabel.Text = f"Color: {self.state['cuColor'] or 'Unknown'}"
+        mode = "Wild" if self.state["isWild"] else "Tamed"
+        self.nameLabel.Text = f"{mode}: {self.state['name']}"
+        if self.state["isWild"]:
+            self.slotLabel.Text = f"Slot: {self.state['oldSlots']} -> {self.state['newSlots']}"
         else:
-            self.templateLabel.Text = ""
-            self.colorLabel.Text = ""
+            self.slotLabel.Text = "Slot: N/A"
+        self.ratingLabel.Text = f"Rating: {self.state['pctRating']}"
+        self.intensityLabel.Text = f"Intensity: {self.state['intensityValue']:.1f}"
+        if self.state["petKey"] == "cu sidhe":
+            if self.state["isWild"]:
+                self.templateLabel.Text = f"Elite: {self.state['cuTemplate'] or 'No elite template'}"
+                self.colorLabel.Text = f"Color: {self.state['cuColor']}"
+                self.rarityLabel.Text = f"Rarity: {self.state['cuRarity']}"
+            else:
+                self.templateLabel.Text = f"Color: {self.state['cuColor']}"
+                self.colorLabel.Text = f"Rarity: {self.state['cuRarity']}"
+                self.rarityLabel.Text = ""
+        else:
+            self.templateLabel.Text = "Elite: N/A"
+            self.colorLabel.Text = "Color: N/A"
+            self.rarityLabel.Text = "Rarity: N/A"
 
         self.totalPetLabel.Text = f"Total pets: {self._historyCount()}"
-
         isWorth = self._isWorthTaming()
-        self.finalDecisionLabel.Text = "Worth taming" if isWorth else "Not worth taming"
+        if not self.state["isWild"]:
+            self.finalDecisionLabel.Text = "Tamed pet info"
+        else:
+            self.finalDecisionLabel.Text = "Worth taming" if isWorth else "Not worth taming"
         self.finalDecisionDetailLabel.Text = self._decisionReason(isWorth)
         self._setRatingHighlight(
+            self.currentHighlights.get("rating", {}),
+            self._ratingColorKey(self._rateIntensity()),
+        )
+        self._setRatingHighlight(
+            self.currentHighlights.get("slots", {}),
+            self._ratingColorKey(self._rateSlots()) if self.state["isWild"] else None,
+        )
+        self._setRatingHighlight(
             self.currentHighlights.get("decision", {}),
-            "perfect" if isWorth else "below",
+            ("perfect" if isWorth else "below") if self.state["isWild"] else None,
         )
 
     def _isWorthTaming(self):
-        if not self.state["petKey"]:
+        if not self.state["petKey"] or not self.state["isWild"]:
             return False
         if Decimal(str(self.state["pctValue"])) < Decimal("70"):
             return False
@@ -554,10 +763,12 @@ class PetIntensity:
 
     def _decisionReason(self, isWorth):
         petKey = self.state["petKey"]
+        if not self.state["isWild"]:
+            return "Tamed calculator needs trained skills, regens, damage, and abilities."
         if isWorth:
             if petKey == "cu sidhe":
                 return "70%+ intensity with elite resist template."
-            return "70%+ intensity for the selected pet type."
+            return "70%+ intensity for pet type."
         if petKey == "cu sidhe" and not self.state["isEliteResists"]:
             return "Cu Sidhe is missing an elite resist template."
         return "Intensity is below the 70% taming target."
@@ -674,17 +885,19 @@ class PetIntensity:
         API.SysMsg("Press SHIFT+S to analyze a pet and NOT save history")
 
     def _evaluatePet(self, isSavingHistory):
-        self.state = self._emptyState()
-
         petSerial = API.RequestTarget()
         if not petSerial:
             return
+        self._evaluatePetBySerial(petSerial, isSavingHistory)
+
+    def _evaluatePetBySerial(self, petSerial, isSavingHistory):
+        self.state = self._emptyState()
 
         pet = API.FindMobile(petSerial)
         if not pet:
             return
 
-        # API.PreTarget(pet.Serial)
+        API.PreTarget(pet.Serial)
         API.UseSkill("Animal Lore")
         API.WaitForTarget()
         API.Target(pet.Serial)
@@ -694,53 +907,67 @@ class PetIntensity:
         if not gump:
             return
 
-        isWild = API.GumpContains("Wild")
         lines = gump.PacketGumpText.split("\n")
+        isWild = any("wild" in line.lower() for line in lines)
         nmLower = pet.Name.lower()
         API.CloseGump(self.loreGumpId)
 
         supportedKeys = ["cu sidhe", "lesser hiryu"]
         key = next((k for k in supportedKeys if k in nmLower), None)
         if not key:
+            key = self.mobileGraphicPetKeys.get(pet.Graphic)
+        if not key:
+            self.state["undefined"] = pet.Name
+            return
+
+        self.selectedPetKey = key
+        for item in self.petTypeRadios:
+            item["radio"].IsChecked = item["key"] == key
+
+        self.currentPetClass = self._petClassFor(key, isWild)
+        if not self.currentPetClass:
             self.state["undefined"] = pet.Name
             return
 
         self.state["petKey"] = key
+        self.state["profile"] = self.currentPetClass.__class__.__name__
         self.state["name"] = pet.Name
         self.state["isWild"] = isWild
 
+        statStart = 1
+        resistStart = 11
+        if self._safe(lines, 1).strip().endswith("%</div>") and "/" in self._safe(lines, 2):
+            statStart = 2
+
         self.state["stats"] = [
-            self._matchStat(lines[1]),  # Hits
-            self._matchStat(lines[2]),  # Stamina
-            self._matchStat(lines[3]),  # Mana
-            self._matchStat(lines[4]),  # Strength
-            self._matchStat(lines[5]),  # Dexterity
-            self._matchStat(lines[6]),  # Intelligence
+            self._matchStat(self._safe(lines, statStart)),
+            self._matchStat(self._safe(lines, statStart + 1)),
+            self._matchStat(self._safe(lines, statStart + 2)),
+            self._matchStat(self._safe(lines, statStart + 3)),
+            self._matchStat(self._safe(lines, statStart + 4)),
+            self._matchStat(self._safe(lines, statStart + 5)),
         ]
         self.state["resists"] = [
-            self._matchResist(lines[11]),  # Physical
-            self._matchResist(lines[12]),  # Fire
-            self._matchResist(lines[13]),  # Cold
-            self._matchResist(lines[14]),  # Poison
-            self._matchResist(lines[15]),  # Energy
+            self._matchResist(self._safe(lines, resistStart)),
+            self._matchResist(self._safe(lines, resistStart + 1)),
+            self._matchResist(self._safe(lines, resistStart + 2)),
+            self._matchResist(self._safe(lines, resistStart + 3)),
+            self._matchResist(self._safe(lines, resistStart + 4)),
         ]
+        self.state["oldSlots"] = self._safe(lines, 21)
+        self.state["newSlots"] = self._safe(lines, 22)
 
-        slotLine = self._safe(lines, 43)
-        m = re.search(r"(\d+)\s*=>\s*(\d+)", slotLine)
-        self.state["oldSlots"] = m.group(1) if m else "?"
-        self.state["newSlots"] = m.group(2) if m else "?"
+        self._recalculate()
+        self.currentPetClass.analyzeDetails(self.state, pet)
 
-        try:
-            self._recalculate()
-            if "cu sidhe" in nmLower:
-                self._analyzeCuSidhe(pet)
+        if isSavingHistory and self.currentPetClass.canSaveHistory:
+            self._saveHistory()
+        elif isSavingHistory and not self.currentPetClass.canSaveHistory:
+            API.SysMsg("[PetIntensity] Tamed pet analyzed for information only; history was not saved.")
 
-            if isSavingHistory:
-                self._saveHistory()
-                self._drawHistoryIntensityChart()
-                self._drawHistoryResistChart()
-        except Exception as e:
-            API.SysMsg(str(e))
+        self._drawHistoryIntensityChart()
+        self._drawHistoryResistChart()
+        self._updateGump()
 
     def _matchStat(self, htmlStr):
         match = re.match(self.statRe, htmlStr)
@@ -759,95 +986,56 @@ class PetIntensity:
     def _safe(self, lines, idx):
         return lines[idx] if idx >= 0 and idx < len(lines) else ""
 
+
+    def _stripHtml(self, htmlStr):
+        return re.sub(r"<[^>]+>", " ", htmlStr or "").replace("&nbsp;", " ").strip()
+
+    def _valueAfterLabel(self, lines, label):
+        for i, line in enumerate(lines):
+            if label.lower() not in self._stripHtml(line).lower():
+                continue
+            for candidate in lines[i + 1:i + 4]:
+                text = self._stripHtml(candidate)
+                match = re.search(r"(\d+(?:\.\d+)?)(?:\s*/\s*\d+(?:\.\d+)?)?%?", text)
+                if match:
+                    return Decimal(match.group(1))
+        return None
+
     def _recalculate(self):
-        if not self.state["petKey"]:
+        if not self.state["petKey"] or not self.currentPetClass:
             return
         cfg = self.petConfigs[self.state["petKey"]]
-        s = self.state["stats"][:]
-        r = self.state["resists"][:]
-
-        if cfg.get("reduce") and self.state["isWild"]:
-            s[0] = Decimal((s[0]) / 2)
-            s[1] = Decimal((s[1]) / 2)
-            s[3] = Decimal((s[3]) / 2)
-            s[4] = Decimal((s[4]) / 2)
-
-        wStats = [
-            Decimal("3"),
-            Decimal("0.5"),
-            Decimal("0.5"),
-            Decimal("3"),
-            Decimal("0.1"),
-            Decimal("0.5"),
-        ]
-        wResists = [Decimal("3")] * 5
-
-        total = sum(s[i] * wStats[i] for i in range(len(s))) + sum(
-            r[j] * wResists[j] for j in range(len(r))
-        )
-        total += (
-            Decimal(cfg.get("dmg", 0))
-            + Decimal(cfg.get("magical", 0))
-            + Decimal(cfg.get("ability", 0))
-        )
-        self.state["intensityValue"] = float(total)
-
-        den = Decimal(cfg["max"]) - Decimal(cfg["min"])
-        pctValue = (
-            ((total - Decimal(cfg["min"])) / den * Decimal(100))
-            if den > 0
-            else Decimal(0)
-        )
-        pctValue = max(Decimal(0), min(Decimal(100), pctValue))
-
-        self.state["pctValue"] = float(pctValue)
-        self.state["pctRating"] = f"{pctValue:.2f}%"
+        self.currentPetClass.calculate(self.state, cfg)
 
     def _drawHistoryResistChart(self):
         try:
             chartX = self._resistChartX or 10
-            chartY = self._resistChartY
+            chartY = self._resistChartY or 10
             chartWidth = self._resistChartWidth or self.GUMP_WIDTH - 30
             chartHeight = 18
 
-            # Remove old bars
             if hasattr(self, "resistChartElements"):
-                for e in self.resistChartElements:
+                for element in self.resistChartElements:
                     try:
-                        e.Destroy()
+                        element.Destroy()
                     except Exception:
-                        pass
+                        try:
+                            element.Dispose()
+                        except Exception:
+                            pass
             self.resistChartElements = []
 
-            # Load data
-            if not os.path.exists(self.SAVE_FILE):
-                API.SysMsg("[PetIntensity] No history file found for resist chart.")
-                elements = self.gump.createStackedBarChart(
-                    chartX, chartY, chartHeight, chartWidth, 0, ""
-                )
-                for element in elements:
-                    self.resistChartElements.append(element)
-                return
-            with open(self.SAVE_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            if not data:
-                return
-
+            profile = self._historyPetClass()
+            data = profile.readHistory() if profile else []
             total = 0
             elite_count = 0
             for entry in data:
                 if "isEliteResists" in entry:
-                    val = entry["isEliteResists"]
-                    if isinstance(val, bool):
-                        total += 1
-                        if val:
-                            elite_count += 1
+                    total += 1
+                    if bool(entry["isEliteResists"]):
+                        elite_count += 1
 
-            if total == 0:
-                API.SysMsg("[PetIntensity] No elite data in history.")
-                return
-
-            elitePct = (elite_count / total) * 100
+            elitePct = (elite_count / total) * 100 if total else 0
             elements = self.gump.createStackedBarChart(
                 chartX, chartY, chartHeight, chartWidth, elitePct, ""
             )
@@ -857,58 +1045,44 @@ class PetIntensity:
             API.SysMsg(f"[PetIntensity] Resist chart error: {e}")
 
     def _historyCount(self):
-        try:
-            if not os.path.exists(self.SAVE_FILE):
-                return 0
-            with open(self.SAVE_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            return len(data) if isinstance(data, list) else 0
-        except Exception:
-            return 0
+        profile = self._historyPetClass()
+        return profile.historyCount() if profile else 0
 
     def _drawHistoryIntensityChart(self):
         try:
-            if not os.path.exists(self.SAVE_FILE):
-                return
-            with open(self.SAVE_FILE, "r", encoding="utf-8") as f:
-                data = json.load(f)
-            if not data:
-                return
-
+            profile = self._historyPetClass()
+            data = profile.readHistory() if profile else []
             intensities = [float(e.get("pctValue", 0)) for e in data]
-            physList = [
-                e["resists"][0] for e in data if "resists" in e and e["resists"]
-            ]
 
             bins = [0] * 10
-            physBins = [[] for _ in range(10)]
-            for i, val in enumerate(intensities):
+            for val in intensities:
                 idx = min(9, int(val // 10))
                 bins[idx] += 1
-                if i < len(physList):
-                    physBins[idx].append(physList[i])
-
-            maxCount = max(bins) if any(bins) else 1
-            chart_x = self._historyChartX or 10
-            chart_y = self._historyChartY
-            chart_width = self._historyChartWidth or 350
-            chart_height = self._historyChartHeight or 100
-            bar_width = int(chart_width / len(bins)) - 2
 
             if hasattr(self, "chartBars"):
                 for b in self.chartBars:
                     try:
                         b.Destroy()
-                    except:
-                        pass
+                    except Exception:
+                        try:
+                            b.Dispose()
+                        except Exception:
+                            pass
             self.chartBars = []
+
+            chart_x = self._historyChartX or 10
+            chart_y = self._historyChartY or 10
+            chart_width = self._historyChartWidth or self.GUMP_WIDTH - 30
+            chart_height = self._historyChartHeight or 120
+            maxCount = max(bins) if any(bins) else 1
+            bar_w = max(3, int(chart_width / 10) - 4)
+
             for i, count in enumerate(bins):
-                if count <= 0:
-                    count = 0.01
-                height = max(1, int((count / maxCount) * chart_height))
-                x = chart_x + i * (bar_width + 2)
-                y = chart_y + (chart_height - height)
-                bar = self.gump.addColorBox(x, y, height, bar_width, "#b8b8b8")
+                bar_h = int((count / maxCount) * chart_height) if count else 0
+                x = chart_x + i * int(chart_width / 10) + 2
+                y = chart_y + chart_height - bar_h
+                color = "#277bd8" if i >= 7 else "#36a852" if i >= 5 else "#d17a22"
+                bar = self.gump.addColorBox(x, y, bar_h, bar_w, color, 0.8)
                 self.chartBars.append(bar)
 
             self.totalPetLabel.Text = f"Total pets: {self._historyCount()}"
@@ -937,34 +1111,9 @@ class PetIntensity:
         return self._running
 
     def _analyzeCuSidhe(self, pet):
-        petHue = pet.Hue
-        colorInfo = self.cuSidheColors.get(
-            petHue, ("Unknown Color", "Rarity not listed")
-        )
-        self.state["cuColor"], self.state["cuRarity"] = colorInfo
-        resists = {
-            "Physical": self.state["resists"][0],
-            "Fire": self.state["resists"][1],
-            "Cold": self.state["resists"][2],
-            "Poison": self.state["resists"][3],
-            "Energy": self.state["resists"][4],
-        }
-        matched = None
-        for i, template in enumerate(self.resistTemplates):
-            trained = self._getPossibleTrainedResists(resists.copy(), template)
-            if self._isWithinTemplateRange(trained, template):
-                matched = f"Template #{i+1} ±5"
-                break
-        self.state["cuTemplate"] = matched
-        self.state["isEliteResists"] = bool(matched)
-        if self._isTameableIcon:
-            self._isTameableIcon.Dispose()
-        icon = "isTameable"
-        iconY = 10
-        if not self.state["isEliteResists"] or self.state["pctValue"] <= 70:
-            icon = "isNotTameable"
-            iconY = 30
-        self._isTameableIcon = self.gump.addButton("", round(self.GUMP_WIDTH / 2 + 10), iconY, icon)
+        profile = self._petClassFor("cu sidhe", self.state.get("isWild", True))
+        if profile:
+            profile.analyzeDetails(self.state, pet)
 
     def _isWithinTemplateRange(self, trained, target):
         for resist in target:
@@ -987,36 +1136,19 @@ class PetIntensity:
         return trained
 
     def _saveHistory(self):
-        try:
-            data = []
-            if os.path.exists(self.SAVE_FILE):
-                with open(self.SAVE_FILE, "r", encoding="utf-8") as f:
-                    data = json.load(f)
-
-            def convert(obj):
-                if isinstance(obj, Decimal):
-                    return float(obj)
-                if isinstance(obj, list):
-                    return [convert(x) for x in obj]
-                if isinstance(obj, dict):
-                    return {k: convert(v) for k, v in obj.items()}
-                return obj
-
-            cleaned_state = convert(self.state)
-            now_str = datetime.now().strftime("%Y-%m-%dT%H:%M:%S")
-            entry = {"timestamp": now_str, **cleaned_state}
-
-            data.append(entry)
-            with open(self.SAVE_FILE, "w", encoding="utf-8") as f:
-                json.dump(data, f, indent=2)
-        except Exception as e:
-            API.SysMsg(f"[PetIntensity] History save error: {e}")
+        if self.currentPetClass:
+            self.currentPetClass.saveHistory(self.state)
 
 
-petIntensity = PetIntensity()
-petIntensity.main()
-while petIntensity._isRunning():
-    petIntensity.gump.tick()
-    petIntensity.gump.tickSubGumps()
-    petIntensity.tick()
-    API.Pause(0.1)
+try:
+    petIntensity = PetIntensity()
+    petIntensity.main()
+    while petIntensity._isRunning():
+        petIntensity.gump.tick()
+        petIntensity.gump.tickSubGumps()
+        petIntensity.tick()
+        API.Pause(0.1)
+except BaseException as e:
+    API.SysMsg(f"PetIntensity e: {e}", 33)
+    API.SysMsg(traceback.format_exc())
+    raise

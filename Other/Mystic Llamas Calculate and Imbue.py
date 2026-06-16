@@ -9,6 +9,7 @@ import os
 import time
 import traceback
 import importlib
+import json
 import API
 from LegionPath import LegionPath
 
@@ -55,6 +56,7 @@ configure_legion_api_compat(API, Util)
 DEBUG_IMBUING = True
 DEBUG_SUIT_DECISIONS = True
 DEBUG_LOG_FILE = "MysticLlamasImbuing.log"
+SETTINGS_FILE = "MysticLlamasImbuing.settings.json"
 
 
 def _debug_log_path():
@@ -63,6 +65,41 @@ def _debug_log_path():
     except Exception:
         base_dir = "."
     return os.path.join(base_dir, DEBUG_LOG_FILE)
+
+
+def _settings_path():
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.getcwd()
+    except Exception:
+        base_dir = "."
+    return os.path.join(base_dir, SETTINGS_FILE)
+
+
+def _load_settings():
+    try:
+        with open(_settings_path(), "r") as settings_file:
+            data = json.load(settings_file)
+        if isinstance(data, dict):
+            return data
+    except Exception:
+        pass
+    return {}
+
+
+def _save_settings():
+    try:
+        data = {
+            "MatCont": int(state.get("MatCont", 0) or 0),
+            "GemCont": int(state.get("GemCont", 0) or 0),
+            "GemBuffer": str(state.get("GemBuffer", "0") or "0"),
+            "SuitKeepCont": int(state.get("SuitKeepCont", 0) or 0),
+            "SuitBody": state.get("SuitBody", "Male"),
+            "SuitPreset": state.get("SuitPreset", SUIT_PRESET_BASIC),
+        }
+        with open(_settings_path(), "w") as settings_file:
+            json.dump(data, settings_file, indent=2, sort_keys=True)
+    except Exception as ex:
+        DebugLog("Could not save settings: {}".format(ex), 33)
 
 
 def DebugLog(message, hue=55):
@@ -719,8 +756,8 @@ IMBUE_PROPS = {
     "Cold Resist": 201,
     "Energy Resist": 202,
     "Fire Resist": 203,
-    "Poison Resist": 204,
-    "Physical Resist": 205,
+    "Physical Resist": 204,
+    "Poison Resist": 205,
     
     # --- STATS (From Screenshot) ---
     "Hit Point Increase": 201,
@@ -802,6 +839,15 @@ SUIT_HIGH_RESIST_COUNT = 2
 SUIT_HIGH_RESIST_GAP = 3
 SUIT_HIGH_BALANCE_MIN = 2
 SUIT_HIGH_BALANCE_MAX = 3
+SUIT_ITEM_RESIST_CAP = 18
+SUIT_MAX_RESIST_IMBUE = 15
+SUIT_EXCEPTIONAL_RESIST_TOTAL = 35
+SUIT_MAGE_SOLVE_STATE_LIMIT = 1500
+SUIT_MAGE_ALLOCATE_COMBO_LIMIT = 400
+SUIT_DURABILITY_TARGET = 255
+SUIT_FORTIFY_MAX_ATTEMPTS = 40
+SUIT_FORTIFICATION_KEG_GRAPHIC = 0x1940
+SUIT_FORTIFICATION_KEG_HUE = 2419
 SUIT_NORMAL_LEATHER_HUE = 0
 SUIT_NORMAL_LEATHER_MATERIAL = {
     "name": "normal leather",
@@ -903,6 +949,16 @@ SUIT_MAGE_STAT_CAPS = {
 }
 
 
+import _Presets as PresetsModule
+BasicLrcSuitPresetModule = importlib.import_module("_Presets.BasicLrcSuitPreset")
+Mage70ResistsSuitPresetModule = importlib.import_module("_Presets.Mage70ResistsSuitPreset")
+LuckSuitPresetModule = importlib.import_module("_Presets.LuckSuitPreset")
+SampireSuitPresetModule = importlib.import_module("_Presets.SampireSuitPreset")
+importlib.reload(BasicLrcSuitPresetModule)
+importlib.reload(Mage70ResistsSuitPresetModule)
+importlib.reload(LuckSuitPresetModule)
+importlib.reload(SampireSuitPresetModule)
+importlib.reload(PresetsModule)
 from _Presets import (
     BasicLrcSuitPreset,
     Mage70ResistsSuitPreset,
@@ -949,6 +1005,10 @@ state = {
     "SuitRunning": False,
     "SuitStop": False,
     "SuitMsg": "",
+    "SuitScanActive": False,
+    "SuitScanCurrent": 0,
+    "SuitScanTotal": 0,
+    "SuitScanText": "",
     "SuitMarkedSerial": 0,
     "SuitSelectedItemHues": {},
     "StaminaInput": "",
@@ -969,6 +1029,11 @@ state = {
     "ScannedProps": {},
     "ImbueTarget": 0
 }
+
+_saved_settings = _load_settings()
+for _settings_key in ("MatCont", "GemCont", "GemBuffer", "SuitKeepCont", "SuitBody", "SuitPreset"):
+    if _settings_key in _saved_settings:
+        state[_settings_key] = _saved_settings[_settings_key]
 
 # ---------------------------------------------------------
 # CALCULATIONS 
@@ -1009,6 +1074,14 @@ def GetDynamicMax(prop_name):
 
 def _suit_row_is_additive_resist(row):
     return row.get("Mode") == "Add" and row.get("Prop") in SUIT_RESISTS
+
+
+def _parse_imbue_new_value(lines):
+    text = " ".join([str(line) for line in lines])
+    match = re.search(r'New\s+Value:\s*(-?\d+)', text, re.IGNORECASE)
+    if match:
+        return int(match.group(1))
+    return None
 
 
 def PreUpdateLeeches():
@@ -1113,6 +1186,8 @@ def CompileIngredients():
         intensity_pct = 1.0
         if prop != "Mage Weapon":
             intensity_pct = float(val) / float(dyn_max)
+            if _suit_row_is_additive_resist(row) and int(row.get("ImbueTargetVal", val) or val) >= SUIT_ITEM_RESIST_CAP:
+                intensity_pct = 1.0
         else:
             intensity_pct = float(abs(val) - 30) / float(-10)
             
@@ -1593,6 +1668,7 @@ def AutoImbue():
         
         target_prop = row["Prop"]
         target_val = row["Val"]
+        target_imbue_val = int(row.get("ImbueTargetVal", target_val) or target_val)
         target_group = active_db[target_prop]["Group"].upper() 
         
         if target_group == "CUSTOM PROPERTIES":
@@ -1656,8 +1732,11 @@ def AutoImbue():
             is_max = False
             
             if target_prop == "Mage Weapon":
-                if target_val >= -20: is_max = True 
-            elif target_val >= dyn_max:
+                if target_imbue_val >= -20: is_max = True 
+            elif _suit_row_is_additive_resist(row):
+                if target_val >= dyn_max:
+                    is_max = True
+            elif target_imbue_val >= dyn_max:
                 is_max = True
                 
             if is_max:
@@ -1671,57 +1750,61 @@ def AutoImbue():
                 while loops < max_loops:
                     loops += 1
                     Misc.Pause(250)
-                    
+
                     lines = Gumps.GetLineList(0xf3e90)
                     current_val = None
-                    
-                    for i, line in enumerate(lines):
-                        if line.strip() in ["<", "<<", "<<<", ">", ">>", ">>>"]:
-                            val_str = lines[i-1]
-                            match = re.search(r'[-]?\d+', val_str)
-                            if match:
-                                current_val = int(match.group())
-                                break
+                    current_new_val = _parse_imbue_new_value(lines)
 
-                if current_val is None:
-                    if not fallback_used:
-                        fallback_used = True
-                        start_val = BASE_PROPS.get(target_prop, {}).get("Step", 1)
-                        steps = abs(target_val - start_val)
-                        direction = 312 if target_val > start_val else 311
-                        DebugLog(
-                            "Could not read intensity for {}; using fallback start={} target={} steps={}".format(
-                                target_prop,
-                                start_val,
-                                target_val,
-                                steps
-                            ),
-                            55
-                        )
-                        for step_index in range(steps):
+                    if _suit_row_is_additive_resist(row) and current_new_val is not None:
+                        current_val = current_new_val
+                    else:
+                        for i, line in enumerate(lines):
+                            if line.strip() in ["<", "<<", "<<<", ">", ">>", ">>>"]:
+                                val_str = lines[i-1]
+                                match = re.search(r'[-]?\d+', val_str)
+                                if match:
+                                    current_val = int(match.group())
+                                    break
+
+                    if current_val is None:
+                        if not fallback_used:
+                            fallback_used = True
+                            start_val = BASE_PROPS.get(target_prop, {}).get("Step", 1)
+                            steps = abs(target_imbue_val - start_val)
+                            direction = 312 if target_imbue_val > start_val else 311
                             DebugLog(
-                                "Fallback intensity click {} {}/{} for {}.".format(
-                                    "up" if direction == 312 else "down",
-                                    step_index + 1,
-                                    steps,
+                                "Could not read intensity for {}; using fallback start={} target={} steps={}".format(
                                     target_prop,
+                                    start_val,
+                                    target_imbue_val,
+                                    steps
                                 ),
-                                55,
+                                55
                             )
-                            Gumps.SendAction(0xf3e90, direction)
-                            Misc.Pause(350)
-                        DebugLog("Fallback intensity complete for {}.".format(target_prop), 55)
+                            for step_index in range(steps):
+                                DebugLog(
+                                    "Fallback intensity click {} {}/{} for {}.".format(
+                                        "up" if direction == 312 else "down",
+                                        step_index + 1,
+                                        steps,
+                                        target_prop,
+                                    ),
+                                    55,
+                                )
+                                Gumps.SendAction(0xf3e90, direction)
+                                Misc.Pause(350)
+                            DebugLog("Fallback intensity complete for {}.".format(target_prop), 55)
+                            intensity_confirmed = True
+                            break
+                        continue
+
+                    if current_val == target_imbue_val or (_suit_row_is_additive_resist(row) and current_val >= target_imbue_val):
                         intensity_confirmed = True
                         break
-                    continue
 
-                    if current_val == target_val:
-                        intensity_confirmed = True
-                        break
-
-                    if current_val < target_val:
+                    if current_val < target_imbue_val:
                         Gumps.SendAction(0xf3e90, 312)
-                    elif current_val > target_val:
+                    elif current_val > target_imbue_val:
                         Gumps.SendAction(0xf3e90, 311)
 
                     Gumps.WaitForGump(0xf3e90, 1500)
@@ -1731,13 +1814,13 @@ def AutoImbue():
                     DebugLog(
                         "Could not confirm intensity for {} target={} last={} lines={}".format(
                             target_prop,
-                            target_val,
+                                target_imbue_val,
                             current_val,
                             " | ".join([str(line) for line in lines])
                         ),
                         33
                     )
-                    Misc.SendMessage("Could not set {} to {}. Aborting.".format(target_prop, target_val), 33)
+                    Misc.SendMessage("Could not set {} to {}. Aborting.".format(target_prop, target_imbue_val), 33)
                     abort_sequence = True
                     break
 
@@ -1762,56 +1845,99 @@ def AutoImbue():
                     DebugLog("Waiting for reimbue result gump for {}.".format(target_prop), 55)
                     waited = Gumps.WaitForGump(0xf3e93, 3000)
                 else:
-                    Gumps.SendAction(0xf3e90, 302) # Click "Imbue Item"
-                    DebugLog("Waiting for imbue result gump for {}.".format(target_prop), 55)
-                    waited = Gumps.WaitForGump(0xf3e93, 5000)
+                    confirm_lines = Gumps.GetLineList(0xf3e90)
+                    confirm_text = " | ".join([str(line) for line in confirm_lines])
+                    DebugLog(
+                        "Apply click for {} target={} lines={}".format(
+                        target_prop,
+                        target_imbue_val if _suit_row_is_additive_resist(row) else target_val,
+                        confirm_text
+                        ),
+                        55
+                    )
+                    expected_property_text = "Property: {}".format(target_prop)
+                    if "Property:" in confirm_text and expected_property_text not in confirm_text:
+                        DebugLog(
+                            "Selected wrong imbue property: expected {} but gump lines={}".format(
+                                target_prop,
+                                confirm_text,
+                            ),
+                            33,
+                        )
+                        Misc.SendMessage("Wrong imbue property selected for {}.".format(target_prop), 33)
+                        abort_sequence = True
+                        imbuing = False
+                    break
+                if _suit_row_is_additive_resist(row):
+                    confirm_new_value = _parse_imbue_new_value(confirm_lines)
+                    if confirm_new_value is not None and confirm_new_value < target_imbue_val:
+                        DebugLog(
+                            "Additive resist under target: {} new={} required={} row_val={} lines={}".format(
+                                target_prop,
+                                confirm_new_value,
+                                target_imbue_val,
+                                target_val,
+                                confirm_text,
+                            ),
+                            33,
+                        )
+                        Misc.SendMessage("{} can only reach {} / {} now.".format(target_prop, confirm_new_value, target_imbue_val), 33)
+                        abort_sequence = True
+                        imbuing = False
+                        break
+                Gumps.SendAction(0xf3e90, 302) # Click "Imbue Item"
+                DebugLog("Waiting for imbue result gump for {}.".format(target_prop), 55)
+                waited = Gumps.WaitForGump(0xf3e93, 5000)
                 DebugLog("Imbue result gump wait for {} returned {}.".format(target_prop, waited), 55)
                 
-            outcome = None
-            for _ in range(16):
-                if Journal.Search("successfully imbue"):
-                    outcome = "success"
-                    break
-                if Journal.Search("attempt to imbue the item, but fail"):
-                    outcome = "fail"
-                    break
-                if Journal.Search("do not have enough resources"):
-                    outcome = "resources"
-                    break
-                Misc.Pause(250)
+                outcome = None
+                for _ in range(16):
+                    if Journal.Search("successfully imbue"):
+                        outcome = "success"
+                        break
+                    if Journal.Search("attempt to imbue the item, but fail"):
+                        outcome = "fail"
+                        break
+                    if Journal.Search("do not have enough resources"):
+                        outcome = "resources"
+                        break
+                    Misc.Pause(250)
 
-            if outcome == "success":
-                Misc.SendMessage("Successfully imbued {}!".format(target_prop), 69)
-                DebugLog("Journal reported success for {}.".format(target_prop), 69)
-                if _suit_row_is_additive_resist(row):
-                    state["ScannedProps"][target_prop] = state["ScannedProps"].get(target_prop, 0) + target_val
-                else:
-                    state["ScannedProps"][target_prop] = target_val
+                if outcome == "success":
+                    Misc.SendMessage("Successfully imbued {}!".format(target_prop), 69)
+                    DebugLog("Journal reported success for {}.".format(target_prop), 69)
+                    if _suit_row_is_additive_resist(row):
+                        state["ScannedProps"][target_prop] = target_imbue_val
+                    else:
+                        state["ScannedProps"][target_prop] = target_val
 
-                imbuing = False
-                property_completed = True
-
-            elif outcome == "fail":
-                Misc.SendMessage("Failed imbue. Retrying...", 33)
-                DebugLog("Journal reported imbue failure for {}; retrying.".format(target_prop), 33)
-                is_retry = True
-
-            elif outcome == "resources":
-                DebugLog("Journal reported missing resources during imbue. Running PullItems again.", 55)
-                Misc.SendMessage("Out of buffer! Pulling safely...", 55)
-                Gumps.SendAction(0xf3e93, 0)
-                Gumps.SendAction(0xf3e90, 0)
-                Misc.Pause(500)
-                if not PullItems():
-                    DebugLog("PullItems failed after journal missing-resource message.", 33)
-                    abort_sequence = True
                     imbuing = False
+                    property_completed = True
 
-            else:
-                DebugLog("No journal outcome after imbue click for {} retry={}.".format(target_prop, is_retry), 33)
-                Misc.SendMessage("Imbuing halted. Check journal/materials.", 33)
-                imbuing = False
-                abort_sequence = True
+                elif outcome == "fail":
+                    Misc.SendMessage("Failed imbue. Retrying...", 33)
+                    DebugLog("Journal reported imbue failure for {}; retrying.".format(target_prop), 33)
+                    is_retry = True
+
+                elif outcome == "resources":
+                    DebugLog("Journal reported missing resources during imbue. Running PullItems again.", 55)
+                    Misc.SendMessage("Out of buffer! Pulling safely...", 55)
+                    Gumps.SendAction(0xf3e93, 0)
+                    Gumps.SendAction(0xf3e90, 0)
+                    Misc.Pause(500)
+                    if not PullItems():
+                        DebugLog("PullItems failed after journal missing-resource message.", 33)
+                        abort_sequence = True
+                        imbuing = False
+                    else:
+                        DebugLog("Resources pulled after journal message; reopening imbuing gump for {}.".format(target_prop), 55)
+                        imbuing = False
+
+                else:
+                    DebugLog("No journal outcome after imbue click for {} retry={}.".format(target_prop, is_retry), 33)
+                    Misc.SendMessage("Imbuing halted. Check journal/materials.", 33)
+                    imbuing = False
+                    abort_sequence = True
 
     return not abort_sequence
 
@@ -1829,6 +1955,8 @@ def _suit_copy_rows(rows):
             copied_row = {"Prop": prop, "Val": val}
             if row.get("Mode"):
                 copied_row["Mode"] = row.get("Mode")
+            if row.get("ImbueTargetVal") is not None:
+                copied_row["ImbueTargetVal"] = int(row.get("ImbueTargetVal", val) or val)
             copied.append(copied_row)
     while len(copied) < SUIT_MAX_ROWS:
         copied.append({"Prop": "None", "Val": 0})
@@ -1899,6 +2027,77 @@ def _suit_parse_prop_values(props):
     return values
 
 
+def _suit_has_started_mage_imbues(candidate):
+    props = candidate.get("PropValues", {})
+    for row in SUIT_MAGE_REQUIRED_ROWS:
+        prop = row.get("Prop")
+        if prop and props.get(prop, 0) > 0:
+            return True
+    return False
+
+
+def _suit_infer_started_high_resists(resists):
+    high_resists = _suit_high_resists(resists)
+    if len(high_resists) == SUIT_HIGH_RESIST_COUNT:
+        return high_resists
+    ranked = sorted(SUIT_RESISTS, key=lambda name: resists.get(name, 0), reverse=True)
+    for ignored in ranked:
+        adjusted = dict(resists)
+        adjusted[ignored] = 0
+        inferred = _suit_high_resists(adjusted)
+        if len(inferred) == SUIT_HIGH_RESIST_COUNT:
+            return inferred
+    return high_resists
+
+
+def _suit_infer_started_base_resists(resists, high_resists):
+    current_total = sum(resists.get(name, 0) for name in SUIT_RESISTS)
+    extra_total = max(0, current_total - SUIT_EXCEPTIONAL_RESIST_TOTAL)
+    base = dict(resists)
+    additions = dict((name, 0) for name in SUIT_RESISTS)
+    if extra_total <= 0:
+        return base, additions
+    ranked = sorted(SUIT_RESISTS, key=lambda name: resists.get(name, 0), reverse=True)
+    for resist_name in ranked:
+        candidate_base = dict(resists)
+        candidate_base[resist_name] = max(0, candidate_base.get(resist_name, 0) - extra_total)
+        if tuple(high_resists or ()) and _suit_high_pair_key(_suit_high_resists(candidate_base)) != _suit_high_pair_key(high_resists):
+            continue
+        base = candidate_base
+        additions[resist_name] = extra_total
+        return base, additions
+    resist_name = ranked[0] if ranked else None
+    if resist_name:
+        base[resist_name] = max(0, base.get(resist_name, 0) - extra_total)
+        additions[resist_name] = extra_total
+    return base, additions
+
+
+def _suit_started_resists_valid(resists, additions):
+    for resist_name in SUIT_RESISTS:
+        if resists.get(resist_name, 0) > SUIT_ITEM_RESIST_CAP:
+            return False
+        if additions.get(resist_name, 0) > SUIT_MAX_RESIST_IMBUE:
+            return False
+    return True
+
+
+def _suit_started_mage_rows(candidate):
+    rows = []
+    props = candidate.get("PropValues", {})
+    for required in SUIT_MAGE_REQUIRED_ROWS:
+        prop = required.get("Prop")
+        value = int(props.get(prop, 0) or 0)
+        if prop and value > 0:
+            rows.append({"Prop": prop, "Val": value})
+    additions = candidate.get("StartedResistAdds", {})
+    for resist_name in SUIT_RESISTS:
+        value = int(additions.get(resist_name, 0) or 0)
+        if value > 0:
+            rows.append({"Prop": resist_name, "Val": value, "Mode": "Add"})
+    return rows
+
+
 def _suit_high_resists(resists):
     ranked = sorted(SUIT_RESISTS, key=lambda name: resists.get(name, 0), reverse=True)
     if len(ranked) < SUIT_HIGH_RESIST_COUNT + 1:
@@ -1935,6 +2134,32 @@ def _suit_candidate_score(candidate):
 
 def _suit_is_better_candidate(candidate, current):
     return _suit_candidate_score(candidate) > _suit_candidate_score(current)
+
+
+def _suit_prune_mage_candidates_by_pair(candidates_by_slot):
+    removed = 0
+    for slot_name, candidates in list(candidates_by_slot.items()):
+        owners = {}
+        for candidate in candidates:
+            high_resists = candidate.get("HighResists", ())
+            if len(high_resists) != SUIT_HIGH_RESIST_COUNT:
+                continue
+            pair_key = _suit_high_pair_key(high_resists)
+            current = owners.get(pair_key)
+            if current is None or _suit_is_better_candidate(candidate, current):
+                owners[pair_key] = candidate
+        pruned = sorted(
+            owners.values(),
+            key=lambda item: (_suit_high_pair_key(item.get("HighResists", ())), item.get("Serial", 0)),
+        )
+        removed += len(candidates) - len(pruned)
+        candidates_by_slot[slot_name] = pruned
+    if removed:
+        SuitLog("mage candidate prune: ignored {} non-owner candidate(s) counts=[{}]".format(
+            removed,
+            _suit_log_slot_counts(candidates_by_slot),
+        ))
+    return removed
 
 
 def _suit_remove_candidate(candidates_by_slot, candidate):
@@ -1995,6 +2220,7 @@ def _suit_read_item(item, slot_name):
         "Name": item_name,
         "Exceptional": _suit_is_exceptional(props),
         "Resists": resists,
+        "PropValues": _suit_parse_prop_values(props),
         "HighResists": _suit_high_resists(resists),
         "Rows": [],
     }
@@ -2022,7 +2248,7 @@ def _suit_slot_for_item(item, body):
     return None
 
 
-def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=True, require_high_resists=True, required=True):
+def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=True, require_high_resists=True, required=True, allow_started_mage=False):
     container = _suit_get_keep_container(required=required)
     if not container:
         SuitLog("scan skipped: no good-piece container selected for body={} required={}".format(body, required))
@@ -2033,12 +2259,13 @@ def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=Tru
         items = API.ItemsInContainer(serial, True) or []
     except Exception:
         items = []
-    SuitLog("scan start: container={} body={} items={} require_exceptional={} require_high_resists={}".format(
+    SuitLog("scan start: container={} body={} items={} require_exceptional={} require_high_resists={} allow_started_mage={}".format(
         _debug_hex(serial),
         body,
         len(items),
         require_exceptional,
         require_high_resists,
+        allow_started_mage,
     ))
 
     known_serials = set()
@@ -2047,7 +2274,9 @@ def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=Tru
             known_serials.add(candidate.get("Serial"))
 
     loaded = 0
-    for item in items:
+    _suit_scan_progress_start(len(items), "Scanning saved pieces")
+    for scan_index, item in enumerate(items):
+        _suit_scan_progress_update(scan_index + 1)
         item_serial = _serial(item)
         if item_serial in known_serials:
             SuitLog("scan skip: duplicate serial {}".format(_debug_hex(item_serial)))
@@ -2060,16 +2289,44 @@ def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=Tru
             SuitLog("scan reject: {} reason=not exceptional".format(_suit_log_candidate(candidate)))
             continue
         if require_high_resists and len(candidate.get("HighResists", ())) != SUIT_HIGH_RESIST_COUNT:
-            SuitLog("scan reject: {} reason=high_resist_count expected={} actual={}".format(
-                _suit_log_candidate(candidate),
-                SUIT_HIGH_RESIST_COUNT,
-                len(candidate.get("HighResists", ())),
-            ))
-            continue
+            if allow_started_mage and _suit_has_started_mage_imbues(candidate):
+                inferred_highs = _suit_infer_started_high_resists(candidate.get("Resists", {}))
+                if len(inferred_highs) == SUIT_HIGH_RESIST_COUNT:
+                    base_resists, resist_adds = _suit_infer_started_base_resists(candidate.get("Resists", {}), inferred_highs)
+                    if not _suit_started_resists_valid(candidate.get("Resists", {}), resist_adds):
+                        SuitLog("scan reject: {} reason=started_resist_cap current_cap={} imbue_cap={}".format(
+                            _suit_log_candidate(candidate),
+                            SUIT_ITEM_RESIST_CAP,
+                            SUIT_MAX_RESIST_IMBUE,
+                        ))
+                        continue
+                    candidate["HighResists"] = inferred_highs
+                    candidate["StartedImbued"] = True
+                    candidate["BaseResists"] = base_resists
+                    candidate["StartedResistAdds"] = resist_adds
+                    SuitLog("scan accept started mage: {} inferred_highs={}".format(
+                        _suit_log_candidate(candidate),
+                        _suit_high_text(inferred_highs),
+                    ))
+                else:
+                    SuitLog("scan reject: {} reason=started_mage_high_resist_count expected={} actual={}".format(
+                        _suit_log_candidate(candidate),
+                        SUIT_HIGH_RESIST_COUNT,
+                        len(inferred_highs),
+                    ))
+                    continue
+            else:
+                SuitLog("scan reject: {} reason=high_resist_count expected={} actual={}".format(
+                    _suit_log_candidate(candidate),
+                    SUIT_HIGH_RESIST_COUNT,
+                    len(candidate.get("HighResists", ())),
+                ))
+                continue
         candidates_by_slot[slot_name].append(candidate)
         known_serials.add(item_serial)
         loaded += 1
         SuitLog("scan accept: {}".format(_suit_log_candidate(candidate)))
+    _suit_scan_progress_finish("Scan complete: {} saved piece{} loaded.".format(loaded, "" if loaded == 1 else "s"))
     SuitLog("scan complete: loaded={} counts=[{}]".format(loaded, _suit_log_slot_counts(candidates_by_slot)))
     return loaded
 
@@ -2405,6 +2662,43 @@ def _suit_store_msg(message):
     state["Msg"] = message
 
 
+def _suit_scan_progress_start(total, text="Scanning saved pieces"):
+    state["SuitScanActive"] = True
+    state["SuitScanCurrent"] = 0
+    state["SuitScanTotal"] = max(1, int(total or 0))
+    state["SuitScanText"] = text
+    state["SuitMsg"] = "{}...".format(text)
+    state["Msg"] = state["SuitMsg"]
+    send_calculator()
+
+
+def _suit_scan_progress_update(current, text=None, force=False):
+    if not state.get("SuitScanActive"):
+        return
+    total = max(1, int(state.get("SuitScanTotal", 1) or 1))
+    current = max(0, min(total, int(current or 0)))
+    state["SuitScanCurrent"] = current
+    if text is not None:
+        state["SuitScanText"] = text
+    if force or current == total or current == 1 or current % 5 == 0:
+        send_calculator()
+
+
+def _suit_scan_progress_finish(text=None):
+    if text:
+        state["SuitScanText"] = text
+        state["SuitMsg"] = text
+        state["Msg"] = text
+    state["SuitScanCurrent"] = state.get("SuitScanTotal", 0)
+    send_calculator()
+    API.Pause(0.15)
+    state["SuitScanActive"] = False
+    state["SuitScanCurrent"] = 0
+    state["SuitScanTotal"] = 0
+    state["SuitScanText"] = ""
+    send_calculator()
+
+
 def _suit_should_stop():
     try:
         API.ProcessCallbacks()
@@ -2510,6 +2804,169 @@ def _suit_move_candidate(candidate, destination):
     Misc.Pause(1000)
     _suit_refresh_item(candidate)
     SuitLog("move complete: {}".format(_suit_log_candidate(candidate)))
+    return True
+
+
+def _suit_parse_durability(props):
+    for prop_line in props:
+        lower = prop_line.lower()
+        if "durability" not in lower:
+            continue
+        nums = re.findall(r"\d+", prop_line)
+        if len(nums) >= 2:
+            return int(nums[-2]), int(nums[-1])
+        if len(nums) == 1:
+            value = int(nums[0])
+            return value, value
+    return None, None
+
+
+def _suit_piece_durability(piece):
+    item = _suit_refresh_item(piece)
+    if not item:
+        return None, None
+    Items.WaitForProps(item, 1000)
+    props = Items.GetPropStringList(item)
+    return _suit_parse_durability(props)
+
+
+def _suit_fortification_keg_text(item):
+    try:
+        Items.WaitForProps(item, 1000)
+        props = Items.GetPropStringList(item)
+    except Exception:
+        props = []
+    return " ".join(str(prop) for prop in props).lower()
+
+
+def _suit_find_fortification_keg():
+    serial = state.get("MatCont", 0)
+    if not serial:
+        SuitLog("fortify failed: no resource container selected")
+        return None
+    container = API.FindItem(serial)
+    if not container:
+        SuitLog("fortify failed: resource container not found serial={}".format(_debug_hex(serial)))
+        return None
+    Items.WaitForContents(serial, 500)
+    try:
+        items = API.ItemsInContainer(serial, True) or []
+    except Exception:
+        items = []
+    for item in items:
+        if getattr(item, "Graphic", 0) == SUIT_FORTIFICATION_KEG_GRAPHIC and getattr(item, "Hue", 0) == SUIT_FORTIFICATION_KEG_HUE:
+            SuitLog("fortify keg found: serial={} graphic={} hue={}".format(
+                _debug_hex(_serial(item)),
+                _debug_hex(SUIT_FORTIFICATION_KEG_GRAPHIC),
+                _debug_hex(SUIT_FORTIFICATION_KEG_HUE),
+            ))
+            return item
+    for item in items:
+        text = _suit_fortification_keg_text(item)
+        if "powder" in text and ("fortification" in text or "fortifying" in text):
+            SuitLog("fortify keg found: serial={} text={!r}".format(_debug_hex(_serial(item)), text[:120]))
+            return item
+    SuitLog("fortify failed: no powder of fortification keg found resource={}".format(_debug_hex(serial)))
+    return None
+
+
+def _suit_apply_fortification_once(keg, piece):
+    item = _suit_refresh_item(piece)
+    if not item:
+        SuitLog("fortify failed: missing piece {}".format(_suit_log_candidate(piece)))
+        return False
+    try:
+        API.CancelTarget()
+    except Exception:
+        pass
+    Journal.Clear()
+    API.UseObject(_serial(keg))
+    if not API.WaitForTarget("any", 3):
+        SuitLog("fortify failed: keg did not open target cursor {}".format(_debug_hex(_serial(keg))))
+        return False
+    API.Target(_serial(item))
+    Misc.Pause(1100)
+    _suit_refresh_item(piece)
+    return True
+
+
+def _suit_fortify_piece(piece):
+    if not _suit_prepare_piece_for_imbue(piece):
+        return False
+    current, maximum = _suit_piece_durability(piece)
+    if maximum is None:
+        SuitLog("fortify failed: could not read durability {}".format(_suit_log_candidate(piece)))
+        _suit_set_msg("Could not read {} durability.".format(piece["Slot"]), 33)
+        return False
+    if maximum >= SUIT_DURABILITY_TARGET:
+        SuitLog("fortify skip: already durability {}/{} {}".format(current, maximum, _suit_log_candidate(piece)))
+        _suit_update_slot(piece["Slot"], piece["Serial"], "Durability 255", _suit_resist_text(piece["Resists"]), _suit_plan_text(piece["Rows"]))
+        return True
+
+    keg = _suit_find_fortification_keg()
+    if not keg:
+        _suit_set_msg("Powder of fortification keg not found.", 33)
+        return False
+
+    _suit_update_slot(piece["Slot"], piece["Serial"], "Fortifying", _suit_resist_text(piece["Resists"]), "{}/{}".format(current, maximum))
+    attempts = 0
+    last_max = maximum
+    no_progress = 0
+    while maximum < SUIT_DURABILITY_TARGET and attempts < SUIT_FORTIFY_MAX_ATTEMPTS:
+        if _suit_should_stop():
+            _suit_set_msg("Suit crafting stopped.", 33)
+            return False
+        attempts += 1
+        SuitLog("fortify attempt: attempt={} durability={}/{} {}".format(
+            attempts,
+            current,
+            maximum,
+            _suit_log_candidate(piece),
+        ))
+        if not _suit_apply_fortification_once(keg, piece):
+            return False
+        current, maximum = _suit_piece_durability(piece)
+        if maximum is None:
+            SuitLog("fortify failed: durability unreadable after attempt {}".format(_suit_log_candidate(piece)))
+            return False
+        if maximum <= last_max:
+            no_progress += 1
+        else:
+            no_progress = 0
+        last_max = maximum
+        _suit_update_slot(piece["Slot"], piece["Serial"], "Fortifying", _suit_resist_text(piece["Resists"]), "{}/{}".format(current, maximum))
+        if no_progress >= 2 and maximum < SUIT_DURABILITY_TARGET:
+            SuitLog("fortify failed: no durability progress durability={}/{} {}".format(current, maximum, _suit_log_candidate(piece)))
+            _suit_set_msg("{} durability did not increase.".format(piece["Slot"]), 33)
+            return False
+
+    if maximum < SUIT_DURABILITY_TARGET:
+        SuitLog("fortify failed: max attempts={} durability={}/{} {}".format(
+            attempts,
+            current,
+            maximum,
+            _suit_log_candidate(piece),
+        ))
+        _suit_set_msg("{} durability still below 255.".format(piece["Slot"]), 33)
+        return False
+
+    SuitLog("fortify complete: attempts={} durability={}/{} {}".format(
+        attempts,
+        current,
+        maximum,
+        _suit_log_candidate(piece),
+    ))
+    _suit_update_slot(piece["Slot"], piece["Serial"], "Durability 255", _suit_resist_text(piece["Resists"]), _suit_plan_text(piece["Rows"]))
+    return True
+
+
+def _suit_fortify_plan(plan):
+    SuitLog("fortify plan begin: pieces={}".format(len(plan)))
+    for piece in plan:
+        if not _suit_fortify_piece(piece):
+            SuitLog("fortify plan failed: {}".format(_suit_log_candidate(piece)))
+            return False
+    SuitLog("fortify plan complete")
     return True
 
 
@@ -2642,13 +3099,25 @@ def _suit_allocate_mage_rows(candidates):
     required_rows_by_piece = _suit_mage_required_rows_by_piece(len(candidates))
     totals = dict((name, 0) for name in SUIT_RESISTS)
     for index, candidate in enumerate(candidates):
-        candidate["Rows"] = [dict(row) for row in required_rows_by_piece[index]]
+        if candidate.get("StartedImbued"):
+            candidate["Rows"] = _suit_started_mage_rows(candidate)
+            existing_props = set(row.get("Prop") for row in candidate["Rows"])
+            for row in required_rows_by_piece[index]:
+                if row.get("Prop") in existing_props:
+                    existing_row = next((existing for existing in candidate["Rows"] if existing.get("Prop") == row.get("Prop")), None)
+                    if existing_row:
+                        existing_row["Val"] = max(int(existing_row.get("Val", 0) or 0), int(row.get("Val", 0) or 0))
+                else:
+                    candidate["Rows"].append(dict(row))
+        else:
+            candidate["Rows"] = [dict(row) for row in required_rows_by_piece[index]]
         for resist_name in SUIT_RESISTS:
             totals[resist_name] += candidate["Resists"].get(resist_name, 0)
         planned.append(candidate)
 
     deficits = dict((name, max(0, SUIT_RESIST_TARGET - totals[name])) for name in SUIT_RESISTS)
     seen = set()
+    search_steps = [0]
 
     def snapshot():
         return tuple(
@@ -2661,9 +3130,33 @@ def _suit_allocate_mage_rows(candidates):
             )
         )
 
+    def remaining_capacity(resist_name):
+        capacity = 0
+        for item in planned:
+            if any(row.get("Prop") == resist_name for row in item["Rows"]):
+                continue
+            if _suit_resist_row_count(item["Rows"]) >= SUIT_MAX_RESIST_ROWS:
+                continue
+            capacity += max(0, min(
+                SUIT_MAX_RESIST_IMBUE,
+                SUIT_ITEM_RESIST_CAP - item["Resists"].get(resist_name, 0),
+            ))
+        return capacity
+
+    def deficits_fillable():
+        for resist_name in SUIT_RESISTS:
+            if deficits[resist_name] > remaining_capacity(resist_name):
+                return False
+        return True
+
     def search():
+        search_steps[0] += 1
+        if search_steps[0] > 25000:
+            return False
         if all(deficits[name] <= 0 for name in SUIT_RESISTS):
             return True
+        if not deficits_fillable():
+            return False
 
         key = snapshot()
         if key in seen:
@@ -2685,7 +3178,13 @@ def _suit_allocate_mage_rows(candidates):
         for index, item in pieces:
             if any(row["Prop"] == resist_name for row in item["Rows"]):
                 continue
-            max_add = min(15, deficits[resist_name])
+            max_add = min(
+                SUIT_MAX_RESIST_IMBUE,
+                deficits[resist_name],
+                SUIT_ITEM_RESIST_CAP - item["Resists"].get(resist_name, 0),
+            )
+            if max_add <= 0:
+                continue
             for val in range(max_add, 0, -1):
                 rows = [dict(row) for row in item["Rows"]]
                 if not _suit_try_add_row(rows, resist_name, val, True, mode="Add"):
@@ -2700,6 +3199,11 @@ def _suit_allocate_mage_rows(candidates):
         return False
 
     if not search():
+        SuitLog("mage allocate failed: steps={} deficits={} capacity={}".format(
+            search_steps[0],
+            _suit_resist_text(deficits),
+            _suit_resist_text(dict((name, remaining_capacity(name)) for name in SUIT_RESISTS)),
+        ))
         return None
 
     for item in planned:
@@ -2708,6 +3212,280 @@ def _suit_allocate_mage_rows(candidates):
             return None
         if _suit_rows_weight(item["Rows"]) > _suit_max_weight(True):
             return None
+    return planned
+
+
+def _suit_allocate_mage_rows_exhaustive(candidates):
+    planned = []
+    required_rows_by_piece = _suit_mage_required_rows_by_piece(len(candidates))
+    totals = dict((name, 0) for name in SUIT_RESISTS)
+
+    for index, candidate in enumerate(candidates):
+        item = dict(candidate)
+        if item.get("StartedImbued"):
+            rows = _suit_started_mage_rows(item)
+            existing_props = set(row.get("Prop") for row in rows)
+            for row in required_rows_by_piece[index]:
+                if row.get("Prop") in existing_props:
+                    existing_row = next((existing for existing in rows if existing.get("Prop") == row.get("Prop")), None)
+                    if existing_row:
+                        existing_row["Val"] = max(int(existing_row.get("Val", 0) or 0), int(row.get("Val", 0) or 0))
+                else:
+                    rows.append(dict(row))
+        else:
+            rows = [dict(row) for row in required_rows_by_piece[index]]
+
+        item["Rows"] = rows
+        for resist_name in SUIT_RESISTS:
+            totals[resist_name] += item["Resists"].get(resist_name, 0)
+            totals[resist_name] += sum(
+                int(row.get("Val", 0) or 0)
+                for row in rows
+                if row.get("Prop") == resist_name
+            )
+        planned.append(item)
+
+    deficits = dict((name, max(0, SUIT_RESIST_TARGET - totals[name])) for name in SUIT_RESISTS)
+    if all(value <= 0 for value in deficits.values()):
+        for item in planned:
+            item["Rows"] = _suit_choose_optional(item["Rows"], True)
+        return planned
+
+    def active_rows(rows):
+        return [row for row in rows if row.get("Prop") != "None" and row.get("Val", 0)]
+
+    def quick_row_feasible():
+        row_slots = []
+        capacities_by_resist = {}
+        for item in planned:
+            rows = active_rows(item["Rows"])
+            row_slots.append(max(0, min(
+                SUIT_MAX_ROWS - len(rows),
+                SUIT_MAX_RESIST_ROWS - _suit_resist_row_count(rows),
+            )))
+        if sum(row_slots) < sum(1 for name in SUIT_RESISTS if deficits[name] > 0):
+            return False
+
+        for resist_name in SUIT_RESISTS:
+            if deficits[resist_name] <= 0:
+                continue
+            capacities = []
+            for index, item in enumerate(planned):
+                if row_slots[index] <= 0:
+                    capacities.append(0)
+                    continue
+                if any(row.get("Prop") == resist_name for row in item["Rows"]):
+                    capacities.append(0)
+                    continue
+                capacities.append(max(0, min(
+                    SUIT_MAX_RESIST_IMBUE,
+                    SUIT_ITEM_RESIST_CAP - item["Resists"].get(resist_name, 0),
+                )))
+            if sum(capacities) < deficits[resist_name]:
+                return False
+            capacities_by_resist[resist_name] = capacities
+
+        resist_order = sorted(
+            [name for name in SUIT_RESISTS if deficits[name] > 0],
+            key=lambda name: sum(1 for cap in capacities_by_resist[name] if cap > 0),
+        )
+        choices_by_resist = {}
+        piece_indexes = list(range(len(planned)))
+        for resist_name in resist_order:
+            choices = []
+            capacities = capacities_by_resist[resist_name]
+            for mask in range(1, 1 << len(piece_indexes)):
+                indexes = [index for index in piece_indexes if mask & (1 << index)]
+                if sum(capacities[index] for index in indexes) < deficits[resist_name]:
+                    continue
+                choices.append(indexes)
+            choices.sort(key=lambda indexes: (len(indexes), -sum(capacities[index] for index in indexes)))
+            if not choices:
+                return False
+            choices_by_resist[resist_name] = choices
+
+        used_rows = [0 for _ in planned]
+
+        def assign(pos):
+            if pos >= len(resist_order):
+                return True
+            resist_name = resist_order[pos]
+            for indexes in choices_by_resist[resist_name]:
+                if any(used_rows[index] >= row_slots[index] for index in indexes):
+                    continue
+                for index in indexes:
+                    used_rows[index] += 1
+                if assign(pos + 1):
+                    return True
+                for index in indexes:
+                    used_rows[index] -= 1
+            return False
+
+        return assign(0)
+
+    if not quick_row_feasible():
+        SuitLog("mage allocate quick fail: deficits={} rowslots={}".format(
+            _suit_resist_text(deficits),
+            ",".join(str(max(0, min(
+                SUIT_MAX_ROWS - len(active_rows(item["Rows"])),
+                SUIT_MAX_RESIST_ROWS - _suit_resist_row_count(active_rows(item["Rows"])),
+            ))) for item in planned),
+        ))
+        return None
+
+    def normalize_adds(adds):
+        return tuple(min(deficits[name], max(0, adds.get(name, 0))) for name in SUIT_RESISTS)
+
+    def dominates(left, right):
+        return all(left[index] >= right[index] for index in range(len(SUIT_RESISTS)))
+
+    def prune_state_map(state_map):
+        kept = {}
+        for key in sorted(state_map.keys(), key=lambda item: sum(item), reverse=True):
+            if any(dominates(kept_key, key) for kept_key in kept):
+                continue
+            kept[key] = state_map[key]
+        return kept
+
+    def piece_options(item):
+        options = {}
+        base_rows = [dict(row) for row in item["Rows"]]
+        if len(active_rows(base_rows)) > SUIT_MAX_ROWS:
+            return []
+        if _suit_rows_weight(base_rows) > _suit_max_weight(True):
+            return []
+
+        def add_option(rows, adds):
+            key = normalize_adds(adds)
+            weight = _suit_rows_weight(rows)
+            previous = options.get(key)
+            if previous is None or weight < previous[0]:
+                options[key] = (weight, [dict(row) for row in rows])
+
+        def walk(rows, adds):
+            add_option(rows, adds)
+            if len(active_rows(rows)) >= SUIT_MAX_ROWS:
+                return
+            if _suit_resist_row_count(rows) >= SUIT_MAX_RESIST_ROWS:
+                return
+            for resist_name in SUIT_RESISTS:
+                if deficits[resist_name] <= adds.get(resist_name, 0):
+                    continue
+                if any(row.get("Prop") == resist_name for row in rows):
+                    continue
+                max_add = min(
+                    SUIT_MAX_RESIST_IMBUE,
+                    deficits[resist_name] - adds.get(resist_name, 0),
+                    SUIT_ITEM_RESIST_CAP - item["Resists"].get(resist_name, 0),
+                )
+                if max_add <= 0:
+                    continue
+                for value in range(max_add, 0, -1):
+                    next_rows = [dict(row) for row in rows]
+                    if not _suit_try_add_row(next_rows, resist_name, value, True, mode="Add"):
+                        continue
+                    next_adds = dict(adds)
+                    next_adds[resist_name] = next_adds.get(resist_name, 0) + value
+                    walk(next_rows, next_adds)
+
+        walk(base_rows, {})
+        pruned = {}
+        for key in sorted(options.keys(), key=lambda item: sum(item), reverse=True):
+            if any(dominates(kept_key, key) for kept_key in pruned):
+                continue
+            pruned[key] = options[key]
+        return [(key, rows) for key, (_weight, rows) in pruned.items()]
+
+    target_key = tuple(deficits[name] for name in SUIT_RESISTS)
+    states = {tuple(0 for _ in SUIT_RESISTS): []}
+    option_counts = []
+
+    for planned_index, item in enumerate(planned):
+        options = piece_options(item)
+        option_counts.append(len(options))
+        _suit_scan_progress_update(
+            state.get("SuitScanCurrent", 0),
+            "Allocating Mage resists: piece {}/{} states={} options={} deficits={}".format(
+                planned_index + 1,
+                len(planned),
+                len(states),
+                ",".join(str(count) for count in option_counts),
+                _suit_resist_text(deficits),
+            ),
+            force=True,
+        )
+        if not options:
+            SuitLog("mage allocate failed: piece_options=0 item={}".format(_suit_log_candidate(item)))
+            return None
+        new_states = {}
+        for state_key, chosen_rows in states.items():
+            for adds_key, rows in options:
+                next_key = tuple(
+                    min(target_key[pos], state_key[pos] + adds_key[pos])
+                    for pos in range(len(SUIT_RESISTS))
+                )
+                if next_key not in new_states:
+                    new_states[next_key] = chosen_rows + [rows]
+        states = prune_state_map(new_states)
+        _suit_scan_progress_update(
+            state.get("SuitScanCurrent", 0),
+            "Allocating Mage resists: piece {}/{} states={} options={} deficits={}".format(
+                planned_index + 1,
+                len(planned),
+                len(states),
+                ",".join(str(count) for count in option_counts),
+                _suit_resist_text(deficits),
+            ),
+            force=True,
+        )
+        if target_key in states:
+            break
+
+    if target_key not in states:
+        capacity = dict((name, 0) for name in SUIT_RESISTS)
+        for item in planned:
+            for resist_name in SUIT_RESISTS:
+                if any(row.get("Prop") == resist_name for row in item["Rows"]):
+                    continue
+                if _suit_resist_row_count(item["Rows"]) >= SUIT_MAX_RESIST_ROWS:
+                    continue
+                if len(active_rows(item["Rows"])) >= SUIT_MAX_ROWS:
+                    continue
+                capacity[resist_name] += max(0, min(
+                    SUIT_MAX_RESIST_IMBUE,
+                    SUIT_ITEM_RESIST_CAP - item["Resists"].get(resist_name, 0),
+                ))
+        _suit_scan_progress_update(
+            state.get("SuitScanCurrent", 0),
+            "Mage allocation failed: states={} options={} deficits={} capacity={}".format(
+                len(states),
+                ",".join(str(count) for count in option_counts),
+                _suit_resist_text(deficits),
+                _suit_resist_text(capacity),
+            ),
+            force=True,
+        )
+        SuitLog("mage allocate failed: exhaustive states={} options={} deficits={} capacity={}".format(
+            len(states),
+            ",".join(str(count) for count in option_counts),
+            _suit_resist_text(deficits),
+            _suit_resist_text(capacity),
+        ))
+        return None
+
+    chosen = states[target_key]
+    for index, item in enumerate(planned):
+        item["Rows"] = [dict(row) for row in chosen[index]]
+        item["Rows"] = _suit_choose_optional(item["Rows"], True)
+        if len(item["Rows"]) > SUIT_MAX_ROWS:
+            return None
+        if _suit_rows_weight(item["Rows"]) > _suit_max_weight(True):
+            return None
+    SuitLog("mage allocate success: states={} options={} deficits={}".format(
+        len(states),
+        ",".join(str(count) for count in option_counts),
+        _suit_resist_text(deficits),
+    ))
     return planned
 
 
@@ -2724,9 +3502,10 @@ def _suit_missing_score(totals):
     return sum(missing), max(missing), tuple(missing)
 
 
-def _suit_trim_states(states, limit=50000):
+def _suit_trim_states(states, limit=SUIT_MAGE_SOLVE_STATE_LIMIT):
     if len(states) <= limit:
         return states
+    SuitLog("mage solve state trim: states={} limit={}".format(len(states), limit))
     ranked = sorted(
         states.items(),
         key=lambda item: (
@@ -2739,15 +3518,23 @@ def _suit_trim_states(states, limit=50000):
 
 def _suit_solve_mage(candidates_by_slot):
     SuitLog("mage solve start: counts=[{}]".format(_suit_log_slot_counts(candidates_by_slot)))
+    _suit_prune_mage_candidates_by_pair(candidates_by_slot)
+    _suit_scan_progress_start(max(1, len(candidates_by_slot)), "Building Mage suit combinations")
     missing_slots = [slot for slot in candidates_by_slot if not candidates_by_slot.get(slot)]
     if missing_slots:
         SuitLog("mage solve blocked: missing slots={}".format(", ".join(missing_slots)))
+        _suit_scan_progress_finish("Mage solve blocked: missing saved slots.")
         return None
 
     empty_totals = tuple(0 for _ in SUIT_RESISTS)
     empty_highs = tuple(0 for _ in SUIT_RESISTS)
-    states = {(empty_totals, empty_highs, ()): []}
-    for slot_name in candidates_by_slot:
+    states = {(empty_totals, empty_highs): []}
+    for slot_index, slot_name in enumerate(candidates_by_slot):
+        _suit_scan_progress_update(
+            slot_index + 1,
+            "Building Mage suit combinations: {}".format(slot_name),
+            force=True,
+        )
         new_states = {}
         previous_state_count = len(states)
         for state_key, combo in states.items():
@@ -2762,13 +3549,15 @@ def _suit_solve_mage(candidates_by_slot):
                 for high_resist in candidate.get("HighResists", ()):
                     if high_resist in SUIT_RESISTS:
                         next_highs[SUIT_RESISTS.index(high_resist)] += 1
+                remaining_slots = len(candidates_by_slot) - slot_index - 1
                 if any(value > SUIT_HIGH_BALANCE_MAX for value in next_highs):
                     continue
-
+                if any(value + remaining_slots < SUIT_HIGH_BALANCE_MIN for value in next_highs):
+                    continue
                 next_combo = combo + [candidate]
-                next_serials = tuple(item.get("Serial") for item in next_combo)
-                next_key = (tuple(next_totals), tuple(next_highs), next_serials)
-                if next_key not in new_states:
+                next_key = (tuple(next_totals), tuple(next_highs))
+                previous = new_states.get(next_key)
+                if previous is None or _suit_combo_rank_key(next_combo) < _suit_combo_rank_key(previous):
                     new_states[next_key] = next_combo
         states = _suit_trim_states(new_states)
         SuitLog("mage solve slot={} candidates={} states {}->{}".format(
@@ -2777,6 +3566,10 @@ def _suit_solve_mage(candidates_by_slot):
             previous_state_count,
             len(states),
         ))
+        if not states:
+            SuitLog("mage solve failed: no high-balanced branches after slot={}".format(slot_name))
+            _suit_scan_progress_finish("Mage solve failed: no balanced coverage.")
+            return None
 
     ranked_combos = sorted(
         states.values(),
@@ -2786,10 +3579,32 @@ def _suit_solve_mage(candidates_by_slot):
             -sum(sum(item["Resists"].values()) for item in combo),
         ),
     )
+    balanced_combos = [combo for combo in ranked_combos if _suit_has_balanced_highs(combo)]
+    if not balanced_combos:
+        SuitLog("mage solve failed: no balanced high coverage from {} combo(s)".format(len(ranked_combos)))
+        _suit_scan_progress_finish("Mage solve failed: no balanced coverage.")
+        return None
+    SuitLog("mage solve balanced filter: {} -> {}".format(len(ranked_combos), len(balanced_combos)))
+    ranked_combos = balanced_combos
+    if len(ranked_combos) > SUIT_MAGE_ALLOCATE_COMBO_LIMIT:
+        SuitLog("mage solve allocation limit: {} -> {}".format(len(ranked_combos), SUIT_MAGE_ALLOCATE_COMBO_LIMIT))
+        ranked_combos = ranked_combos[:SUIT_MAGE_ALLOCATE_COMBO_LIMIT]
+
+    checked_combos = 0
+    total_combos = max(1, len(ranked_combos))
+    _suit_scan_progress_start(total_combos, "Solving Mage suit plan")
     for combo in ranked_combos:
-        if not _suit_has_balanced_highs(combo):
-            continue
-        plan = _suit_allocate_mage_rows([dict(item) for item in combo])
+        if _suit_should_stop():
+            SuitLog("mage solve stopped during allocation")
+            _suit_scan_progress_finish("Mage solve stopped.")
+            return None
+        checked_combos += 1
+        _suit_scan_progress_update(
+            checked_combos,
+            "Solving Mage suit: combo {}/{}".format(checked_combos, total_combos),
+            force=True,
+        )
+        plan = _suit_allocate_mage_rows_exhaustive([dict(item) for item in combo])
         if plan:
             totals = _suit_combo_totals(plan)
             SuitLog("mage solve success: totals={} high_counts={} plan={}".format(
@@ -2797,8 +3612,13 @@ def _suit_solve_mage(candidates_by_slot):
                 _suit_high_count_text(_suit_high_counts(plan)),
                 " | ".join(_suit_log_candidate(piece) for piece in plan),
             ))
+            _suit_scan_progress_finish("Mage suit plan found.")
             return plan
-    SuitLog("mage solve failed: ranked_combos={} no balanced/allocation fit".format(len(ranked_combos)))
+    SuitLog("mage solve failed: ranked_combos={} checked_combos={} no allocation fit".format(
+        len(ranked_combos),
+        checked_combos,
+    ))
+    _suit_scan_progress_finish("Mage solve failed: no allocation fit.")
     return None
 
 
@@ -2832,6 +3652,7 @@ def _suit_scan_saved_mage_plan(body, update_rows=True, required=True):
         candidates_by_slot,
         require_exceptional=True,
         require_high_resists=True,
+        allow_started_mage=True,
         required=required,
     )
     SuitLog("mage scan solve: loaded={} counts=[{}]".format(
@@ -2915,7 +3736,8 @@ def _suit_verify_piece(piece, quiet=False):
         if prop in SUIT_RESISTS:
             required = val
             if _suit_row_is_additive_resist(row):
-                required = piece["Resists"].get(prop, 0) + val
+                base_resists = piece.get("BaseResists", piece.get("Resists", {}))
+                required = base_resists.get(prop, 0) + val
             current = final_resists.get(prop, 0)
         else:
             required = val
@@ -2937,6 +3759,47 @@ def _suit_verify_piece(piece, quiet=False):
     return True
 
 
+def _suit_missing_imbue_rows(piece):
+    item = _suit_refresh_item(piece)
+    if not item:
+        return _suit_copy_rows(piece.get("Rows", []))
+    Items.WaitForProps(item, 1000)
+    props = Items.GetPropStringList(item)
+    if not props:
+        return _suit_copy_rows(piece.get("Rows", []))
+    final_resists = _suit_parse_resists(props)
+    final_props = _suit_parse_prop_values(props)
+    missing_rows = []
+    for row in piece.get("Rows", []):
+        prop = row.get("Prop", "None")
+        val = int(row.get("Val", 0) or 0)
+        if prop == "None" or val <= 0:
+            continue
+        missing_row = dict(row)
+        if prop in SUIT_RESISTS:
+            if _suit_row_is_additive_resist(row):
+                base_resists = piece.get("BaseResists", piece.get("Resists", {}))
+                required = base_resists.get(prop, 0) + val
+                remaining = required - final_resists.get(prop, 0)
+            if remaining <= 0:
+                continue
+            missing_row["Val"] = remaining
+            missing_row["ImbueTargetVal"] = required
+            SuitLog("missing additive resist: slot={} prop={} current={} required={} remaining={}".format(
+                piece.get("Slot"),
+                prop,
+                final_resists.get(prop, 0),
+                    required,
+                    remaining,
+                ))
+            if not _suit_row_is_additive_resist(row) and final_resists.get(prop, 0) >= val:
+                continue
+        elif final_props.get(prop, 0) >= val:
+            continue
+        missing_rows.append(missing_row)
+    return _suit_copy_rows(missing_rows)
+
+
 def _suit_imbue_piece(piece):
     SuitLog("imbue begin: {}".format(_suit_log_candidate(piece)))
     state["Category"] = "Armor"
@@ -2946,7 +3809,7 @@ def _suit_imbue_piece(piece):
     state["Whetstone"] = False
     state["CustomMode"] = False
     state["SelectedPreset"] = PRESET_CUSTOM
-    state["Rows"] = _suit_copy_rows(piece["Rows"])
+    state["Rows"] = _suit_missing_imbue_rows(piece)
     state["ImbueTarget"] = piece["Serial"]
     result = AutoImbue()
     SuitLog("imbue result: slot={} serial={} result={}".format(
@@ -2969,12 +3832,22 @@ def _suit_imbue_plan(plan, verify_resist_target=False):
             _suit_update_slot(piece["Slot"], piece["Serial"], "Done", _suit_resist_text(piece["Resists"]), _suit_plan_text(piece["Rows"]))
             continue
         _suit_update_slot(piece["Slot"], piece["Serial"], "Imbuing", _suit_resist_text(piece["Resists"]), _suit_plan_text(piece["Rows"]))
-        if not _suit_imbue_piece(piece):
-            SuitLog("imbue failed: {}".format(_suit_log_candidate(piece)))
-            _suit_set_msg("{} imbuing failed.".format(piece["Slot"]), 33)
-            return False
-        if not _suit_verify_piece(piece):
-            return False
+        piece_complete = False
+        for imbue_pass in range(3):
+            if not _suit_imbue_piece(piece):
+                SuitLog("imbue pass failed: pass={} {}".format(imbue_pass + 1, _suit_log_candidate(piece)))
+                if _suit_verify_piece(piece, quiet=True):
+                    piece_complete = True
+                    break
+            elif _suit_verify_piece(piece, quiet=True):
+                piece_complete = True
+                break
+            SuitLog("imbue retry needed: pass={} {}".format(imbue_pass + 1, _suit_log_candidate(piece)))
+        if not piece_complete:
+            if not _suit_verify_piece(piece):
+                SuitLog("imbue failed: {}".format(_suit_log_candidate(piece)))
+                _suit_set_msg("{} imbuing failed.".format(piece["Slot"]), 33)
+                return False
         if _suit_should_stop():
             _suit_set_msg("Suit crafting stopped.", 33)
             return False
@@ -3104,13 +3977,14 @@ def _suit_combo_rank_key(combo):
 
 
 def _suit_best_available_mage_combo(candidates_by_slot, slot_names):
+    _suit_prune_mage_candidates_by_pair(candidates_by_slot)
     active_slots = [slot_name for slot_name in slot_names if candidates_by_slot.get(slot_name)]
     if not active_slots:
         return []
 
     empty_totals = tuple(0 for _ in SUIT_RESISTS)
     empty_highs = tuple(0 for _ in SUIT_RESISTS)
-    states = {(empty_totals, empty_highs, ()): []}
+    states = {(empty_totals, empty_highs): []}
     for slot_name in active_slots:
         new_states = {}
         for state_key, combo in states.items():
@@ -3125,10 +3999,11 @@ def _suit_best_available_mage_combo(candidates_by_slot, slot_names):
                 for high_resist in candidate.get("HighResists", ()):
                     if high_resist in SUIT_RESISTS:
                         next_highs[SUIT_RESISTS.index(high_resist)] += 1
+                if any(value > SUIT_HIGH_BALANCE_MAX for value in next_highs):
+                    continue
 
                 next_combo = combo + [candidate]
-                next_serials = tuple(item.get("Serial") for item in next_combo)
-                next_key = (tuple(next_totals), tuple(next_highs), next_serials)
+                next_key = (tuple(next_totals), tuple(next_highs))
                 previous = new_states.get(next_key)
                 if previous is None or _suit_combo_rank_key(next_combo) < _suit_combo_rank_key(previous):
                     new_states[next_key] = next_combo
@@ -3163,6 +4038,10 @@ def _suit_choose_next_mage_craft_slot(candidates_by_slot, active_by_slot, slot_n
         slot_name = missing_active[0]
         return slot_name, "Missing active slot"
 
+    pressure_slot, pressure_reason = _suit_choose_next_mage_pressure_slot(candidates_by_slot, active_by_slot, slot_names)
+    if pressure_slot:
+        return pressure_slot, pressure_reason
+
     recraft_slots, reason = _suit_select_recraft_slots(active_by_slot, slot_names)
     if recraft_slots:
         return recraft_slots[0], reason
@@ -3171,6 +4050,61 @@ def _suit_choose_next_mage_craft_slot(candidates_by_slot, active_by_slot, slot_n
     if ranked:
         return ranked[0][1], "Fewest saved candidates"
     return None, "No suit slots"
+
+
+def _suit_choose_next_mage_pressure_slot(candidates_by_slot, active_by_slot, slot_names):
+    combo = _suit_active_combo(active_by_slot, slot_names)
+    if not combo:
+        return None, ""
+
+    counts = _suit_high_counts(combo)
+    under = set(name for name in SUIT_RESISTS if counts.get(name, 0) < SUIT_HIGH_BALANCE_MIN)
+    over = set(name for name in SUIT_RESISTS if counts.get(name, 0) > SUIT_HIGH_BALANCE_MAX)
+    totals = _suit_combo_totals(combo)
+    deficits = set(name for name in SUIT_RESISTS if totals.get(name, 0) < SUIT_RESIST_TARGET)
+
+    if not under and not over and not deficits:
+        return None, ""
+
+    ranked = []
+    for index, slot_name in enumerate(slot_names):
+        item = active_by_slot.get(slot_name)
+        if not item:
+            continue
+        highs = set(item.get("HighResists", ()))
+        candidate_count = len(candidates_by_slot.get(slot_name, []))
+
+        missing_under = len(under - highs)
+        over_hits = len(highs & over)
+        deficit_hits = len(highs & deficits)
+        low_total = sum(max(0, SUIT_RESIST_TARGET - totals.get(name, 0)) for name in highs)
+
+        pressure = (
+            missing_under * 100
+            + over_hits * 60
+            + deficit_hits * 15
+            + low_total
+            - len(highs & under) * 80
+            - min(candidate_count, 12) * 6
+        )
+        if candidate_count <= 1:
+            pressure += 35
+        elif candidate_count <= 2:
+            pressure += 20
+
+        ranked.append((pressure, -candidate_count, -over_hits, -missing_under, -deficit_hits, -low_total, -index, slot_name))
+
+    if not ranked:
+        return None, ""
+
+    ranked.sort(reverse=True)
+    pressure, _, _, _, _, _, _, slot_name = ranked[0]
+    if pressure <= 0:
+        return None, ""
+    return slot_name, "Pool pressure highs={} counts=[{}]".format(
+        _suit_high_count_text(counts),
+        _suit_log_slot_counts(candidates_by_slot),
+    )
 
 
 def _suit_select_recraft_slots(active_by_slot, slot_names):
@@ -3252,6 +4186,8 @@ def ScanSuitGoodPieces():
         _suit_init_rows(body)
         preset.scan_good_pieces(body, required=True, notify=True)
     except Exception as exc:
+        if state.get("SuitScanActive"):
+            _suit_scan_progress_finish("Scan failed.")
         SuitLog("manual scan error: {}".format(exc))
         _suit_set_msg(str(exc), 33)
 
@@ -3304,7 +4240,7 @@ class MysticLlamasCalculator(GumpControlMixin):
     PANEL_WIDTH = PAGE_WIDTH - 16
     MATERIAL_ROWS_VISIBLE = 3
     WIDTH = TAB_WIDTH
-    HEIGHT = 772
+    HEIGHT = 704
 
     def __init__(self):
         self.gump = None
@@ -3321,6 +4257,8 @@ class MysticLlamasCalculator(GumpControlMixin):
         self.rowControls = []
         self.suitRowControls = []
         self.suitExpectedControls = {}
+        self.suitScanControls = {}
+        self.suitFooterGump = None
         self.pickerSlots = []
         self.controls = {}
         self._last_ui_snapshot = None
@@ -3386,6 +4324,7 @@ class MysticLlamasCalculator(GumpControlMixin):
             self._update_materials()
             self._update_speed_calc()
             self._update_suits()
+            self._update_suit_scan_progress()
         self._update_picker()
         self._set_status(state.get("Msg", ""))
 
@@ -3430,6 +4369,10 @@ class MysticLlamasCalculator(GumpControlMixin):
             state.get("SuitKeepCont", 0),
             state.get("SuitMsg", ""),
             state.get("SuitRunning", False),
+            state.get("SuitScanActive", False),
+            state.get("SuitScanCurrent", 0),
+            state.get("SuitScanTotal", 0),
+            state.get("SuitScanText", ""),
             state.get("SuitMarkedSerial", 0),
             suit_rows,
             rows,
@@ -3446,6 +4389,8 @@ class MysticLlamasCalculator(GumpControlMixin):
             state["Msg"] = ""
             fn()
         except Exception as e:
+            if state.get("SuitScanActive"):
+                _suit_scan_progress_finish("Scan failed.")
             state["Msg"] = "Error: {}".format(e)
             API.SysMsg(traceback.format_exc(), 33)
         self.updateControls()
@@ -4139,7 +5084,8 @@ class MysticLlamasCalculator(GumpControlMixin):
             self.controls.get("suitKeepButton"),
             self._container_text("Good pieces", state.get("SuitKeepCont", 0)),
         )
-        self._set_text(self.controls.get("suitStatusLabel"), self._truncate_text(state.get("SuitMsg", ""), 82))
+        if self.suitFooterGump:
+            self.suitFooterGump.setStatus(self._truncate_text(state.get("SuitMsg", "") or "Ready.", 110))
 
         rows = state.get("SuitRows", [])
         if not rows:
@@ -4196,6 +5142,25 @@ class MysticLlamasCalculator(GumpControlMixin):
         self._set_suit_expected_outcome(self.suitExpectedControls, rows)
 
 
+    def _update_suit_scan_progress(self):
+        controls = self.suitScanControls
+        if not controls:
+            return
+        active = state.get("SuitScanActive", False)
+        self._set_visible(controls, active)
+        if not active:
+            return
+        current = int(state.get("SuitScanCurrent", 0) or 0)
+        total = max(1, int(state.get("SuitScanTotal", 1) or 1))
+        width = int(controls.get("width", 1) or 1)
+        fill_width = max(1, int(width * min(1.0, float(current) / float(total))))
+        try:
+            controls["fill"].SetWidth(fill_width)
+        except Exception:
+            pass
+        self._set_text(controls.get("label"), state.get("SuitScanText", "Scanning saved pieces"))
+        self._set_text(controls.get("count"), "{} / {}".format(current, total))
+
     def _update_picker(self):
         picker_visible = state.get("PickerOpen", False)
         if not picker_visible:
@@ -4238,6 +5203,7 @@ class MysticLlamasCalculator(GumpControlMixin):
     def _sync_inputs(self):
         if self.bufferInput:
             state["GemBuffer"] = (str(self.bufferInput.Text).strip() or "0")
+            _save_settings()
         if self.staminaInput:
             state["StaminaInput"] = str(self.staminaInput.Text)
         if self.ssiInput:
@@ -4332,19 +5298,8 @@ class MysticLlamasCalculator(GumpControlMixin):
         target = Target.PromptTarget(prompt)
         if target != -1:
             state[key] = target
+            _save_settings()
             state["Msg"] = "{} set.".format(prompt.replace("Select ", ""))
-            if key == "SuitKeepCont" and not state.get("SuitRunning"):
-                body = state.get("SuitBody", "Male")
-                preset = _suit_current_preset()
-                SuitLog("ui scan trigger: selected good-piece container={} body={} preset={} preset_class={}".format(
-                    _debug_hex(target),
-                    body,
-                    preset.key,
-                    preset.__class__.__name__,
-                ))
-                _suit_init_rows(body)
-                preset.scan_good_pieces(body, required=False, notify=False)
-                send_calculator()
         else:
             state["Msg"] = "Targeting canceled."
 
@@ -4659,13 +5614,37 @@ class MysticLlamasCalculator(GumpControlMixin):
         outcome_h = max_slots // 2 * card_h + (max_slots // 2 - 1) * row_gap
         self.suitExpectedControls = self._add_suit_expected_outcome_panel(expected_x, gear_y, expected_w, outcome_h)
 
-        ax = 16 + (self.PANEL_WIDTH - 32 - 304) // 2
-        ay = 730
-        self._addFlatRow(ax - 8, ay - 6, 304, 34, "suit")
-        self._addButton("Scan", ax, ay, 70, height=24, callback=ScanSuitGoodPieces, group="suit")
-        self._addButton("Start", ax + 82, ay, 116, height=24, callback=CraftSuit, group="suit")
-        self._addButton("Stop", ax + 216, ay, 74, height=24, callback=StopSuitCraft, group="suit")
-        self.controls["suitStatusLabel"] = self._addBoundedLabel("", 16, 704, self.PANEL_WIDTH - 32, 20, 10, "#f6f2cf", group="suit")
+    def _draw_suit_footer(self, footer):
+        footer.addDivider(10, 46, footer.width - 20, 0.55)
+        content_x = self.WIDTH
+        button_w = 88
+        button_gap = 14
+        button_group_w = button_w * 3 + button_gap * 2
+        ax = content_x + (self.PAGE_WIDTH - button_group_w) // 2
+        ay = 16
+        footer.addTextButton("Scan", ax, ay, button_w, 24, footer.onClick(lambda: self._run_action(ScanSuitGoodPieces)))
+        footer.addTextButton("Start", ax + button_w + button_gap, ay, button_w, 24, footer.onClick(lambda: self._run_action(CraftSuit)))
+        footer.addTextButton("Stop", ax + (button_w + button_gap) * 2, ay, button_w, 24, footer.onClick(lambda: self._run_action(StopSuitCraft)))
+        bar_w = 320
+        bar_h = 12
+        bar_x = content_x + (self.PAGE_WIDTH - bar_w) // 2
+        bar_y = 54
+        label = footer.addTtfLabel("", bar_x, bar_y - 18, bar_w - 62, 16, 11, Gump.theme["buttonText"], "left", None)
+        count = footer.addTtfLabel("", bar_x + bar_w - 58, bar_y - 18, 58, 16, 11, "#f6f2cf", "right", None)
+        frame = footer.addColorBox(bar_x - 2, bar_y - 2, bar_h + 4, bar_w + 4, Gump.theme["frameOuter"], 1, withTexture=False)
+        bg = footer.addColorBox(bar_x, bar_y, bar_h, bar_w, Gump.theme["bgInset"], 0.98, withTexture=True)
+        fill = footer.addColorBox(bar_x, bar_y, bar_h, 1, "#2da8ff", 0.92, withTexture=False)
+        shine = footer.addColorBox(bar_x + 2, bar_y + 2, 1, bar_w - 4, "#ffffff", 0.22, withTexture=False)
+        self.suitScanControls = {
+            "label": label,
+            "count": count,
+            "frame": frame,
+            "bg": bg,
+            "fill": fill,
+            "shine": shine,
+            "width": bar_w,
+        }
+        self._set_visible(self.suitScanControls, False)
 
     def _draw_picker(self, g):
         self.pickerSlots = []
@@ -4712,6 +5691,9 @@ class MysticLlamasCalculator(GumpControlMixin):
         self._drawGump = suitGump
         suitGump.addTitle("SUIT CRAFTING", hue=Gump.hues["text"])
         self._draw_suits(suitGump)
+
+        self.suitFooterGump = g.createSubGump(self.WIDTH + self.PAGE_WIDTH, 100, "bottom", withStatus=True)
+        self._draw_suit_footer(self.suitFooterGump)
 
         pickerGump = g.createSubGump(self.PAGE_WIDTH, self.HEIGHT, "right", withStatus=False, alwaysVisible=False)
         pickerGump.gump.IsVisible = False

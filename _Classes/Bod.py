@@ -14,6 +14,18 @@ from Util import Util
 
 class Bod:
     @staticmethod
+    def _itemProps(item, includeProps=False, attempts=5):
+        for _ in range(attempts):
+            if includeProps:
+                props = API.ItemNameAndProps(item.Serial, True)
+            else:
+                props = API.ItemNameAndProps(item.Serial)
+            if props:
+                return props.split("\n")
+            API.Pause(0.1)
+        raise ValueError("Could not read BOD properties")
+
+    @staticmethod
     def findAllBodItems(selectedBodGraphic, selectedBodHue, isSmall):
         bods = []
         items = Util.itemsInContainer(API.Backpack)
@@ -29,7 +41,11 @@ class Bod:
 
     @staticmethod
     def hasEnoughItem(item, currentCount):
-        values = Bod._parse(item)
+        try:
+            values = Bod._parse(item)
+        except ValueError as e:
+            API.SysMsg(str(e), 33)
+            return True
         amountToFill = values["amountToFill"]
         if not values["isSmall"]:
             API.SysMsg("This function only works on small bod")
@@ -40,7 +56,10 @@ class Bod:
 
     @staticmethod
     def isFilled(item, isColoring=True):
-        values = Bod._parse(item)
+        try:
+            values = Bod._parse(item)
+        except ValueError:
+            return False
         isDone = False
         amountToFill = values["amountToFill"]
         if values["isSmall"]:
@@ -48,7 +67,10 @@ class Bod:
             isDone = amountToFill - amountAlreadyFilled == 0
         if not values["isSmall"]:
             comparisonResults = []
-            props = API.ItemNameAndProps(item.Serial).split("\n")
+            try:
+                props = Bod._itemProps(item)
+            except ValueError:
+                return False
             for prop in reversed(props):
                 if prop.strip().lower().startswith("amount to make"):
                     break
@@ -63,7 +85,10 @@ class Bod:
     
     @staticmethod
     def isPartiallyFilled(item):
-        values = Bod._parse(item)
+        try:
+            values = Bod._parse(item)
+        except ValueError:
+            return False
         isDone = False
         amountToFill = values["amountToFill"]
         if values["isSmall"]:
@@ -72,7 +97,10 @@ class Bod:
             return not isDone and amountAlreadyFilled > 0
 
         comparisonResults = []
-        props = API.ItemNameAndProps(item.Serial).split("\n")
+        try:
+            props = Bod._itemProps(item)
+        except ValueError:
+            return False
         for prop in reversed(props):
             if prop.strip().lower().startswith("amount to make"):
                 break
@@ -85,7 +113,10 @@ class Bod:
 
     @staticmethod
     def isMaxed(item):
-        values = Bod._parse(item)
+        try:
+            values = Bod._parse(item)
+        except ValueError:
+            return False
         isExceptional = values["isExceptional"]
         amountToFill = values["amountToFill"]
         isDone = isExceptional == True and amountToFill == 20
@@ -131,7 +162,7 @@ class Bod:
 
     @staticmethod
     def _parse(item, craftingInfo=None):
-        props = API.ItemNameAndProps(item.Serial).split("\n")
+        props = Bod._itemProps(item)
         isSmall = props[2 + 1] == "Small Bulk Order"
         itemName = None
         amountAlreadyFilled = 0
@@ -247,6 +278,8 @@ class Bod:
                 "A Craft Class and craftingInfo must be defined to fill a bod", 33
             )
             API.Stop()
+        if hasattr(self.craft, "isBlocked"):
+            self.craft.isBlocked = False
         # self.item.Hue = 18
         while not Bod.hasEnoughItem(self.item, self.count):
             isValidItem = self.craft.craft(
@@ -257,6 +290,8 @@ class Bod:
             )
             if onCraftAttempt:
                 onCraftAttempt()
+            if isValidItem is None:
+                return
             if isValidItem:
                 self.count += 1
         self._fillBod()
@@ -303,6 +338,7 @@ class Bod:
         self.amountAlreadyFilled = values["amountAlreadyFilled"]
         self.resourceHue = values["resourceHue"]
         if self.bodSkill and values["itemName"]:
-            self.bodSkillItem = self.bodSkill["items"][values["itemName"]]
+            self.bodSkillItem = dict(self.bodSkill["items"][values["itemName"]])
+            self.bodSkillItem["name"] = values["itemName"]
         self.material = values["material"]
         self.isSmall = values["isSmall"]
