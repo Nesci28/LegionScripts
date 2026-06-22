@@ -265,10 +265,11 @@ class AnimalTaming:
         return self._running
 
 
-animalTaming = AnimalTaming()
-animalTaming.main()
-while animalTaming._isRunning():
-    # animalTaming.gump.tick()
-    # animalTaming.gump.tickSubGumps()
-    animalTaming.tick()
-    API.Pause(0.1)
+if __name__ == "__main__":
+    animalTaming = AnimalTaming()
+    animalTaming.main()
+    while animalTaming._isRunning():
+        # animalTaming.gump.tick()
+        # animalTaming.gump.tickSubGumps()
+        animalTaming.tick()
+        API.Pause(0.1)

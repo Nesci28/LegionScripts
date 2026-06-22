@@ -94,7 +94,9 @@ def _save_settings():
             "GemBuffer": str(state.get("GemBuffer", "0") or "0"),
             "SuitKeepCont": int(state.get("SuitKeepCont", 0) or 0),
             "SuitBody": state.get("SuitBody", "Male"),
+            "SuitArmorType": state.get("SuitArmorType", SUIT_DEFAULT_ARMOR_TYPE),
             "SuitPreset": state.get("SuitPreset", SUIT_PRESET_BASIC),
+            "SuitMaterial": state.get("SuitMaterial", SUIT_DEFAULT_MATERIAL),
         }
         with open(_settings_path(), "w") as settings_file:
             json.dump(data, settings_file, indent=2, sort_keys=True)
@@ -813,10 +815,10 @@ IMBUING_PRESETS = [
     }
 ]
 
-SUIT_PRESET_BASIC = "Basic LRC Training"
-SUIT_PRESET_MAGE = "Mage 70 Resists"
-SUIT_PRESET_LUCK = "Luck"
-SUIT_PRESET_SAMPIRE = "Sampire"
+SUIT_PRESET_BASIC = "Basic"
+SUIT_PRESET_ADVANCED = "Advanced"
+SUIT_PRESET_LUCK_BASIC = "Luck Basic"
+SUIT_PRESET_LUCK_ADVANCED = "Luck Advanced"
 SUIT_BODIES = ("Male", "Female", "Gargoyle")
 SUIT_RESISTS = (
     "Physical Resist",
@@ -848,16 +850,27 @@ SUIT_DURABILITY_TARGET = 255
 SUIT_FORTIFY_MAX_ATTEMPTS = 40
 SUIT_FORTIFICATION_KEG_GRAPHIC = 0x1940
 SUIT_FORTIFICATION_KEG_HUE = 2419
+SUIT_ARMOR_TYPES = (
+    {"key": "Leather", "label": "Leather"},
+    {"key": "Studded", "label": "Studded"},
+)
+SUIT_ARMOR_TYPES_BY_KEY = dict((armor_type["key"], armor_type) for armor_type in SUIT_ARMOR_TYPES)
+SUIT_DEFAULT_ARMOR_TYPE = "Leather"
 SUIT_NORMAL_LEATHER_HUE = 0
-SUIT_NORMAL_LEATHER_MATERIAL = {
-    "name": "normal leather",
-    "hue": SUIT_NORMAL_LEATHER_HUE,
-    "buttonId": 5000,
-}
+SUIT_MATERIALS = (
+    {"key": "normal leather", "label": "Normal", "hue": SUIT_NORMAL_LEATHER_HUE, "buttonId": 5000},
+    {"key": "spined leather", "label": "Spined", "hue": 0x08AC, "buttonId": 5001},
+    {"key": "horned leather", "label": "Horned", "hue": 0x0845, "buttonId": 5002},
+    {"key": "barbed leather", "label": "Barbed", "hue": 0x0851, "buttonId": 5003},
+)
+SUIT_MATERIALS_BY_KEY = dict((material["key"], material) for material in SUIT_MATERIALS)
+SUIT_MATERIAL_BY_HUE = dict((int(material["hue"]), material) for material in SUIT_MATERIALS)
+SUIT_DEFAULT_MATERIAL = "normal leather"
+SUIT_NORMAL_LEATHER_MATERIAL = SUIT_MATERIALS_BY_KEY[SUIT_DEFAULT_MATERIAL]
 TAILORING_CRAFTING_INFO = {
     "tool": {"graphic": 0x0F9D, "buttonId": 14},
     "materialHues": {
-        "normal leather": SUIT_NORMAL_LEATHER_MATERIAL,
+        material["key"]: material for material in SUIT_MATERIALS
     },
 }
 
@@ -888,6 +901,11 @@ SUIT_ITEM_DEFS = {
     "Leather Leggings": _leather_item("leather leggings", 0x13CB, 612, 10),
     "Female Leather Armor": _leather_item("female leather armor", 0x1C06, 637, 8),
     "Leather Skirt": _leather_item("leather skirt", 0x1C08, 634, 6),
+    "Studded Gorget": _leather_item("studded gorget", 0x13D6, 625, 6),
+    "Studded Gloves": _leather_item("studded gloves", 0x13D5, 626, 8),
+    "Studded Sleeves": _leather_item("studded sleeves", 0x13DC, 627, 10),
+    "Studded Leggings": _leather_item("studded leggings", 0x13DA, 628, 12),
+    "Studded Tunic": _leather_item("studded tunic", 0x13DB, 629, 14),
     "Gargish Leather Wing Armor": _leather_item("gargish leather wing armor", None, 680, 6),
     "Gargish Leather Arms": _leather_item("gargish leather arms", None, 681, 8),
     "Gargish Leather Chest": _leather_item("gargish leather chest", None, 682, 8),
@@ -896,32 +914,61 @@ SUIT_ITEM_DEFS = {
     "Gargish Leather Talons": _leather_item("gargish leather talons", None, 685, 6),
 }
 
-SUIT_BODY_ITEMS = {
-    "Male": (
-        "Leather Cap",
-        "Leather Gorget",
-        "Leather Sleeves",
-        "Leather Gloves",
-        "Leather Tunic",
-        "Leather Leggings",
-    ),
-    "Female": (
-        "Leather Cap",
-        "Leather Gorget",
-        "Leather Sleeves",
-        "Leather Gloves",
-        "Female Leather Armor",
-        "Leather Skirt",
-    ),
-    "Gargoyle": (
-        "Gargish Leather Wing Armor",
-        "Gargish Leather Arms",
-        "Gargish Leather Chest",
-        "Gargish Leather Leggings",
-        "Gargish Leather Kilt",
-        "Gargish Leather Talons",
-    ),
+SUIT_BODY_ITEMS_BY_ARMOR = {
+    "Leather": {
+        "Male": (
+            "Leather Cap",
+            "Leather Gorget",
+            "Leather Sleeves",
+            "Leather Gloves",
+            "Leather Tunic",
+            "Leather Leggings",
+        ),
+        "Female": (
+            "Leather Cap",
+            "Leather Gorget",
+            "Leather Sleeves",
+            "Leather Gloves",
+            "Female Leather Armor",
+            "Leather Skirt",
+        ),
+        "Gargoyle": (
+            "Gargish Leather Wing Armor",
+            "Gargish Leather Arms",
+            "Gargish Leather Chest",
+            "Gargish Leather Leggings",
+            "Gargish Leather Kilt",
+            "Gargish Leather Talons",
+        ),
+    },
+    "Studded": {
+        "Male": (
+            "Leather Cap",
+            "Studded Gorget",
+            "Studded Sleeves",
+            "Studded Gloves",
+            "Studded Tunic",
+            "Studded Leggings",
+        ),
+        "Female": (
+            "Leather Cap",
+            "Studded Gorget",
+            "Studded Sleeves",
+            "Studded Gloves",
+            "Studded Tunic",
+            "Studded Leggings",
+        ),
+        "Gargoyle": (
+            "Gargish Leather Wing Armor",
+            "Gargish Leather Arms",
+            "Gargish Leather Chest",
+            "Gargish Leather Leggings",
+            "Gargish Leather Kilt",
+            "Gargish Leather Talons",
+        ),
+    },
 }
+SUIT_BODY_ITEMS = SUIT_BODY_ITEMS_BY_ARMOR[SUIT_DEFAULT_ARMOR_TYPE]
 
 SUIT_GEAR_FALLBACK_GRAPHICS = (
     0x1DB9,
@@ -930,6 +977,11 @@ SUIT_GEAR_FALLBACK_GRAPHICS = (
     0x13C6,
     0x13CC,
     0x13CB,
+    0x13D6,
+    0x13D5,
+    0x13DC,
+    0x13DB,
+    0x13DA,
 )
 SUIT_SELECTED_ITEM_HUE = 69
 
@@ -950,28 +1002,22 @@ SUIT_MAGE_STAT_CAPS = {
 
 
 import _Presets as PresetsModule
-BasicLrcSuitPresetModule = importlib.import_module("_Presets.BasicLrcSuitPreset")
-Mage70ResistsSuitPresetModule = importlib.import_module("_Presets.Mage70ResistsSuitPreset")
-LuckSuitPresetModule = importlib.import_module("_Presets.LuckSuitPreset")
-SampireSuitPresetModule = importlib.import_module("_Presets.SampireSuitPreset")
-importlib.reload(BasicLrcSuitPresetModule)
-importlib.reload(Mage70ResistsSuitPresetModule)
-importlib.reload(LuckSuitPresetModule)
-importlib.reload(SampireSuitPresetModule)
+SimplifiedSuitPresetsModule = importlib.import_module("_Presets.SimplifiedSuitPresets")
+importlib.reload(SimplifiedSuitPresetsModule)
 importlib.reload(PresetsModule)
 from _Presets import (
-    BasicLrcSuitPreset,
-    Mage70ResistsSuitPreset,
-    LuckSuitPreset,
-    SampireSuitPreset,
+    AdvancedSuitPreset,
+    BasicSuitPreset,
+    LuckAdvancedSuitPreset,
+    LuckBasicSuitPreset,
 )
 
 
 SUIT_PRESETS = (
-    BasicLrcSuitPreset(globals()),
-    Mage70ResistsSuitPreset(globals()),
-    LuckSuitPreset(globals()),
-    SampireSuitPreset(globals()),
+    BasicSuitPreset(globals()),
+    AdvancedSuitPreset(globals()),
+    LuckBasicSuitPreset(globals()),
+    LuckAdvancedSuitPreset(globals()),
 )
 SUIT_PRESETS_BY_KEY = dict((preset.key, preset) for preset in SUIT_PRESETS)
 
@@ -987,6 +1033,46 @@ def _suit_current_preset():
     return preset
 
 
+def _suit_material_for_key(material_key=None):
+    material_key = material_key or state.get("SuitMaterial", SUIT_DEFAULT_MATERIAL)
+    material = SUIT_MATERIALS_BY_KEY.get(material_key)
+    if not material:
+        material = SUIT_MATERIALS_BY_KEY[SUIT_DEFAULT_MATERIAL]
+        state["SuitMaterial"] = material["key"]
+    return material
+
+
+def _suit_current_material():
+    return _suit_material_for_key(state.get("SuitMaterial", SUIT_DEFAULT_MATERIAL))
+
+
+def _suit_material_key_for_hue(hue):
+    material = SUIT_MATERIAL_BY_HUE.get(int(hue or 0))
+    return material["key"] if material else None
+
+
+def _suit_material_label(material_key=None):
+    return _suit_material_for_key(material_key).get("label", material_key or SUIT_DEFAULT_MATERIAL)
+
+
+def _suit_armor_type_for_key(armor_type=None):
+    armor_type = armor_type or state.get("SuitArmorType", SUIT_DEFAULT_ARMOR_TYPE)
+    if armor_type not in SUIT_ARMOR_TYPES_BY_KEY:
+        armor_type = SUIT_DEFAULT_ARMOR_TYPE
+        state["SuitArmorType"] = armor_type
+    return SUIT_ARMOR_TYPES_BY_KEY[armor_type]
+
+
+def _suit_current_armor_type():
+    return _suit_armor_type_for_key(state.get("SuitArmorType", SUIT_DEFAULT_ARMOR_TYPE))["key"]
+
+
+def _suit_body_items(body, armor_type=None):
+    armor_key = _suit_armor_type_for_key(armor_type)["key"]
+    body_items = SUIT_BODY_ITEMS_BY_ARMOR.get(armor_key, SUIT_BODY_ITEMS_BY_ARMOR[SUIT_DEFAULT_ARMOR_TYPE])
+    return body_items.get(body, SUIT_BODY_ITEMS_BY_ARMOR[SUIT_DEFAULT_ARMOR_TYPE].get(body, ()))
+
+
 state = {
     "Category": "Armor",
     "ItemGroup": "Armor",
@@ -999,7 +1085,9 @@ state = {
     "GemBuffer": "0",
     "MaterialScroll": 0,
     "SuitBody": "Male",
+    "SuitArmorType": SUIT_DEFAULT_ARMOR_TYPE,
     "SuitPreset": SUIT_PRESET_BASIC,
+    "SuitMaterial": SUIT_DEFAULT_MATERIAL,
     "SuitKeepCont": 0,
     "SuitRows": [],
     "SuitRunning": False,
@@ -1031,9 +1119,15 @@ state = {
 }
 
 _saved_settings = _load_settings()
-for _settings_key in ("MatCont", "GemCont", "GemBuffer", "SuitKeepCont", "SuitBody", "SuitPreset"):
+for _settings_key in ("MatCont", "GemCont", "GemBuffer", "SuitKeepCont", "SuitBody", "SuitArmorType", "SuitPreset", "SuitMaterial"):
     if _settings_key in _saved_settings:
         state[_settings_key] = _saved_settings[_settings_key]
+if state.get("SuitPreset") not in SUIT_PRESETS_BY_KEY:
+    state["SuitPreset"] = SUIT_PRESET_BASIC
+if state.get("SuitArmorType") not in SUIT_ARMOR_TYPES_BY_KEY:
+    state["SuitArmorType"] = SUIT_DEFAULT_ARMOR_TYPE
+if state.get("SuitMaterial") not in SUIT_MATERIALS_BY_KEY:
+    state["SuitMaterial"] = SUIT_DEFAULT_MATERIAL
 
 # ---------------------------------------------------------
 # CALCULATIONS 
@@ -2213,11 +2307,14 @@ def _suit_read_item(item, slot_name):
     props = Items.GetPropStringList(item)
     item_name = props[0] if props else slot_name
     resists = _suit_parse_resists(props)
+    hue = int(getattr(item, "Hue", 0) or 0)
     return {
         "Slot": slot_name,
         "Serial": _serial(item),
         "Item": item,
         "Name": item_name,
+        "Hue": hue,
+        "Material": _suit_material_key_for_hue(hue),
         "Exceptional": _suit_is_exceptional(props),
         "Resists": resists,
         "PropValues": _suit_parse_prop_values(props),
@@ -2231,7 +2328,7 @@ def _suit_slot_for_item(item, body):
     props = Items.GetPropStringList(item)
     item_name = props[0].lower() if props else ""
     graphic = getattr(item, "Graphic", 0)
-    for slot_name in SUIT_BODY_ITEMS.get(body, ()):
+    for slot_name in _suit_body_items(body):
         item_def = SUIT_ITEM_DEFS[slot_name]
         expected_graphic = item_def.get("graphic")
         if expected_graphic is not None and int(expected_graphic) == graphic:
@@ -2248,21 +2345,26 @@ def _suit_slot_for_item(item, body):
     return None
 
 
-def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=True, require_high_resists=True, required=True, allow_started_mage=False):
+def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=True, require_high_resists=True, required=True, allow_started_mage=False, material_key=None):
     container = _suit_get_keep_container(required=required)
     if not container:
         SuitLog("scan skipped: no good-piece container selected for body={} required={}".format(body, required))
         return 0
+    material = _suit_material_for_key(material_key)
+    material_key = material["key"]
+    material_hue = int(material.get("hue", 0) or 0)
     serial = _serial(container)
     Items.WaitForContents(serial, 500)
     try:
         items = API.ItemsInContainer(serial, True) or []
     except Exception:
         items = []
-    SuitLog("scan start: container={} body={} items={} require_exceptional={} require_high_resists={} allow_started_mage={}".format(
+    SuitLog("scan start: container={} body={} items={} material={} hue={} require_exceptional={} require_high_resists={} allow_started_mage={}".format(
         _debug_hex(serial),
         body,
         len(items),
+        material_key,
+        _debug_hex(material_hue),
         require_exceptional,
         require_high_resists,
         allow_started_mage,
@@ -2285,6 +2387,15 @@ def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=Tru
         if not slot_name:
             continue
         candidate = _suit_read_item(item, slot_name)
+        if int(candidate.get("Hue", 0) or 0) != material_hue:
+            SuitLog("scan reject: {} reason=material expected={} hue={} actual={} hue={}".format(
+                _suit_log_candidate(candidate),
+                material_key,
+                _debug_hex(material_hue),
+                candidate.get("Material") or "unknown",
+                _debug_hex(candidate.get("Hue", 0)),
+            ))
+            continue
         if require_exceptional and not candidate.get("Exceptional"):
             SuitLog("scan reject: {} reason=not exceptional".format(_suit_log_candidate(candidate)))
             continue
@@ -2341,7 +2452,7 @@ def _suit_best_candidate(candidates):
 
 
 def _suit_scan_good_pieces(body, require_exceptional=False, require_high_resists=False, update_rows=True, required=False):
-    slot_names = list(SUIT_BODY_ITEMS.get(body, ()))
+    slot_names = list(_suit_body_items(body))
     candidates_by_slot = dict((slot_name, []) for slot_name in slot_names)
     SuitLog("scan good pieces: body={} slots={} update_rows={} required={}".format(
         body,
@@ -2393,9 +2504,11 @@ def _suit_resist_text(resists):
 def _suit_log_candidate(candidate):
     if not candidate:
         return "None"
-    return "{} serial={} ex={} resists={} highs={} score={} rows={}".format(
+    return "{} serial={} mat={} hue={} ex={} resists={} highs={} score={} rows={}".format(
         candidate.get("Slot", "?"),
         _debug_hex(candidate.get("Serial", 0)),
+        candidate.get("Material") or "unknown",
+        _debug_hex(candidate.get("Hue", 0)),
         bool(candidate.get("Exceptional")),
         _suit_resist_text(candidate.get("Resists", {})),
         _suit_high_text(candidate.get("HighResists", ())),
@@ -2719,7 +2832,7 @@ def _suit_init_rows(body):
                 pass
     state["SuitMarkedSerial"] = 0
     state["SuitRows"] = []
-    for slot_name in SUIT_BODY_ITEMS[body]:
+    for slot_name in _suit_body_items(body):
         state["SuitRows"].append({
             "Slot": slot_name,
             "Serial": 0,
@@ -2994,12 +3107,18 @@ def _suit_prepare_piece_for_imbue(piece):
 
 
 def _suit_craft_piece(craft, slot_name, require_exceptional):
-    SuitLog("craft begin: slot={} require_exceptional={}".format(slot_name, require_exceptional))
+    material = _suit_current_material()
+    SuitLog("craft begin: slot={} require_exceptional={} material={} hue={}".format(
+        slot_name,
+        require_exceptional,
+        material["key"],
+        _debug_hex(material.get("hue", 0)),
+    ))
     item_def = SUIT_ITEM_DEFS[slot_name]
     crafted = craft.craft_item(
         item_def,
-        SUIT_NORMAL_LEATHER_HUE,
-        SUIT_NORMAL_LEATHER_MATERIAL,
+        int(material.get("hue", 0) or 0),
+        material,
         require_exceptional=require_exceptional,
         recycle_rejected=True,
     )
@@ -3017,6 +3136,17 @@ def _suit_max_weight(exceptional):
 
 def _suit_resist_row_count(rows):
     return sum(1 for row in rows if row.get("Prop") in SUIT_RESISTS and row.get("Val", 0))
+
+
+def _suit_plan_resist_row_counts(plan):
+    return [
+        _suit_resist_row_count(piece.get("Rows", []))
+        for piece in plan
+    ]
+
+
+def _suit_candidate_physical_resist(candidate):
+    return int((candidate or {}).get("Resists", {}).get("Physical Resist", 0) or 0)
 
 
 def _suit_try_add_row(rows, prop, val, exceptional=True, mode=None):
@@ -3215,9 +3345,9 @@ def _suit_allocate_mage_rows(candidates):
     return planned
 
 
-def _suit_allocate_mage_rows_exhaustive(candidates):
+def _suit_allocate_mage_rows_exhaustive(candidates, include_required_rows=True, choose_optional=True, solve_label="Mage"):
     planned = []
-    required_rows_by_piece = _suit_mage_required_rows_by_piece(len(candidates))
+    required_rows_by_piece = _suit_mage_required_rows_by_piece(len(candidates)) if include_required_rows else [[] for _ in candidates]
     totals = dict((name, 0) for name in SUIT_RESISTS)
 
     for index, candidate in enumerate(candidates):
@@ -3247,8 +3377,9 @@ def _suit_allocate_mage_rows_exhaustive(candidates):
 
     deficits = dict((name, max(0, SUIT_RESIST_TARGET - totals[name])) for name in SUIT_RESISTS)
     if all(value <= 0 for value in deficits.values()):
-        for item in planned:
-            item["Rows"] = _suit_choose_optional(item["Rows"], True)
+        if choose_optional:
+            for item in planned:
+                item["Rows"] = _suit_choose_optional(item["Rows"], True)
         return planned
 
     def active_rows(rows):
@@ -3405,7 +3536,8 @@ def _suit_allocate_mage_rows_exhaustive(candidates):
         option_counts.append(len(options))
         _suit_scan_progress_update(
             state.get("SuitScanCurrent", 0),
-            "Allocating Mage resists: piece {}/{} states={} options={} deficits={}".format(
+            "Allocating {} resists: piece {}/{} states={} options={} deficits={}".format(
+                solve_label,
                 planned_index + 1,
                 len(planned),
                 len(states),
@@ -3457,7 +3589,8 @@ def _suit_allocate_mage_rows_exhaustive(candidates):
                 ))
         _suit_scan_progress_update(
             state.get("SuitScanCurrent", 0),
-            "Mage allocation failed: states={} options={} deficits={} capacity={}".format(
+            "{} allocation failed: states={} options={} deficits={} capacity={}".format(
+                solve_label,
                 len(states),
                 ",".join(str(count) for count in option_counts),
                 _suit_resist_text(deficits),
@@ -3476,7 +3609,8 @@ def _suit_allocate_mage_rows_exhaustive(candidates):
     chosen = states[target_key]
     for index, item in enumerate(planned):
         item["Rows"] = [dict(row) for row in chosen[index]]
-        item["Rows"] = _suit_choose_optional(item["Rows"], True)
+        if choose_optional:
+            item["Rows"] = _suit_choose_optional(item["Rows"], True)
         if len(item["Rows"]) > SUIT_MAX_ROWS:
             return None
         if _suit_rows_weight(item["Rows"]) > _suit_max_weight(True):
@@ -3516,14 +3650,14 @@ def _suit_trim_states(states, limit=SUIT_MAGE_SOLVE_STATE_LIMIT):
     return dict(ranked[:limit])
 
 
-def _suit_solve_mage(candidates_by_slot):
+def _suit_solve_mage(candidates_by_slot, plan_filter=None, include_required_rows=True, choose_optional=True, solve_label="Mage"):
     SuitLog("mage solve start: counts=[{}]".format(_suit_log_slot_counts(candidates_by_slot)))
     _suit_prune_mage_candidates_by_pair(candidates_by_slot)
-    _suit_scan_progress_start(max(1, len(candidates_by_slot)), "Building Mage suit combinations")
+    _suit_scan_progress_start(max(1, len(candidates_by_slot)), "Building {} suit combinations".format(solve_label))
     missing_slots = [slot for slot in candidates_by_slot if not candidates_by_slot.get(slot)]
     if missing_slots:
         SuitLog("mage solve blocked: missing slots={}".format(", ".join(missing_slots)))
-        _suit_scan_progress_finish("Mage solve blocked: missing saved slots.")
+        _suit_scan_progress_finish("{} solve blocked: missing saved slots.".format(solve_label))
         return None
 
     empty_totals = tuple(0 for _ in SUIT_RESISTS)
@@ -3532,7 +3666,7 @@ def _suit_solve_mage(candidates_by_slot):
     for slot_index, slot_name in enumerate(candidates_by_slot):
         _suit_scan_progress_update(
             slot_index + 1,
-            "Building Mage suit combinations: {}".format(slot_name),
+            "Building {} suit combinations: {}".format(solve_label, slot_name),
             force=True,
         )
         new_states = {}
@@ -3592,7 +3726,7 @@ def _suit_solve_mage(candidates_by_slot):
 
     checked_combos = 0
     total_combos = max(1, len(ranked_combos))
-    _suit_scan_progress_start(total_combos, "Solving Mage suit plan")
+    _suit_scan_progress_start(total_combos, "Solving {} suit plan".format(solve_label))
     for combo in ranked_combos:
         if _suit_should_stop():
             SuitLog("mage solve stopped during allocation")
@@ -3601,24 +3735,35 @@ def _suit_solve_mage(candidates_by_slot):
         checked_combos += 1
         _suit_scan_progress_update(
             checked_combos,
-            "Solving Mage suit: combo {}/{}".format(checked_combos, total_combos),
+            "Solving {} suit: combo {}/{}".format(solve_label, checked_combos, total_combos),
             force=True,
         )
-        plan = _suit_allocate_mage_rows_exhaustive([dict(item) for item in combo])
+        plan = _suit_allocate_mage_rows_exhaustive(
+            [dict(item) for item in combo],
+            include_required_rows=include_required_rows,
+            choose_optional=choose_optional,
+            solve_label=solve_label,
+        )
         if plan:
+            if plan_filter and not plan_filter(plan):
+                SuitLog("mage solve filtered out: label={} plan={}".format(
+                    solve_label,
+                    " | ".join(_suit_log_candidate(piece) for piece in plan),
+                ))
+                continue
             totals = _suit_combo_totals(plan)
             SuitLog("mage solve success: totals={} high_counts={} plan={}".format(
                 _suit_resist_text(totals),
                 _suit_high_count_text(_suit_high_counts(plan)),
                 " | ".join(_suit_log_candidate(piece) for piece in plan),
             ))
-            _suit_scan_progress_finish("Mage suit plan found.")
+            _suit_scan_progress_finish("{} suit plan found.".format(solve_label))
             return plan
     SuitLog("mage solve failed: ranked_combos={} checked_combos={} no allocation fit".format(
         len(ranked_combos),
         checked_combos,
     ))
-    _suit_scan_progress_finish("Mage solve failed: no allocation fit.")
+    _suit_scan_progress_finish("{} solve failed: no allocation fit.".format(solve_label))
     return None
 
 
@@ -3644,15 +3789,15 @@ def _suit_select_plan(plan, active_by_slot=None):
         )
 
 
-def _suit_scan_saved_mage_plan(body, update_rows=True, required=True):
-    slot_names = list(SUIT_BODY_ITEMS.get(body, ()))
+def _suit_scan_saved_mage_plan(body, update_rows=True, required=True, plan_filter=None, include_required_rows=True, choose_optional=True, solve_label="Mage", allow_started_mage=True):
+    slot_names = list(_suit_body_items(body))
     candidates_by_slot = dict((slot_name, []) for slot_name in slot_names)
     loaded = _suit_load_kept_candidates(
         body,
         candidates_by_slot,
         require_exceptional=True,
         require_high_resists=True,
-        allow_started_mage=True,
+        allow_started_mage=allow_started_mage,
         required=required,
     )
     SuitLog("mage scan solve: loaded={} counts=[{}]".format(
@@ -3660,7 +3805,13 @@ def _suit_scan_saved_mage_plan(body, update_rows=True, required=True):
         _suit_log_slot_counts(candidates_by_slot),
     ))
 
-    plan = _suit_solve_mage(candidates_by_slot)
+    plan = _suit_solve_mage(
+        candidates_by_slot,
+        plan_filter=plan_filter,
+        include_required_rows=include_required_rows,
+        choose_optional=choose_optional,
+        solve_label=solve_label,
+    )
     if not plan:
         SuitLog("mage scan solve failed: no README-valid six-piece plan loaded={} counts=[{}]".format(
             loaded,
@@ -5055,10 +5206,24 @@ class MysticLlamasCalculator(GumpControlMixin):
     def _set_suit_body(self, body):
         state["SuitBody"] = body
         _suit_init_rows(body)
+        _save_settings()
+
+
+    def _set_suit_armor_type(self, armor_type):
+        state["SuitArmorType"] = _suit_armor_type_for_key(armor_type)["key"]
+        _suit_init_rows(state.get("SuitBody", "Male"))
+        _save_settings()
 
 
     def _set_suit_preset(self, preset):
         state["SuitPreset"] = _suit_preset_for_key(preset).key
+        _save_settings()
+
+
+    def _set_suit_material(self, material_key):
+        state["SuitMaterial"] = _suit_material_for_key(material_key)["key"]
+        _suit_init_rows(state.get("SuitBody", "Male"))
+        _save_settings()
 
 
     def _update_speed_calc(self):
@@ -5073,9 +5238,15 @@ class MysticLlamasCalculator(GumpControlMixin):
         self._set_checked(self.controls.get("suitBodyMale"), state.get("SuitBody") == "Male")
         self._set_checked(self.controls.get("suitBodyFemale"), state.get("SuitBody") == "Female")
         self._set_checked(self.controls.get("suitBodyGargoyle"), state.get("SuitBody") == "Gargoyle")
+        selected_armor_type = _suit_current_armor_type()
+        for armor_type in SUIT_ARMOR_TYPES:
+            self._set_checked(self.controls.get("suitArmor{}".format(armor_type["key"])), selected_armor_type == armor_type["key"])
         selected_preset = _suit_current_preset().key
         for preset in SUIT_PRESETS:
             self._set_checked(self.controls.get(preset.control_key), selected_preset == preset.key)
+        selected_material = _suit_current_material()["key"]
+        for material in SUIT_MATERIALS:
+            self._set_checked(self.controls.get("suitMaterial{}".format(material["buttonId"])), selected_material == material["key"])
         self._set_button_text(
             self.controls.get("suitMatButton"),
             self._container_text("Resource", state.get("MatCont", 0)),
@@ -5092,7 +5263,7 @@ class MysticLlamasCalculator(GumpControlMixin):
             body = state.get("SuitBody", "Male")
             rows = [
                 {"Slot": slot, "Serial": 0, "Status": "Pending", "Resists": "", "Plan": ""}
-                for slot in SUIT_BODY_ITEMS.get(body, ())
+                for slot in _suit_body_items(body)
             ]
         for index, controls in enumerate(self.suitRowControls):
             has_row = index < len(rows)
@@ -5541,9 +5712,11 @@ class MysticLlamasCalculator(GumpControlMixin):
         self._addButton("Auto Imbue", x, y + 104, 110, height=24, callback=AutoImbue, group="speed")
 
     def _draw_suits(self, g):
-        col_w = (self.PANEL_WIDTH - 6) // 2
+        col_w = (self.PANEL_WIDTH - 18) // 4
         gender = self._addSectionPanel(1, "Gender", 8, 44, col_w, 150, group="suit")
-        presets = self._addSectionPanel(2, "Presets", 14 + col_w, 44, col_w, 150, group="suit")
+        armor_panel = self._addSectionPanel(2, "Armor Type", 14 + col_w, 44, col_w, 150, group="suit")
+        material_panel = self._addSectionPanel(3, "Material", 20 + col_w * 2, 44, col_w, 150, group="suit")
+        presets = self._addSectionPanel(4, "Preset", 26 + col_w * 3, 44, col_w, 150, group="suit")
 
         gx = gender["x"] + 10
         gy = gender["y"] + 36
@@ -5553,6 +5726,36 @@ class MysticLlamasCalculator(GumpControlMixin):
         self.controls["suitBodyMale"] = self._addRadio("Male", gx + 4, gy, state.get("SuitBody") == "Male", lambda: self._set_suit_body("Male"), group="suit")
         self.controls["suitBodyFemale"] = self._addRadio("Female", gx + 4, gy + 26, state.get("SuitBody") == "Female", lambda: self._set_suit_body("Female"), group="suit")
         self.controls["suitBodyGargoyle"] = self._addRadio("Gargoyle", gx + 4, gy + 52, state.get("SuitBody") == "Gargoyle", lambda: self._set_suit_body("Gargoyle"), group="suit")
+
+        ax = armor_panel["x"] + 10
+        ay = armor_panel["y"] + 36
+        arow_w = armor_panel["width"] - 20
+        for index, armor_type in enumerate(SUIT_ARMOR_TYPES):
+            row_y = ay - 2 + index * 26
+            self._addFlatRow(ax - 6, row_y, arow_w, 22, "suit")
+            self.controls["suitArmor{}".format(armor_type["key"])] = self._addRadio(
+                armor_type["label"],
+                ax + 4,
+                ay + index * 26,
+                state.get("SuitArmorType") == armor_type["key"],
+                lambda armor_key=armor_type["key"]: self._set_suit_armor_type(armor_key),
+                group="suit",
+            )
+
+        mx = material_panel["x"] + 10
+        my = material_panel["y"] + 36
+        mrow_w = material_panel["width"] - 20
+        for index, material in enumerate(SUIT_MATERIALS):
+            row_y = my - 2 + index * 24
+            self._addFlatRow(mx - 6, row_y, mrow_w, 22, "suit")
+            self.controls["suitMaterial{}".format(material["buttonId"])] = self._addRadio(
+                material["label"],
+                mx + 4,
+                my + index * 24,
+                state.get("SuitMaterial") == material["key"],
+                lambda material_key=material["key"]: self._set_suit_material(material_key),
+                group="suit",
+            )
 
         px = presets["x"] + 10
         py = presets["y"] + 36
@@ -5569,7 +5772,7 @@ class MysticLlamasCalculator(GumpControlMixin):
                 group="suit",
             )
 
-        settings = self._addSectionPanel(3, "Settings", 8, 202, self.PANEL_WIDTH, 74, group="suit")
+        settings = self._addPanel(8, 202, self.PANEL_WIDTH, 74, title="Settings", group="suit")
         settings_x = settings["x"] + 10
         settings_y = settings["y"] + 18
         settings_w = settings["width"] - 20
@@ -5590,7 +5793,7 @@ class MysticLlamasCalculator(GumpControlMixin):
             width=settings_w,
         )
 
-        gear = self._addSectionPanel(4, "Pieces", 8, 284, self.PANEL_WIDTH, 420, group="suit")
+        gear = self._addSectionPanel(5, "Pieces", 8, 284, self.PANEL_WIDTH, 420, group="suit")
         gear_x = gear["x"]
         gear_y = gear["y"] + 30
         gear_w = gear["width"]
@@ -5605,7 +5808,7 @@ class MysticLlamasCalculator(GumpControlMixin):
         row_gap = 6
         self.suitRowControls = []
 
-        max_slots = max(len(items) for items in SUIT_BODY_ITEMS.values())
+        max_slots = max(len(items) for armor_items in SUIT_BODY_ITEMS_BY_ARMOR.values() for items in armor_items.values())
         for index in range(max_slots):
             slot_x = content_x + (index % 2) * (card_w + card_gap)
             slot_y = gear_y + (index // 2) * (card_h + row_gap)

@@ -680,10 +680,11 @@ def showCraftingGump():
             API.Stop()
 
 
-openContainer(API.Backpack)
-API.SysMsg("Target your resource chest", 48)
-resourceChestSerial = API.RequestTarget()
-resourceChest = API.FindItem(resourceChestSerial)
-openContainer(resourceChest)
+if __name__ == "__main__":
+    openContainer(API.Backpack)
+    API.SysMsg("Target your resource chest", 48)
+    resourceChestSerial = API.RequestTarget()
+    resourceChest = API.FindItem(resourceChestSerial)
+    openContainer(resourceChest)
 
-showCraftingGump()
+    showCraftingGump()

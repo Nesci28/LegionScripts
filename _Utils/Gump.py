@@ -82,24 +82,23 @@ class Gump:
     }
     hues = {"text": 2414, "muted": 2406, "accent": 67, "status": 996}
 
-    def __init__(self, width, height, onCloseCb=None, withStatus=True, gumpId=None):
+    def __init__(
+        self, width, height, onCloseCb=None, withStatus=True, gumpId=None, keepOpen=False
+    ):
         self.width = width
         self.height = height
         self.onCloseCb = onCloseCb
         self.withStatus = withStatus
         self.gumpId = gumpId
+        self.keepOpen = keepOpen
 
-        try:
-            self.gump = API.CreateGump(True, True, False, self.gumpId or 0)
-        except:
-            self.gump = API.CreateGump(True, True)
-        if self.gumpId is not None:
-            for attr in ["ID", "LocalSerial", "ServerSerial"]:
-                try:
-                    setattr(self.gump, attr, self.gumpId)
-                except:
-                    pass
+        self.gump = self._createNativeGump()
+        self._applyGumpId()
         self.subGumps = []
+        self._subGumpStates = {}
+        self._lastGroupMainPosition = None
+        self._controls = []
+        self._destroying = False
         self.bg = None
         self._running = True
         self.buttons = []
@@ -132,6 +131,7 @@ class Gump:
     def create(self):
         self._applyGumpId()
         API.AddGump(self.gump)
+        self._rememberGroupPositions()
 
     def _applyGumpId(self):
         if self.gumpId is None:
@@ -141,6 +141,155 @@ class Gump:
                 setattr(self.gump, attr, self.gumpId)
             except:
                 pass
+
+    def _createNativeGump(self):
+        try:
+            return API.CreateGump(True, True, self.keepOpen, self.gumpId or 0)
+        except:
+            try:
+                return API.CreateGump(True, True, self.keepOpen)
+            except:
+                return API.CreateGump(True, True)
+
+    def _addToGump(self, control):
+        if control is None:
+            return control
+        if not any(existing is control for existing in self._controls):
+            self._controls.append(control)
+        self.gump.Add(control)
+        return control
+
+    def _bindSubGumpCloseHandler(self, subGump):
+        def onDisposed():
+            state = self._subGumpStates.get(subGump)
+            if state is None or self._destroying or not self._running:
+                return
+            state["needsRestore"] = True
+            subGump._running = True
+
+        try:
+            API.AddControlOnDisposed(subGump.gump, onDisposed)
+            return
+        except:
+            pass
+        try:
+            API.Gumps.AddControlOnDisposed(subGump.gump, onDisposed)
+        except:
+            pass
+
+    def _isDisposed(self, nativeGump):
+        try:
+            return nativeGump.IsDisposed
+        except:
+            return True
+
+    def _isVisible(self, nativeGump):
+        try:
+            return nativeGump.IsVisible
+        except:
+            return True
+
+    def _getGumpPosition(self, nativeGump):
+        try:
+            return nativeGump.GetX(), nativeGump.GetY()
+        except:
+            return 0, 0
+
+    def _setGumpPosition(self, nativeGump, x, y):
+        try:
+            nativeGump.SetPos(x, y)
+            return
+        except:
+            pass
+        nativeGump.SetX(x)
+        nativeGump.SetY(y)
+
+    def _subGumpOffset(self, width, height, position):
+        if position == "bottom":
+            return 0, self.height
+        if position == "top":
+            return 0, -height
+        if position == "center":
+            return self.width // 2 - width // 2, self.height // 2 - height // 2
+        if position == "left":
+            return -width, 0
+        if position == "right":
+            return self.width, 0
+        return 0, 0
+
+    def _subGumpPositionFromMain(self, mainX, mainY, width, height, position):
+        offsetX, offsetY = self._subGumpOffset(width, height, position)
+        return mainX + offsetX, mainY + offsetY
+
+    def _mainPositionFromSubGump(self, subX, subY, width, height, position):
+        offsetX, offsetY = self._subGumpOffset(width, height, position)
+        return subX - offsetX, subY - offsetY
+
+    def _rememberGroupPositions(self):
+        if self._isDisposed(self.gump):
+            return
+        self._lastGroupMainPosition = self._getGumpPosition(self.gump)
+        for subGump, _, alwaysVisible in self.subGumps:
+            state = self._subGumpStates.get(subGump)
+            if not state:
+                continue
+            if subGump._running and not self._isDisposed(subGump.gump):
+                state["lastPosition"] = self._getGumpPosition(subGump.gump)
+                state["visible"] = True if alwaysVisible else self._isVisible(subGump.gump)
+
+    def _groupMainPositionFromMovedGump(self):
+        if self._isDisposed(self.gump):
+            return None
+
+        mainPosition = self._getGumpPosition(self.gump)
+        if self._lastGroupMainPosition is None or mainPosition != self._lastGroupMainPosition:
+            return mainPosition
+
+        for subGump, position, _ in self.subGumps:
+            state = self._subGumpStates.get(subGump)
+            if not state or not subGump._running or self._isDisposed(subGump.gump):
+                continue
+            if not self._isVisible(subGump.gump):
+                continue
+
+            subPosition = self._getGumpPosition(subGump.gump)
+            if state.get("lastPosition") and subPosition != state["lastPosition"]:
+                return self._mainPositionFromSubGump(
+                    subPosition[0],
+                    subPosition[1],
+                    subGump.width,
+                    subGump.height,
+                    position,
+                )
+
+        return mainPosition
+
+    def _restoreSubGump(self, subGump, position, alwaysVisible, x, y):
+        state = self._subGumpStates.get(subGump, {})
+        visible = True if alwaysVisible else state.get("visible", True)
+        state["needsRestore"] = False
+        subGump._running = True
+
+        try:
+            subGump.gump = subGump._createNativeGump()
+            subGump._applyGumpId()
+            subGump.gump.SetWidth(subGump.width)
+            subGump.gump.SetHeight(subGump.height)
+            self._setGumpPosition(subGump.gump, x, y)
+            for control in getattr(subGump, "_controls", []):
+                try:
+                    subGump.gump.Add(control)
+                except:
+                    pass
+            subGump.gump.IsVisible = visible
+            self._bindSubGumpCloseHandler(subGump)
+            API.AddGump(subGump.gump)
+            subGump.gump.IsVisible = visible
+        except Exception as e:
+            API.SysMsg(f"Sub-gump restore failed: {e}", 33)
+            return False
+
+        return not self._isDisposed(subGump.gump)
 
     def tick(self):
         if not self._running:
@@ -160,24 +309,49 @@ class Gump:
             self._lastCheckTime = now
 
     def tickSubGumps(self):
-        for subGump, position, _ in self.subGumps:
-            if subGump._running and not subGump.gump.IsDisposed:
-                self._setSubGumpPosition(
-                    subGump.gump, subGump.width, subGump.height, position
-                )
+        if not self._running or self._isDisposed(self.gump):
+            return
+
+        mainX, mainY = self._groupMainPositionFromMovedGump()
+        self._setGumpPosition(self.gump, mainX, mainY)
+
+        for subGump, position, alwaysVisible in self.subGumps:
+            state = self._subGumpStates.get(subGump)
+            needsRestore = bool(state and state.get("needsRestore"))
+            isDisposed = self._isDisposed(subGump.gump)
+            shouldBeVisible = True if alwaysVisible else bool(state and state.get("visible"))
+            isHiddenClosed = shouldBeVisible and not isDisposed and not self._isVisible(subGump.gump)
+
+            if not subGump._running and not (needsRestore or isDisposed or isHiddenClosed):
+                continue
+
+            x, y = self._subGumpPositionFromMain(
+                mainX, mainY, subGump.width, subGump.height, position
+            )
+
+            if needsRestore or isDisposed:
+                if not self._restoreSubGump(subGump, position, alwaysVisible, x, y):
+                    continue
+            else:
+                self._setGumpPosition(subGump.gump, x, y)
+                if isHiddenClosed:
+                    subGump.gump.IsVisible = True
+
+            if state is not None:
+                state["lastPosition"] = (x, y)
+                state["visible"] = True if alwaysVisible else self._isVisible(subGump.gump)
+                state["needsRestore"] = False
+
+        self._lastGroupMainPosition = (mainX, mainY)
 
     def destroy(self):
         if not self._running:
             return
+        self._destroying = True
         self._running = False
-        for tab in self.tabGumps.values():
-            try:
-                if not tab.IsDisposed:
-                    tab.Dispose()
-            except:
-                pass
         for subGump, _, _ in self.subGumps:
             subGump.destroy()
+        self._subGumpStates = {}
         try:
             if not self.gump.IsDisposed:
                 self.gump.Dispose()
@@ -247,10 +421,16 @@ class Gump:
     def createSubGump(
         self, width, height, position="bottom", withStatus=False, alwaysVisible=True
     ):
-        gump = Gump(width, height, withStatus=withStatus)
+        gump = Gump(width, height, withStatus=withStatus, keepOpen=True)
         self._setSubGumpPosition(gump.gump, width, height, position)
         API.AddGump(gump.gump)
         self.subGumps.append((gump, position, alwaysVisible))
+        self._subGumpStates[gump] = {
+            "lastPosition": self._getGumpPosition(gump.gump),
+            "visible": True,
+            "needsRestore": False,
+        }
+        self._bindSubGumpCloseHandler(gump)
         return gump
 
     def setStatus(self, text, hue=None):
@@ -287,8 +467,14 @@ class Gump:
         for subGumps, _, alwaysVisible in self.subGumps:
             if not alwaysVisible:
                 subGumps.gump.IsVisible = False
+                state = self._subGumpStates.get(subGumps)
+                if state is not None:
+                    state["visible"] = False
         tabGump = self.tabGumps[name]
         tabGump.gump.IsVisible = True
+        state = self._subGumpStates.get(tabGump)
+        if state is not None:
+            state["visible"] = True
 
 
 
@@ -364,7 +550,7 @@ class Gump:
         checkbox.SetY(y)
         if callback:
             API.AddControlOnClick(checkbox, callback)
-        self.gump.Add(checkbox)
+        self._addToGump(checkbox)
         return checkbox
 
     def addRadio(
@@ -412,7 +598,7 @@ class Gump:
         fill.IsVisible = isChecked
         elements.extend([box, inner, fill])
 
-        self.gump.Add(radio)
+        self._addToGump(radio)
         hitTarget = API.CreateGumpColorBox(0.01, "#000000")
         hitTarget.SetX(x)
         hitTarget.SetY(y)
@@ -420,7 +606,7 @@ class Gump:
         hitTarget.SetHeight(hitHeight)
         if callback:
             API.AddControlOnClick(hitTarget, callback)
-        self.gump.Add(hitTarget)
+        self._addToGump(hitTarget)
         elements.append(hitTarget)
 
         labelObj = self.addLabel(label, x + labelGap, y + labelYOffset, hue)
@@ -476,7 +662,7 @@ class Gump:
             btn.SetY(y)
             if callback:
                 API.AddControlOnClick(btn, callback)
-            self.gump.Add(btn)
+        self._addToGump(btn)
 
         if label:
             if type == "default":
@@ -485,17 +671,17 @@ class Gump:
                     color = Gump.theme["buttonTextDark"]
                 labelObj = self.addTtfLabel(label, x, y, width, height, fontSize, color, "center", None)
                 self.hoverControls.append({"targets": [btn, labelObj], "hover": hover})
-                self.gump.Add(btn)
+                self._addToGump(btn)
             else:
                 labelObj = API.CreateGumpLabel(label, Gump.hues["text"])
                 labelObj.SetY(y)
                 labelObj.SetX(x + 24)
                 if callback:
                     API.AddControlOnClick(labelObj, callback)
-                self.gump.Add(labelObj)
+                self._addToGump(labelObj)
         elif type == "default":
             self.hoverControls.append({"targets": [btn], "hover": hover})
-            self.gump.Add(btn)
+            self._addToGump(btn)
         return btn
 
     def addHelpButton(self, x, y, callback=None, width=20, height=20):
@@ -519,7 +705,7 @@ class Gump:
         self.addColorBox(x + 9, y + 9, 7, 2, "#f5fbff", 1, withTexture=False)
         self.addColorBox(x + 8, y + 16, 1, 4, "#f5fbff", 1, withTexture=False)
         self.hoverControls.append({"targets": [hitTarget], "hover": hover})
-        self.gump.Add(hitTarget)
+        self._addToGump(hitTarget)
         return hitTarget
 
     def _updateHoverControls(self):
@@ -551,7 +737,7 @@ class Gump:
         if container is not None:
             container.Add(ttfLabel)
         else:
-            self.gump.Add(ttfLabel)
+            self._addToGump(ttfLabel)
         return ttfLabel
 
     def createLabel(self, text, hue=None):
@@ -566,7 +752,7 @@ class Gump:
         if container is not None:
             container.Add(label)
         else:
-            self.gump.Add(label)
+            self._addToGump(label)
         return label
 
     def createNativeButton(self, label, normal, pressed=None, hover=None, hue=996):
@@ -602,12 +788,12 @@ class Gump:
         if container is not None:
             container.Add(button)
         else:
-            self.gump.Add(button)
+            self._addToGump(button)
         return button
 
     def addScrollArea(self, x, y, width, height):
         scrollArea = API.CreateGumpScrollArea(x, y, width, height)
-        self.gump.Add(scrollArea)
+        self._addToGump(scrollArea)
         return scrollArea
 
     def addItemPic(self, itemId, x, y, width, height, container=None):
@@ -617,7 +803,7 @@ class Gump:
         if container is not None:
             container.Add(itemPic)
         else:
-            self.gump.Add(itemPic)
+            self._addToGump(itemPic)
         return itemPic
 
     def addFlatRow(self, x, y, width, height=20, selected=False, container=None):
@@ -647,7 +833,7 @@ class Gump:
         hitTarget.SetHeight(height)
         if callback:
             API.AddControlOnClick(hitTarget, callback)
-        self.gump.Add(hitTarget)
+        self._addToGump(hitTarget)
         label = self.addTtfLabel(text, x, y, width, height, fontSize, textColor, "center", callback)
         self.hoverControls.append({"targets": [hitTarget, label], "hover": hover})
         return {
@@ -673,7 +859,7 @@ class Gump:
         hitTarget.SetHeight(20)
         if callback:
             API.AddControlOnClick(hitTarget, callback)
-        self.gump.Add(hitTarget)
+        self._addToGump(hitTarget)
         return {"parts": parts, "hitTarget": hitTarget, "elements": parts + [hitTarget]}
 
     def addSectionTitle(self, number, title, x, y, width, hue=None):
@@ -711,7 +897,7 @@ class Gump:
         hitTarget.SetHeight(22)
         if callback:
             API.AddControlOnClick(hitTarget, callback)
-        self.gump.Add(hitTarget)
+        self._addToGump(hitTarget)
         return {"button": button, "label": label, "hitTarget": hitTarget, "elements": [button, label, hitTarget]}
 
 
@@ -752,7 +938,7 @@ class Gump:
         if container is not None:
             container.Add(colorBox)
         else:
-            self.gump.Add(colorBox)
+            self._addToGump(colorBox)
         return colorBox
 
 
@@ -789,7 +975,7 @@ class Gump:
             border.SetY(by)
             border.SetWidth(bw)
             border.SetHeight(bh)
-            self.gump.Add(border)
+            self._addToGump(border)
             borders.append(border)
         return borders
 
@@ -846,7 +1032,7 @@ class Gump:
             hitTarget.SetWidth(row_width)
             hitTarget.SetHeight(45)
             API.AddControlOnClick(hitTarget, self.onClick(onClick))
-            self.gump.Add(hitTarget)
+            self._addToGump(hitTarget)
             self.buttons.append({"slot": slot, "button": hitTarget, "label": text, "active": active})
         else:
             slot = [
@@ -858,6 +1044,9 @@ class Gump:
             self.buttons.append({"slot": slot, "button": btn})
         tabGump = self.createSubGump(gumpWidth, self.height, "right", withStatus, False)
         tabGump.gump.IsVisible = False
+        state = self._subGumpStates.get(tabGump)
+        if state is not None:
+            state["visible"] = False
         self.tabGumps[name] = tabGump
         self.tabButtons[name] = self.buttons[-1]
         return tabGump
@@ -933,19 +1122,19 @@ class Gump:
             border.SetY(by)
             border.SetWidth(bw)
             border.SetHeight(bh)
-            self.gump.Add(border)
+            self._addToGump(border)
             borders.append(border)
         textbox = API.CreateGumpTextBox(str(clampedValue), width, height, False)
         textbox.SetX(x)
         textbox.SetY(y)
-        self.gump.Add(textbox)
+        self._addToGump(textbox)
         self.skillTextBoxes.append((textbox, minValue, maxValue, borders))
         return textbox
 
     def _setBackground(self):
         if not self.bg:
             self.bg = API.CreateGumpColorBox(1, Gump.theme["bgOuter"])
-            self.gump.Add(self.bg)
+            self._addToGump(self.bg)
         self.bg.SetWidth(self.width)
         self.bg.SetHeight(self.height)
         self.bg.SetX(0)
@@ -965,7 +1154,7 @@ class Gump:
         self.statusLabel = API.CreateGumpLabel("Ready.", Gump.hues["status"])
         self.statusLabel.SetX(18)
         self.statusLabel.SetY(self.height - 27)
-        self.gump.Add(self.statusLabel)
+        self._addToGump(self.statusLabel)
 
     def _setCornerAccents(self):
         accentColor = Gump.theme["frameHighlight"]
@@ -983,18 +1172,5 @@ class Gump:
 
     def _setSubGumpPosition(self, gump, width, height, position):
         gx, gy = self.gump.GetX(), self.gump.GetY()
-        if position == "bottom":
-            gump.SetX(gx)
-            gump.SetY(gy + self.height)
-        elif position == "top":
-            gump.SetX(gx)
-            gump.SetY(gy - height)
-        elif position == "center":
-            gump.SetX(gx + self.width // 2 - width // 2)
-            gump.SetY(gy + self.height // 2 - height // 2)
-        elif position == "left":
-            gump.SetX(gx - width)
-            gump.SetY(gy)
-        elif position == "right":
-            gump.SetX(gx + self.width)
-            gump.SetY(gy)
+        x, y = self._subGumpPositionFromMain(gx, gy, width, height, position)
+        self._setGumpPosition(gump, x, y)

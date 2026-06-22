@@ -1,11 +1,13 @@
-from .BasicLrcSuitPreset import BasicLrcSuitPreset
-from .Mage70ResistsSuitPreset import Mage70ResistsSuitPreset
-from .LuckSuitPreset import LuckSuitPreset
-from .SampireSuitPreset import SampireSuitPreset
+from .SimplifiedSuitPresets import (
+    AdvancedSuitPreset,
+    BasicSuitPreset,
+    LuckAdvancedSuitPreset,
+    LuckBasicSuitPreset,
+)
 
 __all__ = [
-    "BasicLrcSuitPreset",
-    "Mage70ResistsSuitPreset",
-    "LuckSuitPreset",
-    "SampireSuitPreset",
+    "BasicSuitPreset",
+    "AdvancedSuitPreset",
+    "LuckBasicSuitPreset",
+    "LuckAdvancedSuitPreset",
 ]

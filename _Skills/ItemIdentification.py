@@ -1,4 +1,5 @@
 import importlib
+import API
 from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
@@ -9,7 +10,9 @@ importlib.reload(Util)
 
 
 class ItemIdentification:
-    def __init__(self, skillCap=API.GetSkill("Item Identification").Cap):
+    def __init__(self, skillCap=None):
+        if skillCap is None:
+            skillCap = API.GetSkill("Item Identification").Cap
         self.skillCap = skillCap
         self.weapon = Util.Util.findItemWithProps(
             ["One-handed Weapon"]

@@ -1,4 +1,5 @@
 import importlib
+import API
 from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
