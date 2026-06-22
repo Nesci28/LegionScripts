@@ -647,6 +647,21 @@ class ApiUiGump:
         """
         pass
 
+    def LegionTextureControl(self, textureName: "str", width: "int" = 0, height: "int" = 0) -> "Any":
+        """
+         Create an image control that displays a named PNG texture loaded from a ZIP archive.
+         Place the PNG anywhere inside the ZIP (outside gumps/ and art/ folders) and reference it by its path within the archive.
+         Example:
+         ```py
+         # In your zip: icons/sword.png
+         img = API.Gumps.LegionTextureControl("icons/sword.png")
+         img.SetPos(10, 10)
+         g.Add(img)
+         ```
+        
+        """
+        pass
+
     def CreateGumpButton(self, text: "str" = "", hue: "int" = 996, normal: "int" = 0x00EF, pressed: "int" = 0x00F0, hover: "int" = 0x00EE) -> "ApiUiButton":
         """
          Create a button for gumps.
@@ -867,6 +882,10 @@ class ApiUiLabel(ApiUiBaseControl):
     Text: str = None
     Hue: int = None
 
+class ApiUiLegionTexture(ApiUiBaseControl):
+    ""
+    TextureName: str = None
+
 class ApiUiMenuItem:
     ""
     Index: int = None
@@ -924,7 +943,6 @@ class ApiUiNiceButton(ApiUiBaseControl):
 
 class ApiUiNineSliceGump(ApiUiBaseControl, IApiGump):
     ""
-    NineSliceGump = None
     Gump: ApiUiBaseGump = None
 
     def GetHue(self) -> "int":
@@ -969,8 +987,22 @@ class ApiUiNineSliceGump(ApiUiBaseControl, IApiGump):
         """
         pass
 
+    def SetLegionTexture(self, texture: "str", borderSize: "int") -> None:
+        """
+         Set the modern gump texture and border size
+        
+        """
+        pass
+
 class ModernNineSliceGump(NineSliceGump):
     ""
+
+    def SetLegionTexture(self, texture: "str", borderSize: "int") -> None:
+        """
+         Set the modern gump texture and border size
+        
+        """
+        pass
 
     def SetResizeCallback(self, callback: "Any") -> None:
         """
@@ -1087,6 +1119,8 @@ Random = None
 LastTargetSerial: int = None
 LastTargetPos: ApiPoint3D = None
 LastTargetGraphic: int = None
+LastSpellIndex: int = None
+LastSpellName: str = None
 Found: int = None
 Profile: ApiUserProfile = None
 Gumps: ApiUiGump = None
@@ -2506,6 +2540,17 @@ def GetSoundLog(seconds: "float") -> "list[ApiSoundEntry]":
     """
     pass
 
+def PlaySound(index: "int") -> None:
+    """
+     Play a sound effect locally (only audible to you).
+     Example:
+     ```py
+     API.PlaySound(0x13E)
+     ```
+    
+    """
+    pass
+
 def InJournalAny(msgs: "list[str]", clearMatches: "bool" = False) -> "bool":
     """
      Check if the journal contains *any* of the strings in this list.
@@ -3126,6 +3171,22 @@ def TrackingArrow(x: "int", y: "int", identifier: "int" = 1337) -> None:
      Set x or y to a negative value to close existing tracker arrow.
      ```py
      API.TrackingArrow(400, 400)
+     ```
+    
+    """
+    pass
+
+def GetClilocString(cliloc: "int", englishOnly: "bool" = False) -> "str":
+    """
+     Get the string for a cliloc number.
+     Example:
+     ```py
+     text = API.GetClilocString(1020000)
+     if text:
+       API.SysMsg(text)
+    
+     # Force English regardless of client language setting
+     text = API.GetClilocString(1020000, englishOnly=True)
      ```
     
     """
