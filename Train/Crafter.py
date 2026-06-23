@@ -324,9 +324,20 @@ skillNameLabels = []
 skillNumberLabels = []
 itemLabel = None
 statusLabel = None
+TOOL_BUFFER_COUNT = 3
+TINKER_TOOL_IDS = [0x1EB9, 0x1EB8]
+
+
+def getSkill(skillName):
+    skill = API.GetSkill(skillName)
+    if not skill:
+        raise Exception(f"{skillName} - API.GetSkill returned None.")
+    return skill
 
 
 def getContents(findTypeReturn):
+    if not findTypeReturn:
+        return {"items": None, "stones": None}
     props = API.ItemNameAndProps(findTypeReturn.Serial, True).split("\n")
     for prop in props:
         if "Contents" in prop:
@@ -341,9 +352,10 @@ def getContents(findTypeReturn):
 
 
 def openContainer(container):
-    isOpened = container.Opened
+    serial = getattr(container, "Serial", container)
+    isOpened = getattr(container, "Opened", False)
     if not isOpened:
-        API.UseObject(container.Serial)
+        API.UseObject(serial)
         API.Pause(1)
 
 
@@ -361,6 +373,38 @@ def moveItem(item_serial, destination_serial, amount=0, max_retries=5):
         API.Pause(1)
 
     API.SysMsg("Move failed after retries.", 33)
+    return False
+
+
+def stopCrafting(message, hue=33):
+    if statusLabel:
+        statusLabel.Text = message
+        statusLabel.Hue = hue
+    API.SysMsg(message, hue)
+    API.Stop()
+    raise Exception(message)
+
+
+def closeCraftGump():
+    for _ in range(10):
+        if not API.HasGump(460):
+            return True
+        API.CloseGump(460)
+        API.Pause(0.25)
+    return not API.HasGump(460)
+
+
+def toolWornOut(timeout=2):
+    checks = max(1, int(timeout / 0.25))
+    for _ in range(checks):
+        if (
+            API.InJournal("You have worn out your tool", True)
+            or API.InJournal("You have worn out", True)
+            or API.InJournal("worn out your tool", True)
+            or API.InJournal("worn out", True)
+        ):
+            return True
+        API.Pause(0.25)
     return False
 
 
@@ -384,10 +428,13 @@ def checkResource(item, craftingSkill):
             resourceId, resourceChestSerial, hue=resourceHue, minamount=resourceAmount
         )
         if not resourceInChest:
-            statusLabel.Text = "Missing resources"
-            statusLabel.Hue = 33
-            API.Stop()
-        moveItem(resourceInChest, API.Backpack, resourceAmount - amountInBackpack)
+            stopCrafting("Missing resources")
+        if not moveItem(
+            getattr(resourceInChest, "Serial", resourceInChest),
+            API.Backpack,
+            resourceAmount - amountInBackpack,
+        ):
+            stopCrafting("Could not move resources")
 
 
 def checkToolsResource():
@@ -409,67 +456,193 @@ def checkToolsResource():
             resourceId, resourceChestSerial, hue=resourceHue, minamount=resourceAmount
         )
         if not resourceInChest:
-            statusLabel.Text = "Missing resources"
-            statusLabel.Hue = 33
-            API.Stop()
-        moveItem(resourceInChest, API.Backpack, resourceAmount - amountInBackpack)
+            stopCrafting("Missing tool resources")
+        if not moveItem(
+            getattr(resourceInChest, "Serial", resourceInChest),
+            API.Backpack,
+            resourceAmount - amountInBackpack,
+        ):
+            stopCrafting("Could not move tool resources")
 
 
 def craft(item, craftingSkill):
     itemButtonId = item["buttonId"]
+    checkTools(craftingSkill)
     useTool(craftingSkill)
-    API.ReplyGump(itemButtonId, 460)
+    if not API.ReplyGump(itemButtonId, 460):
+        stopCrafting("Could not select crafting item.")
     API.Pause(3)
+    return not toolWornOut(1)
 
 
-def craftTool(toolId, toolButtonId):
+def craftWithRecovery(item, craftingSkill, maxAttempts=5):
+    for _ in range(maxAttempts):
+        if craft(item, craftingSkill):
+            return True
+        recoverWornTool(craftingSkill)
+    stopCrafting("Could not craft after replacing worn tools.")
+
+
+def _toolIds(craftingSkill):
+    tool = craftingSkill["tool"]
+    ids = tool.get("ids") or tool.get("graphics")
+    if ids:
+        return ids
+    toolId = tool.get("id", tool.get("graphic"))
+    if toolId in (0x1EB8, 0x1EB9):
+        return TINKER_TOOL_IDS
+    return [toolId]
+
+
+def _itemsInBackpack():
+    try:
+        return API.ItemsInContainer(API.Backpack, True) or []
+    except Exception:
+        try:
+            return API.ItemsInContainer(API.Backpack) or []
+        except Exception:
+            return []
+
+
+def findTool(toolIds):
+    if not isinstance(toolIds, list):
+        toolIds = [toolIds]
+
+    for toolId in toolIds:
+        tool = API.FindType(toolId, API.Backpack)
+        if tool:
+            return tool
+
+    for item in _itemsInBackpack():
+        if getattr(item, "Graphic", None) in toolIds:
+            return item
+
+    return None
+
+
+def toolCount(toolIds):
+    if not isinstance(toolIds, list):
+        toolIds = [toolIds]
+
+    count = 0
+    seen = set()
+    for toolId in toolIds:
+        for item in API.FindTypeAll(toolId, API.Backpack) or []:
+            serial = getattr(item, "Serial", None)
+            if serial not in seen:
+                seen.add(serial)
+                count += 1
+
+    for item in _itemsInBackpack():
+        serial = getattr(item, "Serial", None)
+        if serial not in seen and getattr(item, "Graphic", None) in toolIds:
+            seen.add(serial)
+            count += 1
+
+    return count
+
+
+def _sameToolIds(left, right):
+    if not isinstance(left, list):
+        left = [left]
+    if not isinstance(right, list):
+        right = [right]
+    return set(left) == set(right)
+
+
+def craftTool(toolIds, toolButtonId, expectedToolCount=None):
     openContainer(API.Backpack)
     openContainer(resourceChest)
-    tool = API.FindType(toolId, API.Backpack)
+    if not isinstance(toolIds, list):
+        toolIds = [toolIds]
+    if expectedToolCount is None:
+        expectedToolCount = toolCount(toolIds) + 1
+
+    tool = findTool(TINKER_TOOL_IDS)
     if not tool:
-        statusLabel.Text = "No tool found!"
-        statusLabel.Hue = 32
-        API.Stop()
-    API.UseObject(tool)
-    API.Pause(1)
-    API.ReplyGump(toolButtonId, 460)
+        stopCrafting("No tinker tool found!", 32)
+    if not closeCraftGump():
+        stopCrafting("Could not close old crafting gump.")
+    API.UseObject(getattr(tool, "Serial", tool))
+    if not API.WaitForGump(460, 3):
+        stopCrafting("Could not open tinker gump.")
+    if not API.ReplyGump(toolButtonId, 460):
+        return False
     API.Pause(3)
+    toolWornOut(0.25)
+    hasExpectedToolCount = toolCount(toolIds) >= expectedToolCount
+    if not closeCraftGump():
+        stopCrafting("Could not close tinker gump.")
+    return hasExpectedToolCount
+
+
+def ensureToolBuffer(toolIds, toolButtonId, label, requiresExistingTool=False):
+    tools = toolCount(toolIds)
+    if tools >= TOOL_BUFFER_COUNT:
+        return False
+    if requiresExistingTool and tools <= 0:
+        stopCrafting(f"No {label} tool found!", 32)
+
+    checkToolsResource()
+
+    attempts = 0
+    maxAttempts = TOOL_BUFFER_COUNT * 4
+    madeTools = False
+    while tools < TOOL_BUFFER_COUNT and attempts < maxAttempts:
+        attempts += 1
+        previousTools = toolCount(toolIds)
+        if requiresExistingTool and previousTools <= 0:
+            stopCrafting(f"No {label} tool found!", 32)
+
+        craftTool(toolIds, toolButtonId, previousTools + 1)
+        madeTools = True
+        currentTools = toolCount(toolIds)
+        if currentTools > tools:
+            tools = currentTools
+            continue
+        if requiresExistingTool and currentTools <= 0:
+            stopCrafting(f"No {label} tool found!", 32)
+
+        tools = currentTools
+        API.Pause(0.5)
+
+    if tools < TOOL_BUFFER_COUNT:
+        stopCrafting(f"Could not top up {label} tools to {TOOL_BUFFER_COUNT}.")
+    return madeTools
 
 
 def checkTools(craftingSkill):
     openContainer(API.Backpack)
     openContainer(resourceChest)
-    toolId = craftingSkill["tool"]["id"]
+    toolIds = _toolIds(craftingSkill)
     toolButtonId = craftingSkill["tool"]["buttonId"]
 
-    checkToolsResource()
-
-    tinkerTools = len(API.FindTypeAll(0x1EB9, API.Backpack))
-    while tinkerTools < 3:
-        craftTool(0x1EB9, 11)
-        tinkerTools = len(API.FindTypeAll(0x1EB9, API.Backpack))
-
-    tools = len(API.FindTypeAll(toolId, API.Backpack))
-    while tools < 3:
-        craftTool(0x1EB9, toolButtonId)
-        tools = len(API.FindTypeAll(toolId, API.Backpack))
+    restocked = ensureToolBuffer(TINKER_TOOL_IDS, 11, "tinker", True)
+    if not _sameToolIds(toolIds, TINKER_TOOL_IDS):
+        restocked = ensureToolBuffer(toolIds, toolButtonId, "crafting") or restocked
+    return restocked
 
 
 def useTool(craftingSkill):
     openContainer(API.Backpack)
     openContainer(resourceChest)
-    toolId = craftingSkill["tool"]["id"]
-    tool = API.FindType(toolId, API.Backpack)
+    tool = findTool(_toolIds(craftingSkill))
     if not tool:
-        statusLabel.Text = "No tool found!"
-        statusLabel.Hue = 32
-        API.Stop()
-    API.UseObject(tool)
-    API.Pause(1)
+        stopCrafting("No tool found!", 32)
+    if not closeCraftGump():
+        stopCrafting("Could not close old crafting gump.")
+    API.UseObject(getattr(tool, "Serial", tool))
+    if not API.WaitForGump(460, 3):
+        stopCrafting("Could not open crafting gump.")
+
+
+def recoverWornTool(craftingSkill):
+    checkTools(craftingSkill)
+    useTool(craftingSkill)
 
 
 def makeLast(item, craftingSkill, skillName, skillTarget):
-    skillLevel = API.GetSkill(skillName)
+    skillLevel = getSkill(skillName)
     itemSkillLevel = item["skill"]
 
     useTool(craftingSkill)
@@ -479,18 +652,34 @@ def makeLast(item, craftingSkill, skillName, skillTarget):
         and skillLevel.Value < skillTarget
         and skillLevel.Value != skillLevel.Cap
     ):
-        skillLevel = API.GetSkill(skillName)
+        skillLevel = getSkill(skillName)
         checkResource(item, craftingSkill)
-        API.ReplyGump(1999, 460)
+        if checkTools(craftingSkill):
+            craftWithRecovery(item, craftingSkill)
+            skillLevel = getSkill(skillName)
+            updateGump(item, skillName)
+            disposeItem(item, craftingSkill)
+            continue
+        if not API.HasGump(460):
+            if toolWornOut(0.25):
+                recoverWornTool(craftingSkill)
+            else:
+                useTool(craftingSkill)
+        if not API.ReplyGump(1999, 460):
+            if toolWornOut(1):
+                recoverWornTool(craftingSkill)
+            else:
+                useTool(craftingSkill)
+            continue
+        if toolWornOut(1):
+            recoverWornTool(craftingSkill)
+            craftWithRecovery(item, craftingSkill)
+            skillLevel = getSkill(skillName)
+            updateGump(item, skillName)
+            disposeItem(item, craftingSkill)
+            continue
         API.Pause(0.5)
         updateGump(item, skillName)
-
-        if API.InJournal("You have worn out"):
-            API.ClearJournal()
-            checkTools(craftingSkill)
-            useTool(craftingSkill)
-            craft(item, craftingSkill)
-
         disposeItem(item, craftingSkill)
 
 
@@ -503,13 +692,27 @@ def disposeItem(item, craftingSkill):
     for i in items:
         if method == "Trash":
             trash = API.FindType(0x0E77, 4294967295, 2)
+            if not trash:
+                API.SysMsg("Trash barrel not found; keeping crafted item.", 33)
+                continue
             trashContents = getContents(trash)
+            if trashContents["items"] is None:
+                API.SysMsg("Trash barrel contents unknown; keeping crafted item.", 33)
+                continue
             while trashContents["items"] == 125:
                 API.Pause(1)
                 trashContents = getContents(trash)
+                if trashContents["items"] is None:
+                    API.SysMsg("Trash barrel contents unknown; keeping crafted item.", 33)
+                    break
+            if trashContents["items"] == 125 or trashContents["items"] is None:
+                continue
             moveItem(i.Serial, trash.Serial)
         if method == "Salvage Bag":
             salvageBag = API.FindType(0x0E76, API.Backpack, hue=0x024E)
+            if not salvageBag:
+                API.SysMsg("Salvage bag not found; keeping crafted item.", 33)
+                continue
             moveItem(i.Serial, salvageBag.Serial)
             contents = API.Contents(salvageBag.Serial)
             if len(contents) > 10:
@@ -522,23 +725,25 @@ def updateGump(item, skillName):
         if cs == skillName:
             skillLabelIndex = i
     skillNumberLabels[skillLabelIndex].Text = truncateDecimal(
-        API.GetSkill(skillName).Value, 1
+        getSkill(skillName).Value, 1
     )
     skillNumberLabels[skillLabelIndex].Hue = 88
     skillNameLabels[skillLabelIndex].Hue = 88
     itemLabel.Text = itemName
 
 
-def makeFirst(item, skillName):
+def makeFirst(item, skillName, skillTarget=None):
     craftingSkill = craftingSkills[skillName]
     targetSkill = item["skill"]
+    if skillTarget is not None:
+        targetSkill = min(float(targetSkill), float(skillTarget))
     statusLabel.Text = "Crafting..."
 
     disposeItem(item, craftingSkill)
     checkResource(item, craftingSkill)
     checkTools(craftingSkill)
 
-    craft(item, craftingSkill)
+    craftWithRecovery(item, craftingSkill)
     updateGump(item, skillName)
     makeLast(item, craftingSkill, skillName, targetSkill)
     API.Pause(0.1)
@@ -547,16 +752,19 @@ def makeFirst(item, skillName):
 def trainCraftingSkill(skillName, targetSkill):
     craftingSkill = craftingSkills[skillName]
     items = craftingSkill["items"]
-    currentSkillLevel = API.GetSkill(skillName).Value
-    while float(currentSkillLevel) < float(targetSkill):
-        currentSkillLevel = API.GetSkill(skillName).Value
-        currentItem = None
+    targetSkillValue = float(targetSkill)
+    currentSkillLevel = getSkill(skillName).Value
+    while float(currentSkillLevel) < targetSkillValue:
+        currentItem = items[-1] if items else None
         for item in items:
             itemSkillLevel = item["skill"]
             if currentSkillLevel < itemSkillLevel:
                 currentItem = item
                 break
-        makeFirst(currentItem, skillName)
+        if not currentItem:
+            raise Exception(f"{skillName} - No crafting item configured.")
+        makeFirst(currentItem, skillName, targetSkillValue)
+        currentSkillLevel = getSkill(skillName).Value
 
 
 def showCraftingGump():
@@ -608,7 +816,7 @@ def showCraftingGump():
         gump.Add(textBox)
 
         skillNumberLabel = API.CreateGumpLabel(
-            truncateDecimal(API.GetSkill(key).Value, 1)
+            truncateDecimal(getSkill(key).Value, 1)
         )
         skillNumberLabel.SetX(170)
         skillNumberLabel.SetY(y)
@@ -643,11 +851,11 @@ def showCraftingGump():
             statusLabel.Text = "Running"
             statusLabel.Hue = 88
 
-            tinkeringSkillLevel = API.GetSkill("Tinkering").Value
+            tinkeringSkillLevel = getSkill("Tinkering").Value
             for key, box in skillInputs:
                 try:
                     val = float(box.Text)
-                    if val < 0 or val > API.GetSkill(key).Cap:
+                    if val < 0 or val > getSkill(key).Cap:
                         msg = "Invalid inputs"
                         statusLabel.Text = msg
                         statusLabel.Hue = 33

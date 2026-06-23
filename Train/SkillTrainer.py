@@ -40,7 +40,10 @@ import SkillTrainerLockpicking
 import SkillTrainerRemoveTrap
 import AnimalTaming
 import _Skills.Veterinary as Veterinary
-import Crafter
+import Tinkering as TinkeringModule
+import Tailoring as TailoringModule
+import Blacksmithy as BlacksmithyModule
+import Cartography as CartographyModule
 
 importlib.reload(Gump)
 importlib.reload(Util)
@@ -64,10 +67,26 @@ importlib.reload(SkillTrainerLockpicking)
 importlib.reload(SkillTrainerRemoveTrap)
 importlib.reload(AnimalTaming)
 importlib.reload(Veterinary)
-importlib.reload(Crafter)
+importlib.reload(TinkeringModule)
+importlib.reload(TailoringModule)
+importlib.reload(BlacksmithyModule)
+importlib.reload(CartographyModule)
 
 try:
     Veterinary.API = API
+    Util.API = API
+    TinkeringModule._Crafting.API = API
+    TailoringModule._Crafting.API = API
+    BlacksmithyModule._Crafting.API = API
+    CartographyModule._Crafting.API = API
+    TinkeringModule._Crafting.Crafter.API = API
+    TailoringModule._Crafting.Crafter.API = API
+    BlacksmithyModule._Crafting.Crafter.API = API
+    CartographyModule._Crafting.Crafter.API = API
+    TinkeringModule._Crafting.Util.API = API
+    TailoringModule._Crafting.Util.API = API
+    BlacksmithyModule._Crafting.Util.API = API
+    CartographyModule._Crafting.Util.API = API
 except Exception:
     pass
 
@@ -91,6 +110,10 @@ from Ninjitsu import Ninjitsu
 from SkillTrainerAnimalLore import AnimalLore
 from SkillTrainerLockpicking import Lockpicking
 from SkillTrainerRemoveTrap import RemoveTrap
+from Tinkering import Tinkering as TinkeringSkill
+from Tailoring import Tailoring as TailoringSkill
+from Blacksmithy import Blacksmithy as BlacksmithySkill
+from Cartography import Cartography as CartographySkill
 
 RESOURCE_CONTAINER_SHARED_VAR = "SKILL_TRAINER_RESOURCE_CONTAINER_SERIAL"
 
@@ -258,30 +281,24 @@ class ItemIdentificationTrainer(TrainOnceSkillTrainer):
 
 class CraftingSkillTrainer:
     skillName = None
+    trainerClass = None
+
+    @classmethod
+    def setResourceContainerSerial(cls, serial):
+        if cls.trainerClass and hasattr(cls.trainerClass, "setResourceContainerSerial"):
+            cls.trainerClass.setResourceContainerSerial(serial)
 
     @classmethod
     def validate(cls, skillCap=None):
-        errors = []
-        resourceError = resourceContainerValidationError(cls.skillName)
-        if resourceError:
-            errors.append(resourceError)
-        if cls.skillName not in Crafter.craftingSkills:
-            errors.append(f"{cls.skillName} - Crafting trainer not implemented.")
-        if cls.skillName == "Cartography" and skillCap is not None and skillCap > Decimal("99.5"):
-            errors.append("Cartography - Target should be <= 99.5.")
-        tinkering = Util.getSkillInfo("Tinkering")["value"]
-        if cls.skillName != "Tinkering" and tinkering < 50:
-            errors.append(f"{cls.skillName} - Tinkering must be at least 50.0.")
-        return errors
+        if not cls.trainerClass:
+            return [f"{cls.skillName} - Training not implemented."]
+        return cls.trainerClass.validate(skillCap)
 
     def __init__(self, skillCap, label=None, skillLevelLabel=None, setStatus=None):
-        self.skillCap = skillCap
-        self.label = label
-        self.skillLevelLabel = skillLevelLabel
-        self.setStatus = setStatus
-        API.SetSkillLock(self.skillName, "up")
+        self.trainer = self.trainerClass(skillCap, label, skillLevelLabel, setStatus)
 
     def _ensureCrafterState(self):
+        return None
         if not hasattr(Crafter, "truncateDecimal"):
             Crafter.truncateDecimal = Math.truncateDecimal
 
@@ -316,28 +333,27 @@ class CraftingSkillTrainer:
         Crafter.openContainer(resourceChest)
 
     def train(self, calculateSkillLabels=None):
-        self._ensureCrafterState()
-        if self.setStatus:
-            self.setStatus(f"Training {self.skillName}...")
-        Crafter.trainCraftingSkill(self.skillName, self.skillCap)
-        if calculateSkillLabels:
-            calculateSkillLabels()
+        self.trainer.train(calculateSkillLabels)
 
 
 class TinkeringTrainer(CraftingSkillTrainer):
     skillName = "Tinkering"
+    trainerClass = TinkeringSkill
 
 
 class TailoringTrainer(CraftingSkillTrainer):
     skillName = "Tailoring"
+    trainerClass = TailoringSkill
 
 
 class BlacksmithyTrainer(CraftingSkillTrainer):
     skillName = "Blacksmithy"
+    trainerClass = BlacksmithySkill
 
 
 class CartographyTrainer(CraftingSkillTrainer):
     skillName = "Cartography"
+    trainerClass = CartographySkill
 
 
 class Trainer:
@@ -502,6 +518,8 @@ class Trainer:
         if not trainer:
             self.errors.append(f"{school['skillName']} - Training not implemented.")
             return
+        if getattr(trainer, "setResourceContainerSerial", None):
+            trainer.setResourceContainerSerial(self.resourceContainerSerial)
         errors = trainer.validate(skillCap)
         self.errors.extend(errors)
 
@@ -534,7 +552,8 @@ class Trainer:
 
     def _onResourceContainerClicked(self):
         self._setStatus("Target global resource container.", 48)
-        serial = API.RequestTarget(10)
+        target = API.RequestTarget(10)
+        serial = getattr(target, "Serial", target)
         if not serial:
             self._setStatus("Global resource container unchanged.", 33)
             return

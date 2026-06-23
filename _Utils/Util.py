@@ -322,11 +322,10 @@ class Util:
 
     @staticmethod
     def openContainer(container):
-        if isinstance(container, System.UInt32):
-            container = API.FindItem(container)
-        isOpened = container.Opened
+        serial = getattr(container, "Serial", container)
+        isOpened = getattr(container, "Opened", False)
         if not isOpened:
-            API.UseObject(container.Serial)
+            API.UseObject(serial)
             API.Pause(1)
 
     @staticmethod

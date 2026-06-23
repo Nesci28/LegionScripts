@@ -1,15 +1,3 @@
-class ApiGameObject:
-    pass
-
-class ApiUiBaseControl:
-    pass
-
-class IApiGump:
-    pass
-
-class TrueTypeLoader:
-    EMBEDDED_FONT = "embedded"
-
 class ApiBuff:
     ""
     Graphic: int = None
@@ -1006,8 +994,6 @@ class ApiUiNineSliceGump(ApiUiBaseControl, IApiGump):
         """
         pass
 
-NineSliceGump = ApiUiNineSliceGump
-
 class ModernNineSliceGump(NineSliceGump):
     ""
 
@@ -1507,7 +1493,7 @@ def PickUpToCursor(serial: "int" = 0, amt: "int" = 0) -> None:
     """
     pass
 
-def DropFromCursor(serial: "int" = 0, x: "int" = 1337, y: "int" = 1337, z: "int" = 127, container: "int" = 1337) -> None:
+def DropFromCursor(serial: "int" = 0, x: "int" = 1337, y: "int" = 1337, z: "int" = sbyte.MaxValue, container: "int" = 1337) -> None:
     """
      Drops an item currently held by the mouse cursor into a container or on the ground at a specified position.
     
@@ -1820,7 +1806,7 @@ def FindLayer(layer: "str", serial: "int" = 1337) -> "ApiItem":
     """
     pass
 
-def GetItemsOnGround(distance: "int" = 2147483647, graphic: "int" = 1337) -> "list[ApiItem]":
+def GetItemsOnGround(distance: "int" = int.MaxValue, graphic: "int" = 1337) -> "list[ApiItem]":
     """
      Get all items on the ground within specified range.
      Example:
@@ -3072,7 +3058,7 @@ def StopScript(scriptName: "str") -> None:
     """
     pass
 
-def AddMapMarker(name: "str", x: "int" = 2147483647, y: "int" = 2147483647, map: "int" = 2147483647, color: "str" = "purple") -> None:
+def AddMapMarker(name: "str", x: "int" = int.MaxValue, y: "int" = int.MaxValue, map: "int" = int.MaxValue, color: "str" = "purple") -> None:
     """
      Add a marker to the current World Map (If one is open)
      Example:
@@ -3362,3 +3348,4 @@ class EventSinkApiDeclaration:
         
         """
         pass
+
