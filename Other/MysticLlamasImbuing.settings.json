@@ -1,8 +1,13 @@
 {
-  "GemBuffer": "0",
-  "GemCont": 0,
+  "GemBuffer": "90",
+  "GemCont": 1103501285,
   "MatCont": 1103501285,
+  "QueenSoulForgeRunebook": 1180989884,
+  "QueenSoulForgeSlot": "9",
+  "SuitArmorType": "Studded",
   "SuitBody": "Male",
-  "SuitKeepCont": 1184086197,
-  "SuitPreset": "Basic LRC Training"
+  "SuitKeepCont": 1100799265,
+  "SuitMaterial": "barbed leather",
+  "SuitPreset": "Advanced",
+  "UseQueenSoulForge": true
 }

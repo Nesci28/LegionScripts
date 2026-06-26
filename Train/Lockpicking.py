@@ -1,4 +1,12 @@
-import API
+try:
+    from typing import TYPE_CHECKING
+except Exception:
+    TYPE_CHECKING = False
+
+if TYPE_CHECKING:
+    import API
+    pass
+# API is injected by TazUO at runtime; the import above is IDE-only.
 
 lockpicks = API.FindType(0x14FB)
 chests1 = API.FindTypeAll(0x09A8, 4294967295, 2)

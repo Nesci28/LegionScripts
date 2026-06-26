@@ -1,4 +1,12 @@
-import API
+try:
+    from typing import TYPE_CHECKING
+except Exception:
+    TYPE_CHECKING = False
+
+if TYPE_CHECKING:
+    import API
+    pass
+# API is injected by TazUO at runtime; the import above is IDE-only.
 import importlib
 import traceback
 from LegionPath import LegionPath
@@ -125,6 +133,11 @@ class StatTrainer:
         self._started = True
         self._advanceToNextStat()
 
+    def _showInfo(self):
+        API.SysMsg("StatTrainer: skill points must be maximized before starting.", 66)
+        API.SysMsg("StatTrainer: the active training skill must be set to Up so it can gain.", 66)
+        API.SysMsg("StatTrainer: lock all other skills so no other skill gains.", 66)
+
     def _advanceToNextStat(self):
         for stat in self.stats:
             if Util.getStatValue(stat["statName"]) < stat["value"]:
@@ -154,15 +167,16 @@ class StatTrainer:
 
         g = Gump(width, height, self._onClose)
         self.gump = g
-        g.addLabel("Stat Adjustements", 90, 5)
+        g.addLabel("Stat Adjustements", 80, 5)
+        g.addHelpButton(265, 5, g.onClick(self._showInfo))
 
         self.statInputs = []
         y = 40
         total = 0
         x = 150
         totalLbl = g.addLabel("0", x, 0)
-        g.addLabel("|", x + 30, 0)
-        g.addLabel(str(API.Player.StatsCap), x + 45, 0)
+        totalSepLbl = g.addLabel("|", x + 30, 0)
+        totalCapLbl = g.addLabel(str(API.Player.StatsCap), x + 45, 0)
 
         for stat in self.stats:
             statName = stat["statName"]
@@ -196,6 +210,8 @@ class StatTrainer:
 
         totalLbl.Text = str(total)
         totalLbl.SetY(y)
+        totalSepLbl.SetY(y)
+        totalCapLbl.SetY(y)
         g.addButton(
             "", 10, y, "okay", g.onClick(self._onStart, "Validating...", "Training")
         )

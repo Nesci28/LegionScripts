@@ -1,4 +1,12 @@
-import API
+try:
+    from typing import TYPE_CHECKING
+except Exception:
+    TYPE_CHECKING = False
+
+if TYPE_CHECKING:
+    import API
+    pass
+# API is injected by TazUO at runtime; the import above is IDE-only.
 import importlib
 import traceback
 from LegionPath import LegionPath
@@ -38,6 +46,7 @@ class Sampire:
         {"name": "Honor", "isActive": True, "checkbox": None, "isBuff": False},
         {"name": "Onslaught", "isActive": True, "checkbox": None, "isBuff": False},
         {"name": "Consecrate Weapon", "isActive": True, "checkbox": None, "isBuff": False},
+        {"name": "Divine Fury", "isActive": True, "checkbox": None, "isBuff": True},
         {
             "name": "Momentum Strike",
             "isActive": True,
@@ -95,8 +104,10 @@ class Sampire:
         if not self._running:
             return False
         if self.gump:
-            qt.gump.tick()
-            qt.gump.tickSubGumps()
+            self.gump.tick()
+            if not self.gump:
+                return False
+            self.gump.tickSubGumps()
             if self.gump.gump.IsDisposed:
                 self._onClose()
                 return False
@@ -104,6 +115,9 @@ class Sampire:
 
     def run(self):
         while True:
+            if not self.tick():
+                return
+
             if hasattr(API.Player, "IsGhost") and API.Player.IsGhost:
                 API.Pause(1)
                 continue
@@ -121,6 +135,11 @@ class Sampire:
             API.ClearJournal()
 
     def _attack(self):
+        autoAttack = Python.find("Auto Attack", self.options, "name")
+        if not autoAttack["isActive"]:
+            self.currentEnemy = None
+            return
+
         enemies = Util.scanEnemies(2)
         enemiesCount = len(enemies)
         currentMana = API.Player.Mana
@@ -164,6 +183,10 @@ class Sampire:
                 API.ToggleAbility("secondary")
 
     def _honor(self):
+        honorOption = Python.find("Honor", self.options, "name")
+        if not honorOption["isActive"]:
+            return
+
         enemies = Util.scanEnemies(8)
         if self.currentHonorSerial:
             for enemy in enemies:
@@ -201,7 +224,11 @@ class Sampire:
 
     def _checkBuffs(self):
         for option in self.options:
-            if option["isBuff"] and not API.BuffExists(option["name"]):
+            if (
+                option["isActive"]
+                and option["isBuff"]
+                and not API.BuffExists(option["name"])
+            ):
                 self.magic.cast(option["name"])
 
     def _settings(self):
@@ -239,6 +266,10 @@ class Sampire:
         y = 1
         g.addLabel("Sampire assistant", 12, y, 191)
         y += 30
+
+        def toggleOption(option):
+            option["isActive"] = not option["isActive"]
+
         for i, option in enumerate(self.options):
             label = option["name"].capitalize()
             checkbox = g.addCheckbox(
@@ -246,7 +277,7 @@ class Sampire:
                 20,
                 y,
                 option["isActive"],
-                None,
+                lambda option=option: toggleOption(option),
             )
             self.options[i]["checkbox"] = checkbox
             y += 25

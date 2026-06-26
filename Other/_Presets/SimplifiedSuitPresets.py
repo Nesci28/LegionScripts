@@ -3,6 +3,10 @@ from .SuitPresetBase import SuitPresetBase
 
 class _ResistPlanSuitPreset(SuitPresetBase):
     require_exceptional = True
+    load_require_high_resists = True
+    required_resist_rows_per_piece = None
+    max_imbued_pieces = None
+    description = "Builds a resist suit from saved or newly crafted pieces."
 
     def plan_matches(self, plan):
         raise NotImplementedError
@@ -15,9 +19,29 @@ class _ResistPlanSuitPreset(SuitPresetBase):
         return self._suit_solve_mage(
             candidates_by_slot,
             plan_filter=self.plan_matches,
-            include_required_rows=False,
             choose_optional=False,
             solve_label=self.label,
+            require_balanced_highs=self.load_require_high_resists,
+            required_resist_rows_per_piece=self.required_resist_rows_per_piece,
+            max_imbued_pieces=self._max_imbued_pieces(),
+        )
+
+    def _max_imbued_pieces(self):
+        return self.max_imbued_pieces
+
+    def _candidate_keep_matches(self, candidate):
+        return len(candidate.get("HighResists", ())) == self.SUIT_HIGH_RESIST_COUNT
+
+    def _candidate_keep_text(self, candidate):
+        return self._suit_high_text(candidate.get("HighResists", ()))
+
+    def _candidate_keep_reject_status(self, candidate=None):
+        return "Flat rejected"
+
+    def _candidate_keep_reject_reason(self, candidate):
+        return "high_resist_count expected={} actual={}".format(
+            self.SUIT_HIGH_RESIST_COUNT,
+            len(candidate.get("HighResists", ())),
         )
 
     def scan_good_pieces(self, body, required=True, notify=True):
@@ -26,10 +50,14 @@ class _ResistPlanSuitPreset(SuitPresetBase):
             update_rows=True,
             required=required,
             plan_filter=self.plan_matches,
-            include_required_rows=False,
             choose_optional=False,
             solve_label=self.label,
-            allow_started_mage=False,
+            require_high_resists=self.load_require_high_resists,
+            require_balanced_highs=self.load_require_high_resists,
+            required_resist_rows_per_piece=self.required_resist_rows_per_piece,
+            max_imbued_pieces=self._max_imbued_pieces(),
+            candidate_filter=self._candidate_keep_matches,
+            candidate_filter_reason=self._candidate_keep_reject_reason,
         )
         if plan:
             self._set_scan_message(
@@ -64,9 +92,10 @@ class _ResistPlanSuitPreset(SuitPresetBase):
             body,
             candidates_by_slot,
             require_exceptional=self.require_exceptional,
-            require_high_resists=True,
+            require_high_resists=self.load_require_high_resists,
             required=False,
-            allow_started_mage=False,
+            candidate_filter=self._candidate_keep_matches,
+            candidate_filter_reason=self._candidate_keep_reject_reason,
         )
         if loaded:
             self._suit_set_msg(
@@ -115,15 +144,18 @@ class _ResistPlanSuitPreset(SuitPresetBase):
                 self._suit_update_slot(target_slot, status="Rejected")
                 continue
 
-            high_resists = candidate.get("HighResists", ())
-            if len(high_resists) != self.SUIT_HIGH_RESIST_COUNT:
-                self.SuitLog("{} reject: high-resist count mismatch {}".format(self.key, self._suit_log_candidate(candidate)))
+            if not self._candidate_keep_matches(candidate):
+                self.SuitLog("{} reject: {} {}".format(
+                    self.key,
+                    self._candidate_keep_reject_reason(candidate),
+                    self._suit_log_candidate(candidate),
+                ))
                 self._suit_update_slot(
                     target_slot,
                     candidate["Serial"],
-                    "Flat rejected",
+                    self._candidate_keep_reject_status(candidate),
                     self._suit_resist_text(candidate["Resists"]),
-                    self._suit_high_text(high_resists),
+                    self._candidate_keep_text(candidate),
                 )
                 craft.dispose_item(candidate.get("Item"), self.SUIT_ITEM_DEFS[target_slot])
                 continue
@@ -134,7 +166,7 @@ class _ResistPlanSuitPreset(SuitPresetBase):
                     candidate["Serial"],
                     "Keep failed",
                     self._suit_resist_text(candidate["Resists"]),
-                    self._suit_high_text(high_resists),
+                    self._candidate_keep_text(candidate),
                 )
                 self._suit_set_msg("Could not move {} to good-piece container.".format(target_slot), 33)
                 return
@@ -167,6 +199,7 @@ class BasicSuitPreset(_ResistPlanSuitPreset):
     key = "Basic"
     label = "Basic"
     control_key = "suitPresetBasic"
+    description = "Basic: keeps exceptional pieces with two high resists, then imbues two resist rows per piece to build a 70 all-resist suit."
 
     def plan_matches(self, plan):
         counts = self._suit_plan_resist_row_counts(plan)
@@ -177,6 +210,10 @@ class AdvancedSuitPreset(_ResistPlanSuitPreset):
     key = "Advanced"
     label = "Advanced"
     control_key = "suitPresetAdvanced"
+    load_require_high_resists = False
+    low_resist_count = 1
+    low_resist_max = 6
+    description = "Advanced: keeps exceptional pieces with exactly one resist at 6 or lower. Studded Barbed limits the plan to at most 4 imbued pieces."
 
     one_row_minimum_by_material = {
         "normal leather": 2,
@@ -185,8 +222,46 @@ class AdvancedSuitPreset(_ResistPlanSuitPreset):
         "barbed leather": 6,
     }
 
+    def _max_imbued_pieces(self):
+        if self._suit_current_armor_type() == "Studded" and self._suit_current_material()["key"] == "barbed leather":
+            return 4
+        return self.max_imbued_pieces
+
+    def _candidate_low_resists(self, candidate):
+        resists = candidate.get("Resists", {})
+        return tuple(
+            resist_name
+            for resist_name in self.SUIT_RESISTS
+            if int(resists.get(resist_name, 0) or 0) <= self.low_resist_max
+        )
+
+    def _candidate_keep_matches(self, candidate):
+        return len(self._candidate_low_resists(candidate)) == self.low_resist_count
+
+    def _candidate_keep_text(self, candidate):
+        lows = self._candidate_low_resists(candidate)
+        if not lows:
+            return "No low <= {}".format(self.low_resist_max)
+        return "Low {} <= {}".format(
+            "/".join(resist_name.replace(" Resist", "") for resist_name in lows),
+            self.low_resist_max,
+        )
+
+    def _candidate_keep_reject_status(self, candidate=None):
+        return "Low rejected"
+
+    def _candidate_keep_reject_reason(self, candidate):
+        return "advanced_low_resist_count max={} expected={} actual={}".format(
+            self.low_resist_max,
+            self.low_resist_count,
+            len(self._candidate_low_resists(candidate)),
+        )
+
     def plan_matches(self, plan):
         counts = self._suit_plan_resist_row_counts(plan)
+        max_imbued = self._max_imbued_pieces()
+        if max_imbued is not None:
+            return sum(1 for count in counts if count > 0) <= max_imbued
         material_key = self._suit_current_material()["key"]
         required = self.one_row_minimum_by_material.get(material_key, 2)
         return sum(1 for count in counts if count == 1) >= required
@@ -199,6 +274,9 @@ class _LuckSuitPreset(SuitPresetBase):
 
     def _candidate_matches(self, candidate):
         return self._suit_candidate_physical_resist(candidate) in self.physical_values
+
+    def _candidate_reject_reason(self, candidate):
+        return "phys={}".format(self._suit_candidate_physical_resist(candidate))
 
     def _candidate_sort_key(self, candidate):
         phys = self._suit_candidate_physical_resist(candidate)
@@ -214,7 +292,6 @@ class _LuckSuitPreset(SuitPresetBase):
             require_exceptional=self.require_exceptional,
             require_high_resists=False,
             required=required,
-            allow_started_mage=False,
         )
         selected_by_slot = {}
         for slot_name in slot_names:
@@ -289,13 +366,14 @@ class _LuckSuitPreset(SuitPresetBase):
 
                 phys = self._suit_candidate_physical_resist(candidate)
                 if not self._candidate_matches(candidate):
-                    self.SuitLog("{} reject: phys={} {}".format(self.key, phys, self._suit_log_candidate(candidate)))
+                    reject_reason = self._candidate_reject_reason(candidate)
+                    self.SuitLog("{} reject: {} {}".format(self.key, reject_reason, self._suit_log_candidate(candidate)))
                     self._suit_update_slot(
                         slot_name,
                         candidate["Serial"],
                         "Phys {} rejected".format(phys),
                         self._suit_resist_text(candidate["Resists"]),
-                        self.free_physical_plan,
+                        reject_reason,
                     )
                     craft.dispose_item(candidate.get("Item"), self.SUIT_ITEM_DEFS[slot_name])
                     continue
@@ -330,6 +408,7 @@ class LuckBasicSuitPreset(_LuckSuitPreset):
     label = "Luck Basic"
     control_key = "suitPresetLuckBasic"
     physical_values = (2, 3)
+    description = "Luck Basic: selects exceptional pieces with Physical Resist 2 or 3 for a free Physical +9 luck-style plan."
 
 
 class LuckAdvancedSuitPreset(_LuckSuitPreset):
@@ -337,3 +416,4 @@ class LuckAdvancedSuitPreset(_LuckSuitPreset):
     label = "Luck Advanced"
     control_key = "suitPresetLuckAdvanced"
     physical_values = (2,)
+    description = "Luck Advanced: selects exceptional pieces with Physical Resist 2 for the strict free Physical +9 luck-style plan."

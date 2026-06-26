@@ -10,7 +10,15 @@ import time
 import traceback
 import importlib
 import json
-import API
+try:
+    from typing import TYPE_CHECKING
+except Exception:
+    TYPE_CHECKING = False
+
+if TYPE_CHECKING:
+    import API
+    pass
+# API is injected by TazUO at runtime; the import above is IDE-only.
 from LegionPath import LegionPath
 
 try:
@@ -29,14 +37,17 @@ LegionPath.addSubdirs()
 import Util as UtilModule
 import Gump as GumpModule
 import Craft as CraftModule
+import Magic as MagicModule
 
 importlib.reload(UtilModule)
 importlib.reload(GumpModule)
 importlib.reload(CraftModule)
+importlib.reload(MagicModule)
 
 from Util import Util
 from Gump import Gump
 from Craft import Craft
+from Magic import Magic
 from _Utils.GumpControlMixin import GumpControlMixin
 from _Utils.LegionApiCompat import (
     Gumps,
@@ -56,7 +67,12 @@ configure_legion_api_compat(API, Util)
 DEBUG_IMBUING = True
 DEBUG_SUIT_DECISIONS = True
 DEBUG_LOG_FILE = "MysticLlamasImbuing.log"
+IMBUE_FLOW_LOG_FILE = "MysticLlamasImbuing.flow.log"
 SETTINGS_FILE = "MysticLlamasImbuing.settings.json"
+IMBUE_ROWS_DB_FILE = "MysticLlamasImbuing.rows.json"
+IMBUE_GEM_RESERVE = "90"
+IMBUE_CLICK_DELAY_MS = 1500
+IMBUE_FINAL_CLICK_DELAY_MS = 4000
 
 
 def _debug_log_path():
@@ -67,6 +83,14 @@ def _debug_log_path():
     return os.path.join(base_dir, DEBUG_LOG_FILE)
 
 
+def _flow_log_path():
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.getcwd()
+    except Exception:
+        base_dir = "."
+    return os.path.join(base_dir, IMBUE_FLOW_LOG_FILE)
+
+
 def _settings_path():
     try:
         base_dir = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.getcwd()
@@ -75,15 +99,55 @@ def _settings_path():
     return os.path.join(base_dir, SETTINGS_FILE)
 
 
+def _imbue_rows_db_path():
+    try:
+        base_dir = os.path.dirname(os.path.abspath(__file__)) if "__file__" in globals() else os.getcwd()
+    except Exception:
+        base_dir = "."
+    return os.path.join(base_dir, IMBUE_ROWS_DB_FILE)
+
+
 def _load_settings():
     try:
         with open(_settings_path(), "r") as settings_file:
             data = json.load(settings_file)
-        if isinstance(data, dict):
-            return data
+            if isinstance(data, dict):
+                return data
     except Exception:
         pass
     return {}
+
+
+def _load_imbue_rows_db():
+    try:
+        with open(_imbue_rows_db_path(), "r") as rows_file:
+            data = json.load(rows_file)
+            if isinstance(data, dict):
+                return data
+    except Exception:
+        pass
+    return {}
+
+
+def _save_imbue_rows_db(data):
+    try:
+        with open(_imbue_rows_db_path(), "w") as rows_file:
+            json.dump(data, rows_file, indent=2, sort_keys=True)
+    except Exception:
+        pass
+
+
+def _clean_queen_soulforge_slot(value, default=""):
+    text = str(value if value is not None else "").strip()
+    if not text or text.lower() == "none":
+        return str(default)
+    try:
+        slot = int(float(text))
+    except Exception:
+        return str(default)
+    if slot < 1:
+        return str(default)
+    return str(slot)
 
 
 def _save_settings():
@@ -91,7 +155,10 @@ def _save_settings():
         data = {
             "MatCont": int(state.get("MatCont", 0) or 0),
             "GemCont": int(state.get("GemCont", 0) or 0),
-            "GemBuffer": str(state.get("GemBuffer", "0") or "0"),
+            "GemBuffer": IMBUE_GEM_RESERVE,
+            "UseQueenSoulForge": bool(state.get("UseQueenSoulForge", False)),
+            "QueenSoulForgeRunebook": int(state.get("QueenSoulForgeRunebook", 0) or 0),
+            "QueenSoulForgeSlot": _clean_queen_soulforge_slot(state.get("QueenSoulForgeSlot", ""), ""),
             "SuitKeepCont": int(state.get("SuitKeepCont", 0) or 0),
             "SuitBody": state.get("SuitBody", "Male"),
             "SuitArmorType": state.get("SuitArmorType", SUIT_DEFAULT_ARMOR_TYPE),
@@ -120,6 +187,27 @@ def _write_debug_log(text):
     try:
         with open(_debug_log_path(), "a") as log_file:
             log_file.write("{} {}\n".format(time.strftime("%Y-%m-%d %H:%M:%S"), text))
+    except Exception:
+        pass
+
+
+def FlowLog(stage, **fields):
+    try:
+        parts = []
+        for key in sorted(fields.keys()):
+            value = fields[key]
+            text = str(value).replace("\n", "\\n").replace("\r", "\\r")
+            if len(text) > 2000:
+                text = text[:2000] + "...<truncated>"
+            parts.append("{}={}".format(key, text))
+        with open(_flow_log_path(), "a") as log_file:
+            log_file.write(
+                "{} FLOW {} {}\n".format(
+                    time.strftime("%Y-%m-%d %H:%M:%S"),
+                    stage,
+                    " ".join(parts),
+                )
+            )
     except Exception:
         pass
 
@@ -812,6 +900,15 @@ IMBUING_PRESETS = [
             ("Mana Regeneration", 1),
             ("Mana Increase", 7),
         ],
+    },
+    {
+        "Name": "Dexxer",
+        "Rows": [
+            ("Lower Mana Cost", 8),
+            ("Mana Increase", 8),
+            ("Stamina Increase", 8),
+            ("Hit Point Increase", 3),
+        ],
     }
 ]
 
@@ -886,7 +983,7 @@ def _leather_item(name, graphic, button_id, amount):
                 "graphic": 0x1081,
                 "amount": amount,
                 "hasSpecialHue": True,
-                "backpackTargetAmount": amount,
+                "backpackTargetAmount": amount * 5,
             },
         ],
     }
@@ -903,7 +1000,7 @@ SUIT_ITEM_DEFS = {
     "Leather Skirt": _leather_item("leather skirt", 0x1C08, 634, 6),
     "Studded Gorget": _leather_item("studded gorget", 0x13D6, 625, 6),
     "Studded Gloves": _leather_item("studded gloves", 0x13D5, 626, 8),
-    "Studded Sleeves": _leather_item("studded sleeves", 0x13DC, 627, 10),
+    "Studded Sleeves": _leather_item("studded sleeves", 0x13D4, 627, 10),
     "Studded Leggings": _leather_item("studded leggings", 0x13DA, 628, 12),
     "Studded Tunic": _leather_item("studded tunic", 0x13DB, 629, 14),
     "Gargish Leather Wing Armor": _leather_item("gargish leather wing armor", None, 680, 6),
@@ -984,21 +1081,6 @@ SUIT_GEAR_FALLBACK_GRAPHICS = (
     0x13DA,
 )
 SUIT_SELECTED_ITEM_HUE = 69
-
-SUIT_BASIC_ROWS = [
-    {"Prop": "Lower Mana Cost", "Val": 7},
-    {"Prop": "Lower Reagent Cost", "Val": 17},
-    {"Prop": "Mana Regeneration", "Val": 1},
-    {"Prop": "Mana Increase", "Val": 7},
-]
-SUIT_MAGE_REQUIRED_ROWS = [
-    {"Prop": "Lower Reagent Cost", "Val": 17},
-    {"Prop": "Lower Mana Cost", "Val": 7},
-]
-SUIT_MAGE_STAT_CAPS = {
-    "Lower Reagent Cost": 100,
-    "Lower Mana Cost": 40,
-}
 
 
 import _Presets as PresetsModule
@@ -1082,7 +1164,10 @@ state = {
     "Whetstone": False,
     "MatCont": 0,
     "GemCont": 0,
-    "GemBuffer": "0",
+    "GemBuffer": IMBUE_GEM_RESERVE,
+    "UseQueenSoulForge": False,
+    "QueenSoulForgeRunebook": 0,
+    "QueenSoulForgeSlot": "",
     "MaterialScroll": 0,
     "SuitBody": "Male",
     "SuitArmorType": SUIT_DEFAULT_ARMOR_TYPE,
@@ -1119,9 +1204,12 @@ state = {
 }
 
 _saved_settings = _load_settings()
-for _settings_key in ("MatCont", "GemCont", "GemBuffer", "SuitKeepCont", "SuitBody", "SuitArmorType", "SuitPreset", "SuitMaterial"):
+IMBUE_ROWS_DB = _load_imbue_rows_db()
+for _settings_key in ("MatCont", "GemCont", "GemBuffer", "UseQueenSoulForge", "QueenSoulForgeRunebook", "QueenSoulForgeSlot", "SuitKeepCont", "SuitBody", "SuitArmorType", "SuitPreset", "SuitMaterial"):
     if _settings_key in _saved_settings:
         state[_settings_key] = _saved_settings[_settings_key]
+state["GemBuffer"] = IMBUE_GEM_RESERVE
+state["QueenSoulForgeSlot"] = _clean_queen_soulforge_slot(state.get("QueenSoulForgeSlot", ""), "")
 if state.get("SuitPreset") not in SUIT_PRESETS_BY_KEY:
     state["SuitPreset"] = SUIT_PRESET_BASIC
 if state.get("SuitArmorType") not in SUIT_ARMOR_TYPES_BY_KEY:
@@ -1129,8 +1217,80 @@ if state.get("SuitArmorType") not in SUIT_ARMOR_TYPES_BY_KEY:
 if state.get("SuitMaterial") not in SUIT_MATERIALS_BY_KEY:
     state["SuitMaterial"] = SUIT_DEFAULT_MATERIAL
 
+
+class _ImbueStopRequested(Exception):
+    pass
+
+
+def _stop_requested():
+    return bool(getattr(API, "StopRequested", False))
+
+
+def _interruptible_pause(ms):
+    deadline = time.time() + (float(ms) / 1000.0)
+    while time.time() < deadline:
+        if _stop_requested():
+            return False
+        remaining_ms = int(max(1, (deadline - time.time()) * 1000))
+        Misc.Pause(min(100, remaining_ms))
+    return not _stop_requested()
+
+
+def _slow_gump_action(gump_id, button_id, label="", delay_ms=None):
+    delay_ms = IMBUE_CLICK_DELAY_MS if delay_ms is None else delay_ms
+    label_text = label or "gump 0x{:X} button {}".format(int(gump_id), button_id)
+    if delay_ms > 0:
+        state["Msg"] = "Click {} in {:.1f}s".format(label_text, float(delay_ms) / 1000.0)
+        FlowLog(
+            "click_wait",
+            label=label_text,
+            gump=_debug_hex(gump_id),
+            button=button_id,
+            delay_ms=delay_ms,
+        )
+        DebugLog("Slow click pause: {} button={} delay={}ms.".format(label_text, button_id, delay_ms), 55)
+        if not _interruptible_pause(delay_ms):
+            state["Msg"] = "Imbuing stopped before click."
+            FlowLog(
+                "click_stopped",
+                label=label_text,
+                gump=_debug_hex(gump_id),
+                button=button_id,
+            )
+            DebugLog("Stopped before slow click: {} button={}.".format(label_text, button_id), 55)
+            raise _ImbueStopRequested(state["Msg"])
+    if _stop_requested():
+        state["Msg"] = "Imbuing stopped before click."
+        FlowLog(
+            "click_stopped",
+            label=label_text,
+            gump=_debug_hex(gump_id),
+            button=button_id,
+        )
+        raise _ImbueStopRequested(state["Msg"])
+    try:
+        result = Gumps.SendAction(gump_id, button_id)
+        FlowLog(
+            "click_sent",
+            label=label_text,
+            gump=_debug_hex(gump_id),
+            button=button_id,
+            result=result,
+        )
+        return result
+    except Exception as ex:
+        FlowLog(
+            "click_error",
+            label=label_text,
+            gump=_debug_hex(gump_id),
+            button=button_id,
+            error=ex,
+        )
+        raise
+
+
 # ---------------------------------------------------------
-# CALCULATIONS 
+# CALCULATIONS
 # ---------------------------------------------------------
 def GetActiveDB():
     if state["Category"] == "Ranged Weapon": return DB_RANGED
@@ -1176,6 +1336,123 @@ def _parse_imbue_new_value(lines):
     if match:
         return int(match.group(1))
     return None
+
+
+def _tooltip_has_imbued(props):
+    return any("imbued" in str(prop).lower() for prop in props)
+
+
+def _scan_existing_imbue_props(props):
+    search_map = {}
+    for key in BASE_PROPS.keys():
+        if key != "None":
+            search_map[key.lower()] = key
+
+    search_map["defence chance increase"] = "Defense Chance Increase"
+    search_map["lower requirement"] = "Lower Requirements"
+    sorted_keys = sorted(search_map.keys(), key=len, reverse=True)
+    skip_list = [
+        "physical damage",
+        "fire damage",
+        "cold damage",
+        "poison damage",
+        "energy damage",
+        "weapon damage",
+        "weapon speed",
+        "durability",
+    ]
+
+    found_props = {}
+    for prop_line in props:
+        prop_text = str(prop_line)
+        prop_lower = prop_text.lower()
+        if any(skip in prop_lower for skip in skip_list):
+            continue
+
+        for search_key in sorted_keys:
+            if search_key in prop_lower:
+                nums = re.findall(r'[-]?\d+', prop_text)
+                if nums:
+                    found_props[search_map[search_key]] = int(nums[0])
+                break
+
+    return found_props
+
+
+def _imbue_rows_key(serial=None):
+    try:
+        value = int(serial if serial is not None else state.get("ImbueTarget", 0) or 0)
+    except Exception:
+        value = 0
+    if value <= 0:
+        return None
+    return str(value)
+
+
+def _normalize_saved_imbue_rows(rows):
+    normalized = []
+    for row in list(rows or [])[:5]:
+        prop = str(row.get("Prop", "None") or "None")
+        try:
+            value = int(row.get("Val", 0) or 0)
+        except Exception:
+            value = 0
+        if prop == "None":
+            value = 0
+        normalized.append({"Prop": prop, "Val": value})
+
+    while len(normalized) < 5:
+        normalized.append({"Prop": "None", "Val": 0})
+
+    return normalized
+
+
+def _save_current_imbue_rows():
+    key = _imbue_rows_key()
+    if not key:
+        return
+
+    rows = _normalize_saved_imbue_rows(state.get("Rows", []))
+    if any(row.get("Prop") != "None" and int(row.get("Val", 0) or 0) != 0 for row in rows):
+        IMBUE_ROWS_DB[key] = {
+            "Category": state.get("Category", ""),
+            "ItemName": state.get("ItemName", ""),
+            "Rows": rows,
+        }
+    else:
+        IMBUE_ROWS_DB.pop(key, None)
+
+    _save_imbue_rows_db(IMBUE_ROWS_DB)
+
+
+def _load_saved_imbue_rows(serial):
+    key = _imbue_rows_key(serial)
+    if not key:
+        return False
+
+    record = IMBUE_ROWS_DB.get(key)
+    if isinstance(record, dict):
+        saved_rows = record.get("Rows", [])
+    else:
+        saved_rows = record
+
+    if not saved_rows:
+        return False
+
+    active_db = GetActiveDB()
+    rows = []
+    for row in _normalize_saved_imbue_rows(saved_rows):
+        prop = row.get("Prop", "None")
+        value = int(row.get("Val", 0) or 0)
+        if prop != "None" and prop not in active_db:
+            prop = "None"
+            value = 0
+        rows.append({"Prop": prop, "Val": value})
+
+    old_states = PreUpdateLeeches()
+    state["Rows"] = rows[:len(state["Rows"])]
+    PostUpdateLeeches(old_states)
+    return any(row.get("Prop") != "None" and int(row.get("Val", 0) or 0) != 0 for row in state["Rows"])
 
 
 def PreUpdateLeeches():
@@ -1308,8 +1585,7 @@ def PullItems():
         state["Msg"] = "Nothing to pull."
         return True
 
-    try: buffer = int((str(state["GemBuffer"]).strip() or "0"))
-    except: buffer = 0
+    buffer = int(IMBUE_GEM_RESERVE)
 
     DebugLog(
         "PullItems: MatCont={} GemCont={} Reserve={} Needed={}".format(
@@ -1416,7 +1692,7 @@ def PullItems():
                 moved_amt += move_amt
                 remaining -= move_amt
                 if remaining <= 0:
-                    break
+                        break
 
             if remaining <= 0:
                 break
@@ -1447,6 +1723,74 @@ def PullItems():
         state["Msg"] = "Items Pulled!"
     DebugLog("PullItems result: {}".format(state["Msg"]), 65 if all_required_found else 33)
     return all_required_found
+
+
+def _queen_soulforge_slot():
+    try:
+        return int(_clean_queen_soulforge_slot(state.get("QueenSoulForgeSlot", ""), "0"))
+    except Exception:
+        return 0
+
+
+def ValidateQueenSoulForgeTravel():
+    if not state.get("UseQueenSoulForge", False):
+        return True
+
+    runebook_serial = int(state.get("QueenSoulForgeRunebook", 0) or 0)
+    slot_number = _queen_soulforge_slot()
+
+    if runebook_serial <= 0:
+        state["Msg"] = "SoulForge runebook missing."
+        Misc.SendMessage("Queen's SoulForge runebook is not selected.", 33)
+        return False
+
+    if slot_number <= 0:
+        state["Msg"] = "SoulForge slot missing."
+        Misc.SendMessage("Queen's SoulForge slot must be 1 or higher.", 33)
+        return False
+
+    runebook = Items.FindBySerial(runebook_serial)
+    if not runebook:
+        state["Msg"] = "SoulForge runebook not found."
+        Misc.SendMessage("Queen's SoulForge runebook not found.", 33)
+        return False
+
+    return True
+
+
+def TeleportToQueenSoulForge():
+    if not ValidateQueenSoulForgeTravel():
+        FlowLog("qsf_validate_failed_inside_teleport")
+        return False
+
+    if not state.get("UseQueenSoulForge", False):
+        return True
+
+    runebook_serial = int(state.get("QueenSoulForgeRunebook", 0) or 0)
+    slot_number = _queen_soulforge_slot()
+
+    state["Msg"] = "Recalling to Queen's SoulForge..."
+    send_calculator()
+    DebugLog(
+        "QueenSoulForge recall: runebook={} uiSlot={} helperIndex={}".format(
+            _debug_hex(runebook_serial),
+            slot_number,
+            slot_number - 1,
+        ),
+        65,
+    )
+
+    try:
+        Magic().recallToLocation(slot_number - 1, runebook_serial)
+    except Exception as ex:
+        state["Msg"] = "SoulForge recall failed."
+        Misc.SendMessage("Queen's SoulForge recall failed: {}".format(ex), 33)
+        DebugLog("QueenSoulForge recall failed: {}".format(ex), 33)
+        return False
+
+    Misc.Pause(2500)
+    return True
+
 
 def ReturnMats():
     if state["MatCont"] == 0 and state["GemCont"] == 0:
@@ -1529,6 +1873,8 @@ def AutoReadItem():
         return
 
     raw_name = props[0].lower()
+    item_has_imbued = _tooltip_has_imbued(props)
+    scanned_props = _scan_existing_imbue_props(props)
 
     found_cat = "Armor"
     found_item_name = "Armor"
@@ -1619,11 +1965,25 @@ def AutoReadItem():
         r["Prop"] = "None"
         r["Val"] = 0
 
-    state["ScannedProps"] = {} 
+    state["ScannedProps"] = dict(scanned_props)
 
     for r in state["Rows"]:
         r["Prop"] = "None"
         r["Val"] = 0
+
+        if _load_saved_imbue_rows(item_serial):
+            state["Msg"] = "Saved item rows loaded."
+            state["_SkipRowInputSyncOnce"] = True
+            send_calculator()
+            return
+
+        if not item_has_imbued:
+            PostUpdateLeeches(PreUpdateLeeches())
+            state["Msg"] = "Item selected. Rows left blank."
+            Misc.SendMessage("Item has no Imbued tooltip; no properties auto-selected.", 55)
+            state["_SkipRowInputSyncOnce"] = True
+            send_calculator()
+            return
 
     row_idx = 0
     is_locked_di = (found_cat in ["One-Handed Melee", "Two-Handed Melee", "Ranged Weapon"] 
@@ -1653,8 +2013,11 @@ def AutoReadItem():
         state["Rows"][row_idx]["Val"] = p_val
         row_idx += 1
 
-    PostUpdateLeeches(PreUpdateLeeches()) 
+    old_states = PreUpdateLeeches()
+    PostUpdateLeeches(old_states)
     state["Msg"] = "Item auto-populated!"
+    state["_SkipRowInputSyncOnce"] = True
+    send_calculator()
 
 # ---------------------------------------------------------
 # LIVE PROPERTY REFRESHER
@@ -1703,13 +2066,48 @@ def RefreshItemProps(serial):
             highest = max(item_resists, key=item_resists.get)
             found_props[highest] = item_resists[highest]
 
-    state["ScannedProps"] = found_props
+    state["ScannedProps"] = _scan_existing_imbue_props(props)
     return True
+
+
+def _imbue_target_reached(prop, target_value):
+    try:
+        target_value = int(target_value)
+        current_value = int(state.get("ScannedProps", {}).get(prop, 0) or 0)
+    except Exception:
+        return False
+
+    if target_value < 0:
+        return current_value <= target_value
+    return current_value >= target_value
+
+
+def _refresh_and_check_imbue_result(prop, target_value):
+    if not RefreshItemProps(state.get("ImbueTarget", 0)):
+        return False
+    reached = _imbue_target_reached(prop, target_value)
+    DebugLog(
+        "Post-click prop check {} target={} scanned={} reached={}.".format(
+            prop,
+            target_value,
+            state.get("ScannedProps", {}).get(prop),
+            reached,
+        ),
+        55 if reached else 33,
+    )
+    return reached
+
+
 # ---------------------------------------------------------
 # AUTO-IMBUE ENGINE
 # ---------------------------------------------------------
 def AutoImbue():
     DebugLog("AutoImbue clicked. Current target={}".format(_debug_hex(state.get("ImbueTarget", 0))), 65)
+    FlowLog(
+        "auto_clicked",
+        target=_debug_hex(state.get("ImbueTarget", 0)),
+        rows=len(state.get("Rows", [])),
+    )
     if state.get("ImbueTarget", 0) == 0:
         state["Msg"] = "Target item to imbue!"
         send_calculator()
@@ -1717,20 +2115,36 @@ def AutoImbue():
         if state["ImbueTarget"] == -1:
             state["ImbueTarget"] = 0
             state["Msg"] = "Imbuing canceled."
+            FlowLog("auto_cancel_target")
             DebugLog("AutoImbue canceled while selecting target.", 33)
             return False
 
     state["Msg"] = "Starting Imbue Sequence..."
     send_calculator()
     DebugLog("AutoImbue starting. Target={}".format(_debug_hex(state["ImbueTarget"])), 65)
+    FlowLog("auto_start", target=_debug_hex(state["ImbueTarget"]))
 
     if not RefreshItemProps(state["ImbueTarget"]):
+        FlowLog("auto_refresh_failed", target=_debug_hex(state["ImbueTarget"]))
         DebugLog("RefreshItemProps failed for target {}.".format(_debug_hex(state["ImbueTarget"])), 33)
         Misc.SendMessage("Failed to read item properties. Is it too far away?", 33)
         return False
 
+    if not ValidateQueenSoulForgeTravel():
+        FlowLog("auto_qsf_invalid")
+        DebugLog("AutoImbue stopped before pull: QueenSoulForge travel not configured.", 33)
+        send_calculator()
+        return False
+
     if not PullItems():
+        FlowLog("auto_pull_failed")
         DebugLog("AutoImbue stopped during pre-pull.", 33)
+        send_calculator()
+        return False
+
+    if not TeleportToQueenSoulForge():
+        FlowLog("auto_qsf_teleport_failed")
+        DebugLog("AutoImbue stopped during QueenSoulForge recall.", 33)
         send_calculator()
         return False
     
@@ -1755,7 +2169,12 @@ def AutoImbue():
     active_db = GetActiveDB()
     abort_sequence = False
     DebugLog("AutoImbue properties: {}".format(", ".join(["{}={}".format(r["Prop"], r["Val"]) for r in props_to_imbue])), 65)
-    
+    FlowLog(
+        "auto_properties",
+        count=len(props_to_imbue),
+        props=", ".join(["{}={}".format(r["Prop"], r["Val"]) for r in props_to_imbue]),
+    )
+
     # --- MAIN PROPERTY LOOP ---
     for row in props_to_imbue:
         if abort_sequence: break
@@ -1763,8 +2182,16 @@ def AutoImbue():
         target_prop = row["Prop"]
         target_val = row["Val"]
         target_imbue_val = int(row.get("ImbueTargetVal", target_val) or target_val)
-        target_group = active_db[target_prop]["Group"].upper() 
-        
+        target_group = active_db[target_prop]["Group"].upper()
+        FlowLog(
+            "property_start",
+            prop=target_prop,
+            row_val=target_val,
+            imbue_target=target_imbue_val,
+            group=target_group,
+            current=state.get("ScannedProps", {}).get(target_prop, ""),
+        )
+
         if target_group == "CUSTOM PROPERTIES":
             Misc.SendMessage("Skipping {} (Non-Imbuable)".format(target_prop), 55)
             continue
@@ -1773,8 +2200,9 @@ def AutoImbue():
 
         while not property_completed and not abort_sequence:
 
-            Gumps.SendAction(0xf3e93, 0)
-            Gumps.SendAction(0xf3e90, 0)
+            FlowLog("property_loop_open", prop=target_prop)
+            _slow_gump_action(0xf3e93, 0, "close imbuing result")
+            _slow_gump_action(0xf3e90, 0, "close imbuing menu")
             Misc.Pause(500)
             
             Player.UseSkill("Imbuing")
@@ -1782,15 +2210,17 @@ def AutoImbue():
             Misc.Pause(200) 
             Target.TargetExecute(state["ImbueTarget"])
             if not Gumps.WaitForGump(0xf3e93, 2000):
+                FlowLog("open_imbuing_failed", prop=target_prop, gump=_debug_hex(0xf3e93))
                 Misc.SendMessage("Failed to open Imbuing! Is item valid?", 33)
                 abort_sequence = True
                 break
                 
-            Gumps.SendAction(0xf3e93, 1) # Click "Imbue Item" 
+            _slow_gump_action(0xf3e93, 1, "open Imbue Item") # Click "Imbue Item"
             Target.WaitForTarget(2000, False)
             Misc.Pause(200)
             Target.TargetExecute(state["ImbueTarget"])
             if not Gumps.WaitForGump(0xf3e90, 2000):
+                FlowLog("open_categories_failed", prop=target_prop, gump=_debug_hex(0xf3e90))
                 Misc.SendMessage("Failed to open Categories menu!", 33)
                 abort_sequence = True
                 break
@@ -1798,12 +2228,13 @@ def AutoImbue():
             Misc.SendMessage("Navigating to {}...".format(target_prop), 55)
             
             cat_btn = IMBUE_CATS.get(target_group)
-            if not cat_btn or cat_btn == 0: 
+            if not cat_btn or cat_btn == 0:
+                FlowLog("category_missing", prop=target_prop, group=target_group)
                 Misc.SendMessage("No mapped ID for Category: {}!".format(target_group), 33)
                 abort_sequence = True
                 break
                 
-            Gumps.SendAction(0xf3e90, cat_btn) 
+            _slow_gump_action(0xf3e90, cat_btn, "category {}".format(target_group))
             Gumps.WaitForGump(0xf3e90, 2000)
             
             item_cat = state["Category"]
@@ -1813,20 +2244,22 @@ def AutoImbue():
             else:
                 prop_btn = IMBUE_PROPS.get(target_prop, 0)
                 
-            if not prop_btn or prop_btn == 0: 
+            if not prop_btn or prop_btn == 0:
+                FlowLog("property_button_missing", prop=target_prop, group=target_group, item_category=item_cat)
                 Misc.SendMessage("No mapped ID for Property: {}!".format(target_prop), 33)
                 abort_sequence = True
                 break
                 
-            Gumps.SendAction(0xf3e90, prop_btn) 
+            _slow_gump_action(0xf3e90, prop_btn, "property {}".format(target_prop))
             Gumps.WaitForGump(0xf3e90, 2000) 
             
             # --- SMART INTENSITY STEPPER ---
             dyn_max = GetDynamicMax(target_prop)
             is_max = False
-            
+            intensity_confirmed = False
+
             if target_prop == "Mage Weapon":
-                if target_imbue_val >= -20: is_max = True 
+                if target_imbue_val >= -20: is_max = True
             elif _suit_row_is_additive_resist(row):
                 if target_val >= dyn_max:
                     is_max = True
@@ -1834,12 +2267,13 @@ def AutoImbue():
                 is_max = True
                 
             if is_max:
-                Gumps.SendAction(0xf3e90, 313)
+                _slow_gump_action(0xf3e90, 313, "max intensity {}".format(target_prop))
                 Gumps.WaitForGump(0xf3e90, 1500)
+                intensity_confirmed = True
+                FlowLog("intensity_max_selected", prop=target_prop, target=target_imbue_val, dyn_max=dyn_max)
             else:
                 max_loops = 50
                 loops = 0
-                intensity_confirmed = False
                 fallback_used = False
                 while loops < max_loops:
                     loops += 1
@@ -1885,7 +2319,7 @@ def AutoImbue():
                                     ),
                                     55,
                                 )
-                                Gumps.SendAction(0xf3e90, direction)
+                                _slow_gump_action(0xf3e90, direction, "fallback intensity {}".format(target_prop))
                                 Misc.Pause(350)
                             DebugLog("Fallback intensity complete for {}.".format(target_prop), 55)
                             intensity_confirmed = True
@@ -1897,15 +2331,21 @@ def AutoImbue():
                         break
 
                     if current_val < target_imbue_val:
-                        Gumps.SendAction(0xf3e90, 312)
+                        _slow_gump_action(0xf3e90, 312, "increase {}".format(target_prop))
                     elif current_val > target_imbue_val:
-                        Gumps.SendAction(0xf3e90, 311)
+                        _slow_gump_action(0xf3e90, 311, "decrease {}".format(target_prop))
 
                     Gumps.WaitForGump(0xf3e90, 1500)
 
-                if not intensity_confirmed:
-                    lines = Gumps.GetLineList(0xf3e90)
-                    DebugLog(
+            if not intensity_confirmed:
+                lines = Gumps.GetLineList(0xf3e90)
+                FlowLog(
+                    "intensity_not_confirmed",
+                    prop=target_prop,
+                    target=target_imbue_val,
+                    lines=" | ".join([str(line) for line in lines]),
+                )
+                DebugLog(
                         "Could not confirm intensity for {} target={} last={} lines={}".format(
                             target_prop,
                                 target_imbue_val,
@@ -1914,9 +2354,9 @@ def AutoImbue():
                         ),
                         33
                     )
-                    Misc.SendMessage("Could not set {} to {}. Aborting.".format(target_prop, target_imbue_val), 33)
-                    abort_sequence = True
-                    break
+                Misc.SendMessage("Could not set {} to {}. Aborting.".format(target_prop, target_imbue_val), 33)
+                abort_sequence = True
+                break
 
             # Execute Imbue & Retry Loop
             imbuing = True
@@ -1932,25 +2372,47 @@ def AutoImbue():
                     imbuing = False
                     break
                 Journal.Clear()
-                
+
                 DebugLog("Imbue attempt {} for {} retry={}.".format(imbue_attempts, target_prop, is_retry), 55)
+                check_target = target_imbue_val if _suit_row_is_additive_resist(row) else target_val
+                FlowLog(
+                    "imbue_attempt",
+                    prop=target_prop,
+                    attempt=imbue_attempts,
+                    retry=is_retry,
+                    check_target=check_target,
+                )
                 if is_retry:
-                    Gumps.SendAction(0xf3e93, 4) # Click "Reimbue Last"
+                    _slow_gump_action(0xf3e93, 4, "Reimbue Last") # Click "Reimbue Last"
                     DebugLog("Waiting for reimbue result gump for {}.".format(target_prop), 55)
                     waited = Gumps.WaitForGump(0xf3e93, 3000)
                 else:
                     confirm_lines = Gumps.GetLineList(0xf3e90)
                     confirm_text = " | ".join([str(line) for line in confirm_lines])
+                    expected_property_text = "Property: {}".format(target_prop)
+                    FlowLog(
+                        "confirm_page",
+                        prop=target_prop,
+                        target=check_target,
+                        expected=expected_property_text,
+                        has_expected=("Property:" not in confirm_text or expected_property_text in confirm_text),
+                        text=confirm_text,
+                    )
                     DebugLog(
                         "Apply click for {} target={} lines={}".format(
-                        target_prop,
-                        target_imbue_val if _suit_row_is_additive_resist(row) else target_val,
-                        confirm_text
+                            target_prop,
+                            target_imbue_val if _suit_row_is_additive_resist(row) else target_val,
+                            confirm_text
                         ),
                         55
                     )
-                    expected_property_text = "Property: {}".format(target_prop)
                     if "Property:" in confirm_text and expected_property_text not in confirm_text:
+                        FlowLog(
+                            "confirm_wrong_property",
+                            prop=target_prop,
+                            expected=expected_property_text,
+                            text=confirm_text,
+                        )
                         DebugLog(
                             "Selected wrong imbue property: expected {} but gump lines={}".format(
                                 target_prop,
@@ -1961,11 +2423,19 @@ def AutoImbue():
                         Misc.SendMessage("Wrong imbue property selected for {}.".format(target_prop), 33)
                         abort_sequence = True
                         imbuing = False
-                    break
-                if _suit_row_is_additive_resist(row):
-                    confirm_new_value = _parse_imbue_new_value(confirm_lines)
-                    if confirm_new_value is not None and confirm_new_value < target_imbue_val:
-                        DebugLog(
+                        break
+                    if _suit_row_is_additive_resist(row):
+                        confirm_new_value = _parse_imbue_new_value(confirm_lines)
+                        if confirm_new_value is not None and confirm_new_value < target_imbue_val:
+                            FlowLog(
+                                "confirm_under_target",
+                                prop=target_prop,
+                                new_value=confirm_new_value,
+                                required=target_imbue_val,
+                                row_val=target_val,
+                                text=confirm_text,
+                            )
+                            DebugLog(
                             "Additive resist under target: {} new={} required={} row_val={} lines={}".format(
                                 target_prop,
                                 confirm_new_value,
@@ -1975,17 +2445,27 @@ def AutoImbue():
                             ),
                             33,
                         )
-                        Misc.SendMessage("{} can only reach {} / {} now.".format(target_prop, confirm_new_value, target_imbue_val), 33)
-                        abort_sequence = True
-                        imbuing = False
-                        break
-                Gumps.SendAction(0xf3e90, 302) # Click "Imbue Item"
-                DebugLog("Waiting for imbue result gump for {}.".format(target_prop), 55)
-                waited = Gumps.WaitForGump(0xf3e93, 5000)
-                DebugLog("Imbue result gump wait for {} returned {}.".format(target_prop, waited), 55)
+                            Misc.SendMessage("{} can only reach {} / {} now.".format(target_prop, confirm_new_value, target_imbue_val), 33)
+                            abort_sequence = True
+                            imbuing = False
+                            break
+                    FlowLog("before_final_click", prop=target_prop, check_target=check_target, button=302)
+                    DebugLog("Ready to press final Imbue Item for {} target={}.".format(target_prop, check_target), 55)
+                    click_result = _slow_gump_action(0xf3e90, 302, "FINAL Imbue Item {}".format(target_prop), IMBUE_FINAL_CLICK_DELAY_MS) # Click "Imbue Item"
+                    DebugLog("Sent final Imbue Item action 302 for {} result={}.".format(target_prop, click_result), 55)
+                    DebugLog("Waiting for imbue result gump for {}.".format(target_prop), 55)
+                    waited = Gumps.WaitForGump(0xf3e93, 5000)
+                    FlowLog(
+                        "after_final_click",
+                        prop=target_prop,
+                        button=302,
+                        result=click_result,
+                        waited=waited,
+                    )
+                    DebugLog("Imbue result gump wait for {} returned {}.".format(target_prop, waited), 55)
                 
                 outcome = None
-                for _ in range(16):
+                for check_index in range(20):
                     if Journal.Search("successfully imbue"):
                         outcome = "success"
                         break
@@ -1995,8 +2475,30 @@ def AutoImbue():
                     if Journal.Search("do not have enough resources"):
                         outcome = "resources"
                         break
+                    if Journal.Search("You must wait to perform another action"):
+                        outcome = "wait"
+                        break
+                    if Journal.Search("must wait to perform another action"):
+                        outcome = "wait"
+                        break
+                    if Journal.Search("must be near"):
+                        outcome = "location"
+                        break
+                    if Journal.Search("soulforge") or Journal.Search("Soulforge") or Journal.Search("Soul Forge"):
+                        outcome = "location"
+                        break
+                    if check_index in (3, 8, 13, 18) and _refresh_and_check_imbue_result(target_prop, check_target):
+                        outcome = "success"
+                        break
                     Misc.Pause(250)
 
+                FlowLog(
+                    "imbue_outcome",
+                    prop=target_prop,
+                    outcome=outcome,
+                    retry=is_retry,
+                    attempts=imbue_attempts,
+                )
                 if outcome == "success":
                     Misc.SendMessage("Successfully imbued {}!".format(target_prop), 69)
                     DebugLog("Journal reported success for {}.".format(target_prop), 69)
@@ -2014,10 +2516,11 @@ def AutoImbue():
                     is_retry = True
 
                 elif outcome == "resources":
+                    FlowLog("outcome_resources_repull", prop=target_prop)
                     DebugLog("Journal reported missing resources during imbue. Running PullItems again.", 55)
                     Misc.SendMessage("Out of buffer! Pulling safely...", 55)
-                    Gumps.SendAction(0xf3e93, 0)
-                    Gumps.SendAction(0xf3e90, 0)
+                    _slow_gump_action(0xf3e93, 0, "close imbuing result")
+                    _slow_gump_action(0xf3e90, 0, "close imbuing menu")
                     Misc.Pause(500)
                     if not PullItems():
                         DebugLog("PullItems failed after journal missing-resource message.", 33)
@@ -2027,11 +2530,61 @@ def AutoImbue():
                         DebugLog("Resources pulled after journal message; reopening imbuing gump for {}.".format(target_prop), 55)
                         imbuing = False
 
-                else:
-                    DebugLog("No journal outcome after imbue click for {} retry={}.".format(target_prop, is_retry), 33)
-                    Misc.SendMessage("Imbuing halted. Check journal/materials.", 33)
+                elif outcome == "wait":
+                    FlowLog("outcome_wait_reopen", prop=target_prop)
+                    DebugLog("Journal reported action throttle after final click {}; reopening property.".format(target_prop), 55)
+                    Misc.SendMessage("Action throttle. Retrying {}...".format(target_prop), 55)
+                    _slow_gump_action(0xf3e93, 0, "close imbuing result")
+                    _slow_gump_action(0xf3e90, 0, "close imbuing menu")
+                    Misc.Pause(1250)
+                    imbuing = False
+
+                elif outcome == "location":
+                    FlowLog("outcome_location_abort", prop=target_prop)
+                    DebugLog("Journal reported SoulForge/location problem after final click {}.".format(target_prop), 33)
+                    Misc.SendMessage("Imbuing halted. Check SoulForge location.", 33)
                     imbuing = False
                     abort_sequence = True
+
+                else:
+                    if _refresh_and_check_imbue_result(target_prop, check_target):
+                        FlowLog("outcome_tooltip_success", prop=target_prop, check_target=check_target)
+                        Misc.SendMessage("Successfully imbued {}!".format(target_prop), 69)
+                        DebugLog("Tooltip verification reported success for {} after no journal outcome.".format(target_prop), 69)
+                        if _suit_row_is_additive_resist(row):
+                            state["ScannedProps"][target_prop] = target_imbue_val
+                        else:
+                            state["ScannedProps"][target_prop] = target_val
+                        imbuing = False
+                        property_completed = True
+                    else:
+                        try:
+                            confirm_after = " | ".join([str(line) for line in Gumps.GetLineList(0xf3e90)])
+                        except Exception:
+                            confirm_after = ""
+                        try:
+                            result_after = " | ".join([str(line) for line in Gumps.GetLineList(0xf3e93)])
+                        except Exception:
+                            result_after = ""
+                        FlowLog(
+                            "outcome_none",
+                            prop=target_prop,
+                            retry=is_retry,
+                            confirm_gump=confirm_after,
+                            result_gump=result_after,
+                        )
+                        DebugLog(
+                            "No journal/tooltip outcome after imbue click for {} retry={} confirmGump={} resultGump={}.".format(
+                                target_prop,
+                                is_retry,
+                                confirm_after,
+                                result_after,
+                            ),
+                            33,
+                        )
+                        Misc.SendMessage("Imbuing halted. Check journal/materials.", 33)
+                        imbuing = False
+                        abort_sequence = True
 
     return not abort_sequence
 
@@ -2121,77 +2674,6 @@ def _suit_parse_prop_values(props):
     return values
 
 
-def _suit_has_started_mage_imbues(candidate):
-    props = candidate.get("PropValues", {})
-    for row in SUIT_MAGE_REQUIRED_ROWS:
-        prop = row.get("Prop")
-        if prop and props.get(prop, 0) > 0:
-            return True
-    return False
-
-
-def _suit_infer_started_high_resists(resists):
-    high_resists = _suit_high_resists(resists)
-    if len(high_resists) == SUIT_HIGH_RESIST_COUNT:
-        return high_resists
-    ranked = sorted(SUIT_RESISTS, key=lambda name: resists.get(name, 0), reverse=True)
-    for ignored in ranked:
-        adjusted = dict(resists)
-        adjusted[ignored] = 0
-        inferred = _suit_high_resists(adjusted)
-        if len(inferred) == SUIT_HIGH_RESIST_COUNT:
-            return inferred
-    return high_resists
-
-
-def _suit_infer_started_base_resists(resists, high_resists):
-    current_total = sum(resists.get(name, 0) for name in SUIT_RESISTS)
-    extra_total = max(0, current_total - SUIT_EXCEPTIONAL_RESIST_TOTAL)
-    base = dict(resists)
-    additions = dict((name, 0) for name in SUIT_RESISTS)
-    if extra_total <= 0:
-        return base, additions
-    ranked = sorted(SUIT_RESISTS, key=lambda name: resists.get(name, 0), reverse=True)
-    for resist_name in ranked:
-        candidate_base = dict(resists)
-        candidate_base[resist_name] = max(0, candidate_base.get(resist_name, 0) - extra_total)
-        if tuple(high_resists or ()) and _suit_high_pair_key(_suit_high_resists(candidate_base)) != _suit_high_pair_key(high_resists):
-            continue
-        base = candidate_base
-        additions[resist_name] = extra_total
-        return base, additions
-    resist_name = ranked[0] if ranked else None
-    if resist_name:
-        base[resist_name] = max(0, base.get(resist_name, 0) - extra_total)
-        additions[resist_name] = extra_total
-    return base, additions
-
-
-def _suit_started_resists_valid(resists, additions):
-    for resist_name in SUIT_RESISTS:
-        if resists.get(resist_name, 0) > SUIT_ITEM_RESIST_CAP:
-            return False
-        if additions.get(resist_name, 0) > SUIT_MAX_RESIST_IMBUE:
-            return False
-    return True
-
-
-def _suit_started_mage_rows(candidate):
-    rows = []
-    props = candidate.get("PropValues", {})
-    for required in SUIT_MAGE_REQUIRED_ROWS:
-        prop = required.get("Prop")
-        value = int(props.get(prop, 0) or 0)
-        if prop and value > 0:
-            rows.append({"Prop": prop, "Val": value})
-    additions = candidate.get("StartedResistAdds", {})
-    for resist_name in SUIT_RESISTS:
-        value = int(additions.get(resist_name, 0) or 0)
-        if value > 0:
-            rows.append({"Prop": resist_name, "Val": value, "Mode": "Add"})
-    return rows
-
-
 def _suit_high_resists(resists):
     ranked = sorted(SUIT_RESISTS, key=lambda name: resists.get(name, 0), reverse=True)
     if len(ranked) < SUIT_HIGH_RESIST_COUNT + 1:
@@ -2234,16 +2716,18 @@ def _suit_prune_mage_candidates_by_pair(candidates_by_slot):
     removed = 0
     for slot_name, candidates in list(candidates_by_slot.items()):
         owners = {}
+        unpaired = []
         for candidate in candidates:
             high_resists = candidate.get("HighResists", ())
             if len(high_resists) != SUIT_HIGH_RESIST_COUNT:
+                unpaired.append(candidate)
                 continue
             pair_key = _suit_high_pair_key(high_resists)
             current = owners.get(pair_key)
             if current is None or _suit_is_better_candidate(candidate, current):
                 owners[pair_key] = candidate
         pruned = sorted(
-            owners.values(),
+            list(owners.values()) + unpaired,
             key=lambda item: (_suit_high_pair_key(item.get("HighResists", ())), item.get("Serial", 0)),
         )
         removed += len(candidates) - len(pruned)
@@ -2345,7 +2829,7 @@ def _suit_slot_for_item(item, body):
     return None
 
 
-def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=True, require_high_resists=True, required=True, allow_started_mage=False, material_key=None):
+def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=True, require_high_resists=True, required=True, material_key=None, candidate_filter=None, candidate_filter_reason=None):
     container = _suit_get_keep_container(required=required)
     if not container:
         SuitLog("scan skipped: no good-piece container selected for body={} required={}".format(body, required))
@@ -2359,7 +2843,7 @@ def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=Tru
         items = API.ItemsInContainer(serial, True) or []
     except Exception:
         items = []
-    SuitLog("scan start: container={} body={} items={} material={} hue={} require_exceptional={} require_high_resists={} allow_started_mage={}".format(
+    SuitLog("scan start: container={} body={} items={} material={} hue={} require_exceptional={} require_high_resists={}".format(
         _debug_hex(serial),
         body,
         len(items),
@@ -2367,7 +2851,6 @@ def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=Tru
         _debug_hex(material_hue),
         require_exceptional,
         require_high_resists,
-        allow_started_mage,
     ))
 
     known_serials = set()
@@ -2400,39 +2883,18 @@ def _suit_load_kept_candidates(body, candidates_by_slot, require_exceptional=Tru
             SuitLog("scan reject: {} reason=not exceptional".format(_suit_log_candidate(candidate)))
             continue
         if require_high_resists and len(candidate.get("HighResists", ())) != SUIT_HIGH_RESIST_COUNT:
-            if allow_started_mage and _suit_has_started_mage_imbues(candidate):
-                inferred_highs = _suit_infer_started_high_resists(candidate.get("Resists", {}))
-                if len(inferred_highs) == SUIT_HIGH_RESIST_COUNT:
-                    base_resists, resist_adds = _suit_infer_started_base_resists(candidate.get("Resists", {}), inferred_highs)
-                    if not _suit_started_resists_valid(candidate.get("Resists", {}), resist_adds):
-                        SuitLog("scan reject: {} reason=started_resist_cap current_cap={} imbue_cap={}".format(
-                            _suit_log_candidate(candidate),
-                            SUIT_ITEM_RESIST_CAP,
-                            SUIT_MAX_RESIST_IMBUE,
-                        ))
-                        continue
-                    candidate["HighResists"] = inferred_highs
-                    candidate["StartedImbued"] = True
-                    candidate["BaseResists"] = base_resists
-                    candidate["StartedResistAdds"] = resist_adds
-                    SuitLog("scan accept started mage: {} inferred_highs={}".format(
-                        _suit_log_candidate(candidate),
-                        _suit_high_text(inferred_highs),
-                    ))
-                else:
-                    SuitLog("scan reject: {} reason=started_mage_high_resist_count expected={} actual={}".format(
-                        _suit_log_candidate(candidate),
-                        SUIT_HIGH_RESIST_COUNT,
-                        len(inferred_highs),
-                    ))
-                    continue
-            else:
-                SuitLog("scan reject: {} reason=high_resist_count expected={} actual={}".format(
-                    _suit_log_candidate(candidate),
-                    SUIT_HIGH_RESIST_COUNT,
-                    len(candidate.get("HighResists", ())),
-                ))
-                continue
+            SuitLog("scan reject: {} reason=high_resist_count expected={} actual={}".format(
+                _suit_log_candidate(candidate),
+                SUIT_HIGH_RESIST_COUNT,
+                len(candidate.get("HighResists", ())),
+            ))
+            continue
+        if candidate_filter and not candidate_filter(candidate):
+            reason = "candidate_filter"
+            if candidate_filter_reason:
+                reason = candidate_filter_reason(candidate)
+            SuitLog("scan reject: {} reason={}".format(_suit_log_candidate(candidate), reason))
+            continue
         candidates_by_slot[slot_name].append(candidate)
         known_serials.add(item_serial)
         loaded += 1
@@ -2875,6 +3337,34 @@ def _suit_update_slot(slot_name, serial=0, status=None, resists=None, plan=None)
     send_calculator()
 
 
+def _suit_display_combo_rows(combo, slot_names, status="Current Best"):
+    by_slot = dict((piece.get("Slot"), piece) for piece in combo)
+    rows = []
+    for slot_name in slot_names:
+        piece = by_slot.get(slot_name)
+        if piece:
+            plan_text = _suit_plan_text(piece.get("Rows", []))
+            if plan_text == "-":
+                plan_text = _suit_high_text(piece.get("HighResists", ()))
+            rows.append({
+                "Slot": slot_name,
+                "Serial": piece.get("Serial", 0),
+                "Status": status,
+                "Resists": _suit_resist_text(piece.get("Resists", {})),
+                "Plan": plan_text,
+            })
+        else:
+            rows.append({
+                "Slot": slot_name,
+                "Serial": 0,
+                "Status": "Pending",
+                "Resists": "",
+                "Plan": "",
+            })
+    state["SuitRows"] = rows
+    send_calculator()
+
+
 def _suit_get_craft():
     serial = state.get("MatCont", 0)
     if not serial:
@@ -3170,27 +3660,7 @@ def _suit_try_add_row(rows, prop, val, exceptional=True, mode=None):
 
 
 def _suit_choose_optional(rows, exceptional=True):
-    active_rows = [row for row in rows if row.get("Prop") != "None" and row.get("Val", 0)]
-    optional_props = (("Mana Increase", 8, 0), ("Mana Regeneration", 2, 1))
-    while len(active_rows) < SUIT_MAX_ROWS:
-        existing_props = set(row.get("Prop") for row in active_rows)
-        best = None
-        for prop, max_val, prefer in optional_props:
-            if prop in existing_props:
-                continue
-            for val in range(max_val, 0, -1):
-                candidate = active_rows + [{"Prop": prop, "Val": val}]
-                weight = _suit_rows_weight(candidate)
-                if weight > _suit_max_weight(exceptional):
-                    continue
-                diff = abs(_suit_max_weight(exceptional) - weight)
-                score = (diff, prefer, -val)
-                if best is None or score < best[0]:
-                    best = (score, {"Prop": prop, "Val": val})
-        if not best:
-            break
-        active_rows.append(best[1])
-    return active_rows
+    return [row for row in rows if row.get("Prop") != "None" and row.get("Val", 0)]
 
 
 def _suit_distribute_values(total, count, preferred_value):
@@ -3211,36 +3681,12 @@ def _suit_distribute_values(total, count, preferred_value):
     return values
 
 
-def _suit_mage_required_rows_by_piece(count):
-    rows_by_piece = [[] for _ in range(count)]
-    for row in SUIT_MAGE_REQUIRED_ROWS:
-        prop = row.get("Prop")
-        preferred_value = int(row.get("Val", 0) or 0)
-        total = SUIT_MAGE_STAT_CAPS.get(prop, preferred_value * count)
-        values = _suit_distribute_values(total, count, preferred_value)
-        for index, value in enumerate(values):
-            if value > 0:
-                rows_by_piece[index].append({"Prop": prop, "Val": value})
-    return rows_by_piece
-
-
 def _suit_allocate_mage_rows(candidates):
     planned = []
-    required_rows_by_piece = _suit_mage_required_rows_by_piece(len(candidates))
+    required_rows_by_piece = [[] for _ in candidates]
     totals = dict((name, 0) for name in SUIT_RESISTS)
     for index, candidate in enumerate(candidates):
-        if candidate.get("StartedImbued"):
-            candidate["Rows"] = _suit_started_mage_rows(candidate)
-            existing_props = set(row.get("Prop") for row in candidate["Rows"])
-            for row in required_rows_by_piece[index]:
-                if row.get("Prop") in existing_props:
-                    existing_row = next((existing for existing in candidate["Rows"] if existing.get("Prop") == row.get("Prop")), None)
-                    if existing_row:
-                        existing_row["Val"] = max(int(existing_row.get("Val", 0) or 0), int(row.get("Val", 0) or 0))
-                else:
-                    candidate["Rows"].append(dict(row))
-        else:
-            candidate["Rows"] = [dict(row) for row in required_rows_by_piece[index]]
+        candidate["Rows"] = [dict(row) for row in candidate.get("Rows", [])]
         for resist_name in SUIT_RESISTS:
             totals[resist_name] += candidate["Resists"].get(resist_name, 0)
         planned.append(candidate)
@@ -3345,25 +3791,294 @@ def _suit_allocate_mage_rows(candidates):
     return planned
 
 
-def _suit_allocate_mage_rows_exhaustive(candidates, include_required_rows=True, choose_optional=True, solve_label="Mage"):
+def _suit_allocate_fixed_resist_rows(planned, deficits, rows_per_piece, solve_label="Mage"):
+    rows_per_piece = int(rows_per_piece or 0)
+    target_key = tuple(deficits[name] for name in SUIT_RESISTS)
+
+    def active_rows(rows):
+        return [row for row in rows if row.get("Prop") != "None" and row.get("Val", 0)]
+
+    def normalize_adds(adds):
+        return tuple(min(deficits[name], max(0, adds.get(name, 0))) for name in SUIT_RESISTS)
+
+    def dominates(left, right):
+        return all(left[index] >= right[index] for index in range(len(SUIT_RESISTS)))
+
+    def prune_state_map(state_map):
+        kept = {}
+        for key in sorted(state_map.keys(), key=lambda item: sum(item), reverse=True):
+            if any(dominates(kept_key, key) for kept_key in kept):
+                continue
+            kept[key] = state_map[key]
+        return kept
+
+    def piece_options(item):
+        base_rows = [dict(row) for row in item.get("Rows", [])]
+        if len(active_rows(base_rows)) > SUIT_MAX_ROWS:
+            return []
+        if _suit_rows_weight(base_rows) > _suit_max_weight(True):
+            return []
+
+        current_resist_rows = _suit_resist_row_count(base_rows)
+        if current_resist_rows > rows_per_piece:
+            return []
+        missing_rows = rows_per_piece - current_resist_rows
+        if len(active_rows(base_rows)) + missing_rows > SUIT_MAX_ROWS:
+            return []
+
+        options = {}
+
+        def add_option(rows, adds):
+            key = normalize_adds(adds)
+            weight = _suit_rows_weight(rows)
+            previous = options.get(key)
+            if previous is None or weight < previous[0]:
+                options[key] = (weight, [dict(row) for row in rows])
+
+        def walk(rows, adds, remaining):
+            if remaining <= 0:
+                add_option(rows, adds)
+                return
+            for resist_name in SUIT_RESISTS:
+                if any(row.get("Prop") == resist_name for row in rows):
+                    continue
+                max_add = min(
+                    SUIT_MAX_RESIST_IMBUE,
+                    SUIT_ITEM_RESIST_CAP - item["Resists"].get(resist_name, 0),
+                )
+                if max_add <= 0:
+                    continue
+                value = min(max_add, max(1, deficits.get(resist_name, 0) - adds.get(resist_name, 0)))
+                next_rows = [dict(row) for row in rows]
+                if not _suit_try_add_row(next_rows, resist_name, value, True, mode="Add"):
+                    continue
+                next_adds = dict(adds)
+                next_adds[resist_name] = next_adds.get(resist_name, 0) + value
+                walk(next_rows, next_adds, remaining - 1)
+
+        walk(base_rows, {}, missing_rows)
+        return [(key, rows) for key, (_weight, rows) in sorted(options.items(), key=lambda item: item[1][0])]
+
+    states = {tuple(0 for _ in SUIT_RESISTS): []}
+    option_counts = []
+    for planned_index, item in enumerate(planned):
+        options = piece_options(item)
+        option_counts.append(len(options))
+        _suit_scan_progress_update(
+            state.get("SuitScanCurrent", 0),
+            "Allocating {} resists: piece {}/{} states={} options={} deficits={}".format(
+                solve_label,
+                planned_index + 1,
+                len(planned),
+                len(states),
+                ",".join(str(count) for count in option_counts),
+                _suit_resist_text(deficits),
+            ),
+            force=True,
+        )
+        if not options:
+            SuitLog("mage allocate fixed failed: piece_options=0 item={}".format(_suit_log_candidate(item)))
+            return None
+
+        new_states = {}
+        for state_key, chosen_rows in states.items():
+            for adds_key, rows in options:
+                next_key = tuple(
+                    min(target_key[pos], state_key[pos] + adds_key[pos])
+                    for pos in range(len(SUIT_RESISTS))
+                )
+                if next_key not in new_states:
+                    new_states[next_key] = chosen_rows + [rows]
+        states = prune_state_map(new_states)
+
+    if target_key not in states:
+        SuitLog("mage allocate fixed failed: states={} options={} deficits={}".format(
+            len(states),
+            ",".join(str(count) for count in option_counts),
+            _suit_resist_text(deficits),
+        ))
+        return None
+
+    chosen = states[target_key]
+    for index, item in enumerate(planned):
+        item["Rows"] = [dict(row) for row in chosen[index]]
+        if len(item["Rows"]) > SUIT_MAX_ROWS:
+            return None
+        if _suit_rows_weight(item["Rows"]) > _suit_max_weight(True):
+            return None
+
+    SuitLog("mage allocate fixed success: states={} options={} deficits={} rows_per_piece={}".format(
+        len(states),
+        ",".join(str(count) for count in option_counts),
+        _suit_resist_text(deficits),
+        rows_per_piece,
+    ))
+    return planned
+
+
+def _suit_allocate_limited_imbued_pieces(planned, deficits, max_imbued_pieces, solve_label="Mage"):
+    max_imbued_pieces = int(max_imbued_pieces or 0)
+    target_key = tuple(deficits[name] for name in SUIT_RESISTS)
+
+    def active_rows(rows):
+        return [row for row in rows if row.get("Prop") != "None" and row.get("Val", 0)]
+
+    def normalize_adds(adds):
+        return tuple(min(deficits[name], max(0, adds.get(name, 0))) for name in SUIT_RESISTS)
+
+    def dominates(left, right):
+        left_adds, left_count = left
+        right_adds, right_count = right
+        return left_count <= right_count and all(left_adds[index] >= right_adds[index] for index in range(len(SUIT_RESISTS)))
+
+    def prune_state_map(state_map):
+        kept = {}
+        for key in sorted(state_map.keys(), key=lambda item: (sum(item[0]), -item[1]), reverse=True):
+            if any(dominates(kept_key, key) for kept_key in kept):
+                continue
+            kept[key] = state_map[key]
+        return kept
+
+    def add_option(options, rows, adds):
+        key = normalize_adds(adds)
+        weight = _suit_rows_weight(rows)
+        previous = options.get(key)
+        if previous is None or weight < previous[0]:
+            options[key] = (weight, [dict(row) for row in rows])
+
+    def piece_options(item):
+        base_rows = [dict(row) for row in item.get("Rows", [])]
+        if len(active_rows(base_rows)) > SUIT_MAX_ROWS:
+            return []
+        if _suit_rows_weight(base_rows) > _suit_max_weight(True):
+            return []
+
+        options = {}
+        base_adds = {}
+        for row in base_rows:
+            prop = row.get("Prop")
+            if prop in SUIT_RESISTS:
+                base_adds[prop] = base_adds.get(prop, 0) + int(row.get("Val", 0) or 0)
+        add_option(options, base_rows, base_adds)
+
+        current_resist_rows = _suit_resist_row_count(base_rows)
+        remaining_resist_rows = SUIT_MAX_RESIST_ROWS - current_resist_rows
+        if remaining_resist_rows <= 0:
+            return [(key, rows) for key, (_weight, rows) in options.items()]
+
+        def try_row(rows, adds, resist_name):
+            if any(row.get("Prop") == resist_name for row in rows):
+                return None
+            max_add = min(
+                SUIT_MAX_RESIST_IMBUE,
+                SUIT_ITEM_RESIST_CAP - item["Resists"].get(resist_name, 0),
+            )
+            if max_add <= 0:
+                return None
+            value = min(max_add, max(1, deficits.get(resist_name, 0) - adds.get(resist_name, 0)))
+            next_rows = [dict(row) for row in rows]
+            if not _suit_try_add_row(next_rows, resist_name, value, True, mode="Add"):
+                return None
+            next_adds = dict(adds)
+            next_adds[resist_name] = next_adds.get(resist_name, 0) + value
+            return next_rows, next_adds
+
+        one_row = []
+        for resist_name in SUIT_RESISTS:
+            result = try_row(base_rows, base_adds, resist_name)
+            if not result:
+                continue
+            rows, adds = result
+            add_option(options, rows, adds)
+            one_row.append((rows, adds))
+
+        if remaining_resist_rows >= 2:
+            for rows, adds in one_row:
+                for resist_name in SUIT_RESISTS:
+                    result = try_row(rows, adds, resist_name)
+                    if not result:
+                        continue
+                    next_rows, next_adds = result
+                    add_option(options, next_rows, next_adds)
+
+        return [(key, rows) for key, (_weight, rows) in sorted(options.items(), key=lambda item: item[1][0])]
+
+    states = {(tuple(0 for _ in SUIT_RESISTS), 0): []}
+    option_counts = []
+    for planned_index, item in enumerate(planned):
+        options = piece_options(item)
+        option_counts.append(len(options))
+        _suit_scan_progress_update(
+            state.get("SuitScanCurrent", 0),
+            "Allocating {} resists: piece {}/{} states={} options={} maxPieces={} deficits={}".format(
+                solve_label,
+                planned_index + 1,
+                len(planned),
+                len(states),
+                ",".join(str(count) for count in option_counts),
+                max_imbued_pieces,
+                _suit_resist_text(deficits),
+            ),
+            force=True,
+        )
+        if not options:
+            SuitLog("mage allocate limited failed: piece_options=0 item={}".format(_suit_log_candidate(item)))
+            return None
+
+        new_states = {}
+        for state_key, chosen_rows in states.items():
+            current_adds, current_count = state_key
+            for adds_key, rows in options:
+                is_imbued_piece = bool(active_rows(rows))
+                next_count = current_count + (1 if is_imbued_piece else 0)
+                if next_count > max_imbued_pieces:
+                    continue
+                next_adds = tuple(
+                    min(target_key[pos], current_adds[pos] + adds_key[pos])
+                    for pos in range(len(SUIT_RESISTS))
+                )
+                next_key = (next_adds, next_count)
+                if next_key not in new_states:
+                    new_states[next_key] = chosen_rows + [rows]
+        states = prune_state_map(new_states)
+
+    target_states = [key for key in states if key[0] == target_key and key[1] <= max_imbued_pieces]
+    if not target_states:
+        SuitLog("mage allocate limited failed: states={} options={} maxPieces={} deficits={}".format(
+            len(states),
+            ",".join(str(count) for count in option_counts),
+            max_imbued_pieces,
+            _suit_resist_text(deficits),
+        ))
+        return None
+
+    best_key = sorted(target_states, key=lambda key: (key[1], sum(_suit_rows_weight(rows) for rows in states[key])))[0]
+    chosen = states[best_key]
+    for index, item in enumerate(planned):
+        item["Rows"] = [dict(row) for row in chosen[index]]
+        if len(item["Rows"]) > SUIT_MAX_ROWS:
+            return None
+        if _suit_rows_weight(item["Rows"]) > _suit_max_weight(True):
+            return None
+
+    SuitLog("mage allocate limited success: states={} options={} deficits={} maxPieces={} usedPieces={}".format(
+        len(states),
+        ",".join(str(count) for count in option_counts),
+        _suit_resist_text(deficits),
+        max_imbued_pieces,
+        best_key[1],
+    ))
+    return planned
+
+
+def _suit_allocate_mage_rows_exhaustive(candidates, choose_optional=False, solve_label="Mage", required_resist_rows_per_piece=None, max_imbued_pieces=None):
     planned = []
-    required_rows_by_piece = _suit_mage_required_rows_by_piece(len(candidates)) if include_required_rows else [[] for _ in candidates]
+    required_rows_by_piece = [[] for _ in candidates]
     totals = dict((name, 0) for name in SUIT_RESISTS)
 
     for index, candidate in enumerate(candidates):
         item = dict(candidate)
-        if item.get("StartedImbued"):
-            rows = _suit_started_mage_rows(item)
-            existing_props = set(row.get("Prop") for row in rows)
-            for row in required_rows_by_piece[index]:
-                if row.get("Prop") in existing_props:
-                    existing_row = next((existing for existing in rows if existing.get("Prop") == row.get("Prop")), None)
-                    if existing_row:
-                        existing_row["Val"] = max(int(existing_row.get("Val", 0) or 0), int(row.get("Val", 0) or 0))
-                else:
-                    rows.append(dict(row))
-        else:
-            rows = [dict(row) for row in required_rows_by_piece[index]]
+        rows = [dict(row) for row in item.get("Rows", [])]
 
         item["Rows"] = rows
         for resist_name in SUIT_RESISTS:
@@ -3376,6 +4091,22 @@ def _suit_allocate_mage_rows_exhaustive(candidates, include_required_rows=True, 
         planned.append(item)
 
     deficits = dict((name, max(0, SUIT_RESIST_TARGET - totals[name])) for name in SUIT_RESISTS)
+    if max_imbued_pieces is not None:
+        return _suit_allocate_limited_imbued_pieces(
+            planned,
+            deficits,
+            max_imbued_pieces,
+            solve_label,
+        )
+
+    if required_resist_rows_per_piece is not None:
+        return _suit_allocate_fixed_resist_rows(
+            planned,
+            deficits,
+            required_resist_rows_per_piece,
+            solve_label,
+        )
+
     if all(value <= 0 for value in deficits.values()):
         if choose_optional:
             for item in planned:
@@ -3608,7 +4339,10 @@ def _suit_allocate_mage_rows_exhaustive(candidates, include_required_rows=True, 
 
     chosen = states[target_key]
     for index, item in enumerate(planned):
-        item["Rows"] = [dict(row) for row in chosen[index]]
+        if index < len(chosen):
+            item["Rows"] = [dict(row) for row in chosen[index]]
+        else:
+            item["Rows"] = [dict(row) for row in item.get("Rows", [])]
         if choose_optional:
             item["Rows"] = _suit_choose_optional(item["Rows"], True)
         if len(item["Rows"]) > SUIT_MAX_ROWS:
@@ -3650,9 +4384,10 @@ def _suit_trim_states(states, limit=SUIT_MAGE_SOLVE_STATE_LIMIT):
     return dict(ranked[:limit])
 
 
-def _suit_solve_mage(candidates_by_slot, plan_filter=None, include_required_rows=True, choose_optional=True, solve_label="Mage"):
+def _suit_solve_mage(candidates_by_slot, plan_filter=None, choose_optional=False, solve_label="Mage", require_balanced_highs=True, required_resist_rows_per_piece=None, max_imbued_pieces=None):
     SuitLog("mage solve start: counts=[{}]".format(_suit_log_slot_counts(candidates_by_slot)))
-    _suit_prune_mage_candidates_by_pair(candidates_by_slot)
+    if require_balanced_highs:
+        _suit_prune_mage_candidates_by_pair(candidates_by_slot)
     _suit_scan_progress_start(max(1, len(candidates_by_slot)), "Building {} suit combinations".format(solve_label))
     missing_slots = [slot for slot in candidates_by_slot if not candidates_by_slot.get(slot)]
     if missing_slots:
@@ -3684,10 +4419,11 @@ def _suit_solve_mage(candidates_by_slot, plan_filter=None, include_required_rows
                     if high_resist in SUIT_RESISTS:
                         next_highs[SUIT_RESISTS.index(high_resist)] += 1
                 remaining_slots = len(candidates_by_slot) - slot_index - 1
-                if any(value > SUIT_HIGH_BALANCE_MAX for value in next_highs):
-                    continue
-                if any(value + remaining_slots < SUIT_HIGH_BALANCE_MIN for value in next_highs):
-                    continue
+                if require_balanced_highs:
+                    if any(value > SUIT_HIGH_BALANCE_MAX for value in next_highs):
+                        continue
+                    if any(value + remaining_slots < SUIT_HIGH_BALANCE_MIN for value in next_highs):
+                        continue
                 next_combo = combo + [candidate]
                 next_key = (tuple(next_totals), tuple(next_highs))
                 previous = new_states.get(next_key)
@@ -3701,25 +4437,26 @@ def _suit_solve_mage(candidates_by_slot, plan_filter=None, include_required_rows
             len(states),
         ))
         if not states:
-            SuitLog("mage solve failed: no high-balanced branches after slot={}".format(slot_name))
-            _suit_scan_progress_finish("Mage solve failed: no balanced coverage.")
+            SuitLog("mage solve failed: no viable branches after slot={}".format(slot_name))
+            _suit_scan_progress_finish("{} solve failed: no viable coverage.".format(solve_label))
             return None
 
     ranked_combos = sorted(
         states.values(),
         key=lambda combo: (
             _suit_missing_score(_suit_combo_totals(combo)),
-            _suit_high_balance_score(combo),
+            _suit_high_balance_score(combo) if require_balanced_highs else (0, 0, 0),
             -sum(sum(item["Resists"].values()) for item in combo),
         ),
     )
-    balanced_combos = [combo for combo in ranked_combos if _suit_has_balanced_highs(combo)]
-    if not balanced_combos:
-        SuitLog("mage solve failed: no balanced high coverage from {} combo(s)".format(len(ranked_combos)))
-        _suit_scan_progress_finish("Mage solve failed: no balanced coverage.")
-        return None
-    SuitLog("mage solve balanced filter: {} -> {}".format(len(ranked_combos), len(balanced_combos)))
-    ranked_combos = balanced_combos
+    if require_balanced_highs:
+        balanced_combos = [combo for combo in ranked_combos if _suit_has_balanced_highs(combo)]
+        if not balanced_combos:
+            SuitLog("mage solve failed: no balanced high coverage from {} combo(s)".format(len(ranked_combos)))
+            _suit_scan_progress_finish("Mage solve failed: no balanced coverage.")
+            return None
+        SuitLog("mage solve balanced filter: {} -> {}".format(len(ranked_combos), len(balanced_combos)))
+        ranked_combos = balanced_combos
     if len(ranked_combos) > SUIT_MAGE_ALLOCATE_COMBO_LIMIT:
         SuitLog("mage solve allocation limit: {} -> {}".format(len(ranked_combos), SUIT_MAGE_ALLOCATE_COMBO_LIMIT))
         ranked_combos = ranked_combos[:SUIT_MAGE_ALLOCATE_COMBO_LIMIT]
@@ -3740,9 +4477,10 @@ def _suit_solve_mage(candidates_by_slot, plan_filter=None, include_required_rows
         )
         plan = _suit_allocate_mage_rows_exhaustive(
             [dict(item) for item in combo],
-            include_required_rows=include_required_rows,
             choose_optional=choose_optional,
             solve_label=solve_label,
+            required_resist_rows_per_piece=required_resist_rows_per_piece,
+            max_imbued_pieces=max_imbued_pieces,
         )
         if plan:
             if plan_filter and not plan_filter(plan):
@@ -3789,16 +4527,17 @@ def _suit_select_plan(plan, active_by_slot=None):
         )
 
 
-def _suit_scan_saved_mage_plan(body, update_rows=True, required=True, plan_filter=None, include_required_rows=True, choose_optional=True, solve_label="Mage", allow_started_mage=True):
+def _suit_scan_saved_mage_plan(body, update_rows=True, required=True, plan_filter=None, choose_optional=False, solve_label="Mage", require_high_resists=True, require_balanced_highs=True, required_resist_rows_per_piece=None, max_imbued_pieces=None, candidate_filter=None, candidate_filter_reason=None):
     slot_names = list(_suit_body_items(body))
     candidates_by_slot = dict((slot_name, []) for slot_name in slot_names)
     loaded = _suit_load_kept_candidates(
         body,
         candidates_by_slot,
         require_exceptional=True,
-        require_high_resists=True,
-        allow_started_mage=allow_started_mage,
+        require_high_resists=require_high_resists,
         required=required,
+        candidate_filter=candidate_filter,
+        candidate_filter_reason=candidate_filter_reason,
     )
     SuitLog("mage scan solve: loaded={} counts=[{}]".format(
         loaded,
@@ -3808,9 +4547,11 @@ def _suit_scan_saved_mage_plan(body, update_rows=True, required=True, plan_filte
     plan = _suit_solve_mage(
         candidates_by_slot,
         plan_filter=plan_filter,
-        include_required_rows=include_required_rows,
         choose_optional=choose_optional,
         solve_label=solve_label,
+        require_balanced_highs=require_balanced_highs,
+        required_resist_rows_per_piece=required_resist_rows_per_piece,
+        max_imbued_pieces=max_imbued_pieces,
     )
     if not plan:
         SuitLog("mage scan solve failed: no README-valid six-piece plan loaded={} counts=[{}]".format(
@@ -3827,16 +4568,17 @@ def _suit_scan_saved_mage_plan(body, update_rows=True, required=True, plan_filte
         return {}, candidates_by_slot, loaded, None
 
     counts = _suit_high_counts(plan)
-    missing, overflow, spread = _suit_high_balance_score(plan)
-    if missing or overflow:
-        SuitLog("mage scan solve rejected: unbalanced highs={} missing={} overflow={} spread={}".format(
-            _suit_high_count_text(counts),
-            missing,
-            overflow,
-            spread,
-        ))
-        _suit_preview_mage_candidates(candidates_by_slot, slot_names, update_rows)
-        return {}, candidates_by_slot, loaded, None
+    if require_balanced_highs:
+        missing, overflow, spread = _suit_high_balance_score(plan)
+        if missing or overflow:
+            SuitLog("mage scan solve rejected: unbalanced highs={} missing={} overflow={} spread={}".format(
+                _suit_high_count_text(counts),
+                missing,
+                overflow,
+                spread,
+            ))
+            _suit_preview_mage_candidates(candidates_by_slot, slot_names, update_rows)
+            return {}, candidates_by_slot, loaded, None
 
     selected_by_slot = dict((piece.get("Slot"), piece) for piece in plan)
     SuitLog("mage scan solve selected: selected={} highs={} totals={} pieces={}".format(
@@ -4104,15 +4846,8 @@ def _suit_preview_mage_candidates(candidates_by_slot, slot_names, update_rows=Tr
     combo = _suit_best_available_mage_combo(candidates_by_slot, slot_names)
     if not update_rows:
         return combo
-    for piece in combo:
-        slot_name = piece.get("Slot")
-        _suit_update_slot(
-            slot_name,
-            piece["Serial"],
-            "Saved candidate",
-            _suit_resist_text(piece["Resists"]),
-            _suit_high_text(piece.get("HighResists", ())),
-        )
+    if combo:
+        _suit_display_combo_rows(combo, slot_names, status="Current Best")
     return combo
 
 
@@ -4175,6 +4910,7 @@ def _suit_refresh_active_mage_combo(candidates_by_slot, active_by_slot, slot_nam
     for piece in combo:
         active_by_slot[piece.get("Slot")] = piece
     if combo:
+        _suit_display_combo_rows(combo, slot_names, status="Current Best")
         SuitLog("mage active preview: highs={} totals={} pieces={}".format(
             _suit_high_count_text(_suit_high_counts(combo)),
             _suit_resist_text(_suit_combo_totals(combo)),
@@ -4184,6 +4920,11 @@ def _suit_refresh_active_mage_combo(candidates_by_slot, active_by_slot, slot_nam
 
 
 def _suit_choose_next_mage_craft_slot(candidates_by_slot, active_by_slot, slot_names):
+    missing_saved = [slot_name for slot_name in slot_names if not candidates_by_slot.get(slot_name)]
+    if missing_saved:
+        slot_name = missing_saved[0]
+        return slot_name, "Missing saved candidate"
+
     missing_active = [slot_name for slot_name in slot_names if not active_by_slot.get(slot_name)]
     if missing_active:
         slot_name = missing_active[0]
@@ -4398,10 +5139,12 @@ class MysticLlamasCalculator(GumpControlMixin):
         self._drawGump = None
         self._running = True
         self.bufferInput = None
+        self.queenSoulForgeSlotInput = None
         self.staminaInput = None
         self.ssiInput = None
         self.materialScrollArea = None
         self.materialTableWidth = 0
+        self.materialTableHeight = 0
         self.materialQtyX = 0
         self.mainControls = []
         self.pickerControls = []
@@ -4410,9 +5153,12 @@ class MysticLlamasCalculator(GumpControlMixin):
         self.suitExpectedControls = {}
         self.suitScanControls = {}
         self.suitFooterGump = None
+        self.soulForgeDetailControls = []
         self.pickerSlots = []
         self.controls = {}
         self._last_ui_snapshot = None
+        self._last_material_inputs = None
+        self._last_material_items = ()
         self._active_picker_tab = False
         self._showGump()
         self.updateControls(force=True)
@@ -4422,9 +5168,12 @@ class MysticLlamasCalculator(GumpControlMixin):
             return False
         if self.gump:
             self.gump.tick()
-            for subGump, _, _ in self.gump.subGumps:
-                if subGump._running and not subGump.gump.IsDisposed:
-                    subGump.tick()
+            for subGump, _, always_visible in self.gump.subGumps:
+                if not subGump._running or subGump.gump.IsDisposed:
+                    continue
+                if not always_visible and not getattr(subGump.gump, "IsVisible", False):
+                    continue
+                subGump.tick()
             self.gump.tickSubGumps()
             if self.gump.gump.IsDisposed:
                 self._onClose()
@@ -4462,6 +5211,7 @@ class MysticLlamasCalculator(GumpControlMixin):
                 self.gump.setActiveTab(state.get("PickerReturnTab", "Imbuing"))
             self._active_picker_tab = False
 
+        self._sync_inputs()
         snapshot = self._make_ui_snapshot()
         if not force and snapshot == self._last_ui_snapshot:
             return
@@ -4479,6 +5229,32 @@ class MysticLlamasCalculator(GumpControlMixin):
         self._update_picker()
         self._set_status(state.get("Msg", ""))
 
+    def _material_inputs_snapshot(self):
+        rows = tuple(
+            (
+                row.get("Prop"),
+                row.get("Val"),
+                row.get("Mode"),
+                row.get("ImbueTargetVal"),
+            )
+            for row in state.get("Rows", [])
+        )
+        scanned_props = tuple(sorted(state.get("ScannedProps", {}).items()))
+        return (
+            state.get("Category"),
+            state.get("ItemName"),
+            state.get("CustomMode", False),
+            rows,
+            scanned_props,
+        )
+
+    def _compiled_material_items(self):
+        inputs = self._material_inputs_snapshot()
+        if inputs != self._last_material_inputs:
+            self._last_material_inputs = inputs
+            self._last_material_items = tuple(sorted(CompileIngredients().items()))
+        return self._last_material_items
+
     def _make_ui_snapshot(self):
         rows = tuple((row.get("Prop"), row.get("Val")) for row in state.get("Rows", []))
         suit_rows = tuple(
@@ -4491,7 +5267,7 @@ class MysticLlamasCalculator(GumpControlMixin):
             )
             for row in state.get("SuitRows", [])
         )
-        materials = tuple(sorted(CompileIngredients().items()))
+        materials = self._compiled_material_items()
         return (
             state.get("PickerOpen", False),
             state.get("PickerMode"),
@@ -4509,6 +5285,9 @@ class MysticLlamasCalculator(GumpControlMixin):
             state.get("GemBuffer", "0"),
             state.get("MatCont", 0),
             state.get("GemCont", 0),
+            state.get("UseQueenSoulForge", False),
+            state.get("QueenSoulForgeRunebook", 0),
+            state.get("QueenSoulForgeSlot", ""),
             state.get("CalcWeaponName", ""),
             state.get("StaminaInput", "0"),
             state.get("SSIInput", "0"),
@@ -4539,6 +5318,9 @@ class MysticLlamasCalculator(GumpControlMixin):
             self._sync_inputs()
             state["Msg"] = ""
             fn()
+        except _ImbueStopRequested as e:
+            state["Msg"] = str(e)
+            DebugLog(str(e), 55)
         except Exception as e:
             if state.get("SuitScanActive"):
                 _suit_scan_progress_finish("Scan failed.")
@@ -4883,7 +5665,7 @@ class MysticLlamasCalculator(GumpControlMixin):
             return "Complete", "chosen"
         if "saved" in lower:
             return "Saved", "chosen"
-        if "chosen" in lower or "select" in lower or lower.startswith("good "):
+        if "chosen" in lower or "select" in lower or "best" in lower or lower.startswith("good "):
             return self._suit_status_display(status_text), "chosen"
         if "fail" in lower or "reject" in lower:
             return "Failed", "failed"
@@ -5153,7 +5935,10 @@ class MysticLlamasCalculator(GumpControlMixin):
 
     def _set_button_text(self, control, text):
         if control:
-            self._set_text(control.get("label"), text)
+            if isinstance(control, dict):
+                self._set_text(control.get("label"), text)
+            else:
+                self._set_text(control, text)
 
 
 
@@ -5164,6 +5949,7 @@ class MysticLlamasCalculator(GumpControlMixin):
         self._set_checked(self.controls["customCheck"], state.get("CustomMode", False))
         self._set_checked(self.controls["exceptionalCheck"], state.get("Exceptional", False))
         self._set_checked(self.controls["whetstoneCheck"], state.get("Whetstone", False))
+        self._set_checked(self.controls.get("queenSoulForgeCheck"), state.get("UseQueenSoulForge", False))
         target = state.get("ImbueTarget", 0)
         target_text = "Target: 0x{:X}".format(target) if target else "No imbue target"
         self._set_text(self.controls["targetLabel"], target_text)
@@ -5183,6 +5969,7 @@ class MysticLlamasCalculator(GumpControlMixin):
             self._set_visible(controls["row"], main_visible)
             self._set_visible(controls["select"], main_visible and not locked)
             self._set_visible(controls["max"], main_visible and not locked)
+            self._set_visible(controls["reset"], main_visible)
             self._set_visible(controls["locked"], main_visible and locked)
             self._set_visible(controls["input"], main_visible)
             self._set_visible(controls["weight"], main_visible)
@@ -5194,6 +5981,7 @@ class MysticLlamasCalculator(GumpControlMixin):
         selected_preset = state.get("SelectedPreset", PRESET_CUSTOM)
         self._set_checked(self.controls.get("presetCustom"), selected_preset == PRESET_CUSTOM)
         self._set_checked(self.controls.get("presetBasicLrc"), selected_preset == "Basic LRC")
+        self._set_checked(self.controls.get("presetDexxer"), selected_preset == "Dexxer")
 
 
 
@@ -5218,6 +6006,15 @@ class MysticLlamasCalculator(GumpControlMixin):
     def _set_suit_preset(self, preset):
         state["SuitPreset"] = _suit_preset_for_key(preset).key
         _save_settings()
+
+
+    def _show_suit_preset_help(self, preset_key):
+        preset = _suit_preset_for_key(preset_key)
+        text = getattr(preset, "description", "") or "{} preset.".format(preset.label)
+        short_text = "{} help sent to journal.".format(preset.label)
+        state["SuitMsg"] = short_text
+        state["Msg"] = short_text
+        Misc.SendMessage("[Suit Preset] {}: {}".format(preset.label, text), 55)
 
 
     def _set_suit_material(self, material_key):
@@ -5372,24 +6169,35 @@ class MysticLlamasCalculator(GumpControlMixin):
         self._set_visible(self.controls["closePickerButton"], True)
 
     def _sync_inputs(self):
-        if self.bufferInput:
-            state["GemBuffer"] = (str(self.bufferInput.Text).strip() or "0")
+        if state.get("GemBuffer") != IMBUE_GEM_RESERVE:
+            state["GemBuffer"] = IMBUE_GEM_RESERVE
             _save_settings()
+        if self.queenSoulForgeSlotInput:
+            soulforge_slot = _clean_queen_soulforge_slot(self.queenSoulForgeSlotInput.Text, "")
+            if state.get("QueenSoulForgeSlot", "") != soulforge_slot:
+                state["QueenSoulForgeSlot"] = soulforge_slot
+                _save_settings()
         if self.staminaInput:
             state["StaminaInput"] = str(self.staminaInput.Text)
         if self.ssiInput:
             state["SSIInput"] = str(self.ssiInput.Text)
-        for i, controls in enumerate(self.rowControls):
-            if i >= len(state["Rows"]):
-                continue
-            box = controls["input"]
-            prop = state["Rows"][i]["Prop"]
-            if prop == "None":
-                continue
-            new_val = self._clamp_value(prop, self._parse_int(box.Text, state["Rows"][i]["Val"]))
-            if state["Rows"][i]["Val"] != new_val:
-                state["SelectedPreset"] = PRESET_CUSTOM
-            state["Rows"][i]["Val"] = new_val
+        skip_row_sync = bool(state.pop("_SkipRowInputSyncOnce", False))
+        rows_changed = False
+        if not skip_row_sync:
+            for i, controls in enumerate(self.rowControls):
+                if i >= len(state["Rows"]):
+                    continue
+                box = controls["input"]
+                prop = state["Rows"][i]["Prop"]
+                if prop == "None":
+                    continue
+                new_val = self._clamp_value(prop, self._parse_int(box.Text, state["Rows"][i]["Val"]))
+                if state["Rows"][i]["Val"] != new_val:
+                    state["SelectedPreset"] = PRESET_CUSTOM
+                    state["Rows"][i]["Val"] = new_val
+                    rows_changed = True
+        if rows_changed:
+            _save_current_imbue_rows()
 
     def _input_bounds(self, prop):
         if prop == "Mage Weapon":
@@ -5419,10 +6227,21 @@ class MysticLlamasCalculator(GumpControlMixin):
             old_states = PreUpdateLeeches()
             state["Rows"][idx]["Val"] = GetDynamicMax(prop)
             PostUpdateLeeches(old_states)
+            _save_current_imbue_rows()
+
+    def _reset_row(self, idx):
+        if idx < 0 or idx >= len(state["Rows"]):
+            return
+        state["SelectedPreset"] = PRESET_CUSTOM
+        old_states = PreUpdateLeeches()
+        state["Rows"][idx]["Prop"] = "None"
+        state["Rows"][idx]["Val"] = 0
+        PostUpdateLeeches(old_states)
+        _save_current_imbue_rows()
 
     def _apply_preset(self, preset_name):
-        state["SelectedPreset"] = preset_name
         if preset_name == PRESET_CUSTOM:
+            state["SelectedPreset"] = PRESET_CUSTOM
             return
 
         preset = next((p for p in IMBUING_PRESETS if p["Name"] == preset_name), None)
@@ -5430,18 +6249,34 @@ class MysticLlamasCalculator(GumpControlMixin):
             state["SelectedPreset"] = PRESET_CUSTOM
             return
 
-        old_states = PreUpdateLeeches()
-        rows = []
         active_db = GetActiveDB()
+        current_props = set(row.get("Prop", "None") for row in state["Rows"] if row.get("Prop", "None") != "None")
+        additions = []
         for prop, value in preset["Rows"]:
-            if prop in active_db and prop in BASE_PROPS:
-                rows.append({"Prop": prop, "Val": self._clamp_value(prop, value)})
-            else:
-                rows.append({"Prop": "None", "Val": 0})
-        while len(rows) < len(state["Rows"]):
-            rows.append({"Prop": "None", "Val": 0})
-        state["Rows"] = rows[: len(state["Rows"])]
+            if prop not in active_db or prop not in BASE_PROPS or prop in current_props:
+                continue
+            additions.append({"Prop": prop, "Val": self._clamp_value(prop, value)})
+
+        if not additions:
+            state["SelectedPreset"] = preset_name
+            state["Msg"] = "{} already present.".format(preset_name)
+            return
+
+        free_indices = [i for i, row in enumerate(state["Rows"]) if row.get("Prop", "None") == "None"]
+        if len(free_indices) < len(additions):
+            state["Msg"] = "{} needs {} free rows; only {} free.".format(preset_name, len(additions), len(free_indices))
+            Misc.SendMessage(state["Msg"], 33)
+            return
+
+        old_states = PreUpdateLeeches()
+        for row_index, addition in zip(free_indices, additions):
+            state["Rows"][row_index]["Prop"] = addition["Prop"]
+            state["Rows"][row_index]["Val"] = addition["Val"]
         PostUpdateLeeches(old_states)
+        state["SelectedPreset"] = preset_name
+        state["Msg"] = "{} added.".format(preset_name)
+        state["_SkipRowInputSyncOnce"] = True
+        _save_current_imbue_rows()
 
     def _toggle_exceptional(self):
         old_states = PreUpdateLeeches()
@@ -5462,6 +6297,10 @@ class MysticLlamasCalculator(GumpControlMixin):
         old_states = PreUpdateLeeches()
         state["Whetstone"] = not state["Whetstone"]
         PostUpdateLeeches(old_states)
+
+    def _toggle_queen_soulforge(self):
+        state["UseQueenSoulForge"] = not state.get("UseQueenSoulForge", False)
+        _save_settings()
 
     def _target_container(self, key, prompt):
         state["Msg"] = prompt + "..."
@@ -5592,6 +6431,7 @@ class MysticLlamasCalculator(GumpControlMixin):
             else:
                 state["Rows"][target_row]["Val"] = 1
             state["PickerOpen"] = False
+            _save_current_imbue_rows()
         elif mode == "SpeedCategories":
             state["CalcSelectedSpeedCat"] = selection
             state["PickerMode"] = "SpeedWeapons"
@@ -5682,12 +6522,11 @@ class MysticLlamasCalculator(GumpControlMixin):
         x = panel["x"] + 10
         y = panel["y"] + 22
         row_w = panel["width"] - 20
-        for row_y in (y - 2, y + 26, y + 52):
+        for row_y in (y - 2, y + 26):
             self._addFlatRow(x - 6, row_y, row_w, 21, "main")
-        self._addLabel("Reserve", x, y + 3, Gump.hues["muted"])
-        self.bufferInput = self._addInput(str(state.get("GemBuffer", "0") or "0"), x + 88, y - 1, 0, 999, width=72, height=24)
-        self.controls["matButton"] = self._addSettingAction("Select material container", x + 4, y + 29, lambda: self._target_container("MatCont", "Select Material Container"), group="main")
-        self.controls["gemButton"] = self._addSettingAction("Select gem container", x + 4, y + 55, lambda: self._target_container("GemCont", "Select Gem Container"), group="main")
+        self.bufferInput = None
+        self.controls["matButton"] = self._addSettingAction("Select material container", x + 4, y + 3, lambda: self._target_container("MatCont", "Select Material Container"), group="main")
+        self.controls["gemButton"] = self._addSettingAction("Select gem container", x + 4, y + 29, lambda: self._target_container("GemCont", "Select Gem Container"), group="main")
 
 
 
@@ -5771,6 +6610,16 @@ class MysticLlamasCalculator(GumpControlMixin):
                 lambda preset_key=preset.key: self._set_suit_preset(preset_key),
                 group="suit",
             )
+            self._addButton(
+                "?",
+                px + prow_w - 22,
+                row_y + 1,
+                18,
+                height=20,
+                callback=lambda preset_key=preset.key: self._show_suit_preset_help(preset_key),
+                fontSize=10,
+                group="suit",
+            )
 
         settings = self._addPanel(8, 202, self.PANEL_WIDTH, 74, title="Settings", group="suit")
         settings_x = settings["x"] + 10
@@ -5849,6 +6698,20 @@ class MysticLlamasCalculator(GumpControlMixin):
         }
         self._set_visible(self.suitScanControls, False)
 
+    def _set_suit_footer_visible(self, visible):
+        if not self.suitFooterGump:
+            return
+        try:
+            self.suitFooterGump.gump.IsVisible = bool(visible)
+        except Exception:
+            pass
+        try:
+            sub_state = self.gump._subGumpStates.get(self.suitFooterGump)
+            if sub_state is not None:
+                sub_state["visible"] = bool(visible)
+        except Exception:
+            pass
+
     def _draw_picker(self, g):
         self.pickerSlots = []
         panel = self._addSectionPanel("", "Select", 8, 44, self.PANEL_WIDTH, 548, group="picker")
@@ -5877,7 +6740,7 @@ class MysticLlamasCalculator(GumpControlMixin):
         except Exception:
             pass
 
-        imbueGump = g.addTabButton("Imbuing", "caster", self.PAGE_WIDTH, yOffset=52, withStatus=False, tabStyle="list")
+        imbueGump = g.addTabButton("Imbuing", "caster", self.PAGE_WIDTH, callback=lambda: self._set_suit_footer_visible(False), yOffset=52, withStatus=False, tabStyle="list")
         self._drawGump = imbueGump
         imbueGump.addTitle("MYSTIC LLAMAS IMBUING", hue=Gump.hues["text"])
         self._draw_item_properties(imbueGump)
@@ -5885,17 +6748,17 @@ class MysticLlamasCalculator(GumpControlMixin):
         self._draw_rows(imbueGump)
         self._draw_material_costs(imbueGump)
 
-        speedGump = g.addTabButton("Swing Speed", "bard", self.PAGE_WIDTH, yOffset=52, withStatus=False, tabStyle="list")
+        speedGump = g.addTabButton("Swing Speed", "bard", self.PAGE_WIDTH, callback=lambda: self._set_suit_footer_visible(False), yOffset=52, withStatus=False, tabStyle="list")
         self._drawGump = speedGump
         speedGump.addTitle("SWING SPEED INCREASE", hue=Gump.hues["text"])
         self._draw_speed_calc(speedGump)
 
-        suitGump = g.addTabButton("Suits", "caster", self.PAGE_WIDTH, yOffset=52, withStatus=False, label="Suit Builder", tabStyle="list")
+        suitGump = g.addTabButton("Suits", "caster", self.PAGE_WIDTH, callback=lambda: self._set_suit_footer_visible(True), yOffset=52, withStatus=False, label="Suit Builder", tabStyle="list")
         self._drawGump = suitGump
         suitGump.addTitle("SUIT CRAFTING", hue=Gump.hues["text"])
         self._draw_suits(suitGump)
 
-        self.suitFooterGump = g.createSubGump(self.WIDTH + self.PAGE_WIDTH, 100, "bottom", withStatus=True)
+        self.suitFooterGump = g.createSubGump(self.WIDTH + self.PAGE_WIDTH, 100, "bottom", withStatus=True, alwaysVisible=False)
         self._draw_suit_footer(self.suitFooterGump)
 
         pickerGump = g.createSubGump(self.PAGE_WIDTH, self.HEIGHT, "right", withStatus=False, alwaysVisible=False)
@@ -5938,21 +6801,22 @@ class MysticLlamasCalculator(GumpControlMixin):
         self._addLabel("Property", x + 88, y, Gump.hues["muted"])
         self._addLabel("Val", x + 236, y, Gump.hues["muted"])
         self._addLabel("Weight", x + 312, y, Gump.hues["muted"])
-        self._addButton("Calc", x + row_w - 40, y - 2, 36, height=20, callback=self._recalculate_materials, fontSize=9, group="main")
         for i, row in enumerate(state["Rows"]):
             row_y = y + 22 + i * 21
             row_control = {
                 "row": self._addFlatRow(x - 6, row_y - 1, row_w, 20, "main"),
-                "select": self._addButton("", x + 8, row_y - 1, 204, height=20, callback=lambda idx=i: self._open_property_picker(idx), fontSize=9, group=None),
+                "select": self._addButton("", x + 8, row_y - 1, 204, height=20, callback=lambda idx=i: self._open_property_picker(idx), fontSize=11, group=None),
                 "locked": self._addLabel("", x + 12, row_y, Gump.hues["muted"], group=None),
                 "input": self._addInput(str(row["Val"]), x + 230, row_y - 1, 0, 999, width=50, height=20, group=None),
                 "max": self._addMaxButton(x + 292, row_y - 1, lambda idx=i: self._max_row(idx), group=None),
+                "reset": self._addButton("X", x + 320, row_y - 1, 20, height=20, callback=lambda idx=i: self._reset_row(idx), fontSize=10, group=None),
                 "weight": self._addLabel("", x + 360, row_y, Gump.hues["text"], group=None),
             }
             self.rowControls.append(row_control)
         total_y = y + 126
         self._addLabel("Total Weight", x + 226, total_y + 3, Gump.hues["muted"])
         self.controls["totalWeightLabel"] = self._addLabel("", x + 334, total_y + 3, Gump.hues["text"])
+        self._addButton("Calc", x + row_w - 44, total_y + 1, 40, height=20, callback=self._recalculate_materials, fontSize=11, group="main")
 
         preset_y = total_y + 24
         self._addLabel("Preset", x, preset_y + 3, Gump.hues["muted"])
@@ -5973,14 +6837,24 @@ class MysticLlamasCalculator(GumpControlMixin):
             lambda: self._apply_preset("Basic LRC"),
             group="main",
         )
+        self.controls["presetDexxer"] = self._addRadio(
+            "Dexxer",
+            x + 278,
+            preset_y,
+            selected_preset == "Dexxer",
+            lambda: self._apply_preset("Dexxer"),
+            group="main",
+        )
     def _draw_material_costs(self, g):
-        panel = self._addSectionPanel(4, "Materials Cost", 8, 496, self.PANEL_WIDTH, 116)
+        panel = self._addSectionPanel(4, "Materials Cost", 8, 496, self.PANEL_WIDTH, self.HEIGHT - 504)
         x = panel["x"] + 10
         y = panel["y"] + 18
         scroll_y = y + 18
         scroll_width = panel["width"] - 20
-        scroll_height = 34
+        start_button_y = panel["y"] + panel["height"] - 28
+        scroll_height = max(34, start_button_y - scroll_y - 4)
         self.materialTableWidth = scroll_width - 18
+        self.materialTableHeight = scroll_height
         self.materialQtyX = self.materialTableWidth - 86
         self._addLabel("Material", x + 20, y, Gump.hues["muted"])
         self._addLabel("Qty", x + self.materialQtyX, y, Gump.hues["muted"])
@@ -5993,7 +6867,7 @@ class MysticLlamasCalculator(GumpControlMixin):
         self.controls["startImbuingButton"] = self._addButton(
             "Start Imbuing",
             x - 4,
-            panel["y"] + panel["height"] - 28,
+            start_button_y,
             scroll_width,
             height=24,
             callback=AutoImbue,
@@ -6003,19 +6877,30 @@ class MysticLlamasCalculator(GumpControlMixin):
 
     def _update_materials(self):
         main_visible = True
-        self._set_input_text(self.bufferInput, state.get("GemBuffer", "0") or "0")
-        self._set_button_text(self.controls["matButton"], self._container_text("Mats", state.get("MatCont", 0)))
-        self._set_button_text(self.controls["gemButton"], self._container_text("Gems", state.get("GemCont", 0)))
-        items = sorted(CompileIngredients().items())
+        state["GemBuffer"] = IMBUE_GEM_RESERVE
+        mat_serial = int(state.get("MatCont", 0) or 0)
+        gem_serial = int(state.get("GemCont", 0) or 0)
+        self._set_button_text(self.controls["matButton"], "[0x{:X}]".format(mat_serial) if mat_serial else "Not set")
+        self._set_button_text(self.controls["gemButton"], "[0x{:X}]".format(gem_serial) if gem_serial else "Not set")
+        soulforge_enabled = bool(state.get("UseQueenSoulForge", False))
+        runebook_serial = int(state.get("QueenSoulForgeRunebook", 0) or 0)
+        self._set_button_text(self.controls.get("queenSoulForgeRunebookValue"), "[0x{:X}]".format(runebook_serial) if runebook_serial else "Not set")
+        self._set_input_text(self.queenSoulForgeSlotInput, _clean_queen_soulforge_slot(state.get("QueenSoulForgeSlot", ""), "1"))
+        self._set_visible(self.soulForgeDetailControls, soulforge_enabled)
+        items = list(self._compiled_material_items())
         self._set_visible(self.controls["noMaterialsLabel"], main_visible and not items)
         self._set_text(self.controls["noMaterialsLabel"], "No materials required.")
         if self.materialScrollArea:
             self.materialScrollArea.Clear()
             ui = self._ui_gump()
-            for index, (name, amount) in enumerate(items):
+            visible_rows = max(len(items), int(math.ceil(float(max(1, self.materialTableHeight)) / 16.0)))
+            for index in range(visible_rows):
                 row_y = index * 16
                 ui.addColorBox(0, row_y, 15, self.materialTableWidth, Gump.theme["row"], 0.42, container=self.materialScrollArea)
                 ui.addColorBox(0, row_y + 15, 1, self.materialTableWidth, "#000000", 0.32, container=self.materialScrollArea)
+                if index >= len(items):
+                    continue
+                name, amount = items[index]
                 graphic_data = INGREDIENT_GRAPHICS.get(name)
                 if graphic_data:
                     try:
@@ -6028,6 +6913,201 @@ class MysticLlamasCalculator(GumpControlMixin):
         self._set_text(self.controls["moreMaterialsLabel"], count_text)
         self._set_visible(self.controls["moreMaterialsIcon"], main_visible and bool(items))
         self._set_visible(self.controls["moreMaterialsLabel"], main_visible and bool(items))
+
+    def _add_invisible_hit(self, x, y, width, height, callback):
+        hit_target = API.CreateGumpColorBox(0.01, "#000000")
+        hit_target.SetX(x)
+        hit_target.SetY(y)
+        hit_target.SetWidth(width)
+        hit_target.SetHeight(height)
+        API.AddControlOnClick(hit_target, self._callback(callback))
+        self._ui_gump().gump.Add(hit_target)
+        return hit_target
+
+    def _add_select_action(self, text, x, y, callback, width=204):
+        button = self._addNativeCircleButton("radioBlue", x, y - 1, callback, group="main")
+        label = self._addLabel(text, x + 28, y + 2, Gump.hues["text"], group="main")
+        hit_target = self._add_invisible_hit(x, y - 2, width, 22, callback)
+        return {"button": button, "label": label, "hitTarget": hit_target}
+
+    def _draw_item_properties(self, g):
+        panel = self._addSectionPanel(1, "SELECT ITEM", 8, 44, self.PANEL_WIDTH, 124)
+        x = panel["x"] + 10
+        y = panel["y"] + 22
+        row_w = panel["width"] - 20
+        label_x = x
+        value_x = x + 200
+        check_x = x + 340
+
+        for row_y in (y - 2, y + 25, y + 47, y + 69):
+            self._addFlatRow(x - 6, row_y, row_w, 21, "main")
+
+        self._addLabel("Item", label_x, y + 3, Gump.hues["muted"])
+        self._add_select_action("Select item", x + 54, y, AutoReadItem, width=116)
+        self.controls["targetLabel"] = self._addLabel("", value_x, y + 3, Gump.hues["muted"])
+        self._add_invisible_hit(x - 6, y - 2, row_w, 21, AutoReadItem)
+
+        type_y = y + 27
+        self._addLabel("Category", label_x, type_y, Gump.hues["muted"])
+        self.controls["categoryLabel"] = self._addLabel("", value_x, type_y, Gump.hues["text"])
+        self._addLabel("Group", label_x, type_y + 22, Gump.hues["muted"])
+        self.controls["groupLabel"] = self._addLabel("", value_x, type_y + 22, Gump.hues["text"])
+        self._addLabel("Base Item", label_x, type_y + 44, Gump.hues["muted"])
+        self.controls["itemLabel"] = self._addLabel("", value_x, type_y + 44, Gump.hues["text"])
+
+        self.controls["customCheck"] = self._addReadOnlyRadio("Custom", check_x, type_y, state.get("CustomMode", False), Gump.hues["muted"])
+        self.controls["exceptionalCheck"] = self._addReadOnlyRadio("Exceptional", check_x, type_y + 22, state.get("Exceptional", False), Gump.hues["muted"])
+        self.controls["whetstoneCheck"] = self._addReadOnlyRadio("Whetstone", check_x, type_y + 44, state.get("Whetstone", False), Gump.hues["muted"])
+
+    def _draw_settings(self, g):
+        panel = self._addSectionPanel(2, "SETTINGS", 8, 172, self.PANEL_WIDTH, 158)
+        x = panel["x"] + 10
+        y = panel["y"] + 22
+        row_w = panel["width"] - 20
+        label_x = x
+        value_x = x + 200
+
+        for row_y in (y - 2, y + 26, y + 52, y + 78, y + 104):
+            self._addFlatRow(x - 6, row_y, row_w, 21, "main")
+
+        self.bufferInput = None
+
+        self._add_select_action("Selected material container", label_x, y + 3, lambda: self._target_container("MatCont", "Select Material Container"), width=190)
+        self.controls["matButton"] = {"label": self._addLabel("", value_x, y + 3, Gump.hues["text"])}
+        self._add_invisible_hit(x - 6, y - 2, row_w, 21, lambda: self._target_container("MatCont", "Select Material Container"))
+
+        self._add_select_action("Selected gem container", label_x, y + 29, lambda: self._target_container("GemCont", "Select Gem Container"), width=190)
+        self.controls["gemButton"] = {"label": self._addLabel("", value_x, y + 29, Gump.hues["text"])}
+        self._add_invisible_hit(x - 6, y + 26, row_w, 21, lambda: self._target_container("GemCont", "Select Gem Container"))
+
+        self.controls["queenSoulForgeCheck"] = self._addRadio(
+            "Queen's SoulForge",
+            label_x,
+            y + 55,
+            state.get("UseQueenSoulForge", False),
+            self._toggle_queen_soulforge,
+            group="main",
+            hitWidth=180,
+        )
+
+        soulforge_row = self._addFlatRow(x - 6, y + 78, row_w, 21, "main")
+        runebook_action = self._add_select_action(
+            "Selected runebook",
+            label_x,
+            y + 81,
+            lambda: self._target_container("QueenSoulForgeRunebook", "Select Queen's SoulForge Runebook"),
+            width=190,
+        )
+        self.controls["queenSoulForgeRunebookValue"] = {"label": self._addLabel("", value_x, y + 81, Gump.hues["text"])}
+        runebook_hit = self._add_invisible_hit(x - 6, y + 78, row_w, 21, lambda: self._target_container("QueenSoulForgeRunebook", "Select Queen's SoulForge Runebook"))
+
+        slot_row = self._addFlatRow(x - 6, y + 104, row_w, 21, "main")
+        slot_label = self._addLabel("Runebook slot", label_x, y + 107, Gump.hues["text"])
+        self.queenSoulForgeSlotInput = self._addInput(_clean_queen_soulforge_slot(state.get("QueenSoulForgeSlot", ""), "1"), value_x, y + 103, 1, 999, width=72, height=24)
+        self.soulForgeDetailControls = [
+            soulforge_row,
+            runebook_action,
+            self.controls["queenSoulForgeRunebookValue"],
+            runebook_hit,
+            slot_row,
+            slot_label,
+            self.queenSoulForgeSlotInput,
+        ]
+
+    def _draw_rows(self, g):
+        panel = self._addSectionPanel(3, "PROPERTIES", 8, 334, self.PANEL_WIDTH, 206)
+        x = panel["x"] + 10
+        y = panel["y"] + 20
+        row_w = panel["width"] - 20
+        table_w = 382
+        divider_x = x + table_w + 12
+        preset_x = divider_x + 28
+
+        self._ui_gump().addColorBox(divider_x, y - 4, 168, 1, Gump.theme["panelHeaderLine"], 0.8)
+        self._ui_gump().addColorBox(divider_x - 3, y + 74, 7, 7, Gump.theme["bgInset"], 1)
+        self._ui_gump().addColorBox(divider_x - 2, y + 75, 5, 5, Gump.theme["frameHighlight"], 0.9)
+
+        self._addLabel("Property", x + 88, y, Gump.hues["muted"])
+        self._addLabel("Val", x + 236, y, Gump.hues["muted"])
+        self._addLabel("Weight", x + 312, y, Gump.hues["muted"])
+
+        for i, row in enumerate(state["Rows"]):
+            row_y = y + 22 + i * 21
+            row_control = {
+                "row": self._addFlatRow(x - 6, row_y - 1, table_w, 20, "main"),
+                "select": self._addButton("", x + 8, row_y - 1, 204, height=20, callback=lambda idx=i: self._open_property_picker(idx), fontSize=11, group=None),
+                "locked": self._addLabel("", x + 12, row_y, Gump.hues["muted"], group=None),
+                "input": self._addInput(str(row["Val"]), x + 230, row_y - 1, 0, 999, width=50, height=20, group=None),
+                "max": self._addMaxButton(x + 292, row_y - 1, lambda idx=i: self._max_row(idx), group=None),
+                "reset": self._addButton("X", x + 320, row_y - 1, 20, height=20, callback=lambda idx=i: self._reset_row(idx), fontSize=10, group=None),
+                "weight": self._addLabel("", x + 360, row_y, Gump.hues["text"], group=None),
+            }
+            self.rowControls.append(row_control)
+
+        total_y = y + 126
+        self._addLabel("Total Weight", x + 226, total_y + 3, Gump.hues["muted"])
+        self.controls["totalWeightLabel"] = self._addLabel("", x + 334, total_y + 3, Gump.hues["text"])
+
+        self._addLabel("Preset", preset_x, y + 2, Gump.hues["muted"])
+        self._addButton("Calc", x + table_w - 44, total_y + 23, 40, height=20, callback=self._recalculate_materials, fontSize=11, group="main")
+        selected_preset = state.get("SelectedPreset", PRESET_CUSTOM)
+        self.controls["presetCustom"] = self._addRadio(
+            PRESET_CUSTOM,
+            preset_x + 4,
+            y + 34,
+            selected_preset == PRESET_CUSTOM,
+            lambda: self._apply_preset(PRESET_CUSTOM),
+            group="main",
+            hitWidth=130,
+        )
+        self.controls["presetBasicLrc"] = self._addRadio(
+            "Basic LRC",
+            preset_x + 4,
+            y + 78,
+            selected_preset == "Basic LRC",
+            lambda: self._apply_preset("Basic LRC"),
+            group="main",
+            hitWidth=130,
+        )
+        self.controls["presetDexxer"] = self._addRadio(
+            "Dexxer",
+            preset_x + 4,
+            y + 122,
+            selected_preset == "Dexxer",
+            lambda: self._apply_preset("Dexxer"),
+            group="main",
+            hitWidth=130,
+        )
+
+    def _draw_material_costs(self, g):
+        panel = self._addSectionPanel(4, "MATERIALS COST", 8, 544, self.PANEL_WIDTH, self.HEIGHT - 552)
+        x = panel["x"] + 10
+        y = panel["y"] + 18
+        scroll_y = y + 18
+        scroll_width = panel["width"] - 20
+        start_button_y = panel["y"] + panel["height"] - 28
+        scroll_height = max(34, start_button_y - scroll_y - 8)
+        self.materialTableWidth = scroll_width - 18
+        self.materialTableHeight = scroll_height
+        self.materialQtyX = self.materialTableWidth - 156
+        self._addLabel("Material", x + 20, y, Gump.hues["muted"])
+        self._addLabel("Qty", x + self.materialQtyX, y, Gump.hues["muted"])
+        self.controls["noMaterialsLabel"] = self._addBoundedLabel("", x - 4, scroll_y + scroll_height // 2 - 8, scroll_width, 16, 12, Gump.theme["buttonText"], group=None, align="center")
+        self.materialScrollArea = self._ui_gump().addScrollArea(x - 4, scroll_y, scroll_width, scroll_height)
+        self._remember(self.materialScrollArea, "main")
+        count_y = y
+        self.controls["moreMaterialsIcon"] = self._addNativeCircleButton("radioBlue", x + 142, count_y - 2, None, group="main")
+        self.controls["moreMaterialsLabel"] = self._addLabel("", x + 170, count_y, Gump.hues["muted"], group="main")
+        self.controls["startImbuingButton"] = self._addButton(
+            "START IMBUING",
+            x - 4,
+            start_button_y,
+            scroll_width,
+            height=24,
+            callback=AutoImbue,
+            fontSize=12,
+            group="main",
+        )
 
 
 _APP = None
@@ -6042,6 +7122,8 @@ def main():
     global _APP
     API.SysMsg("Starting Imbuing & SSI Calculator", 65)
     DebugLog("Debug logging enabled. File={}".format(_debug_log_path()), 65)
+    FlowLog("script_start", debug_log=_debug_log_path(), flow_log=_flow_log_path())
+    DebugLog("Flow logging enabled. File={}".format(_flow_log_path()), 65)
     _APP = MysticLlamasCalculator()
     while not API.StopRequested and _APP.tick():
         API.Pause(0.1)

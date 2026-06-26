@@ -303,9 +303,11 @@ class Gump:
 
         now = time.time()
         if (now - self._lastCheckTime) >= self._checkInterval:
-            self.checkValidateForm()
+            if self.skillTextBoxes:
+                self.checkValidateForm()
             self._checkEvents()
-            self._updateHoverControls()
+            if self.hoverControls:
+                self._updateHoverControls()
             self._lastCheckTime = now
 
     def tickSubGumps(self):

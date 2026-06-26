@@ -1,4 +1,12 @@
-import API
+try:
+    from typing import TYPE_CHECKING
+except Exception:
+    TYPE_CHECKING = False
+
+if TYPE_CHECKING:
+    import API
+    pass
+# API is injected by TazUO at runtime; the import above is IDE-only.
 import importlib
 import traceback
 from LegionPath import LegionPath
@@ -97,8 +105,15 @@ class QuickTravel:
             API.SysMsg(traceback.format_exc())
             self._onClose()
 
+    def _openBackpackIfClosed(self):
+        backpack = API.FindItem(API.Backpack)
+        if not backpack:
+            return
+        if not getattr(backpack, "Opened", False):
+            Util.openContainer(backpack)
+
     def _findRunebook(self):
-        Util.openContainer(API.Backpack)
+        self._openBackpackIfClosed()
         book = API.FindItem(self.config["runebookSerial"])
         if not book:
             raise Exception("Missing runebook")
@@ -158,7 +173,7 @@ class QuickTravel:
         return self._running
 
     def tick(self):
-        Util.openContainer(API.Backpack)
+        self._openBackpackIfClosed()
         if API.HasGump(999139):
             API.CloseGump(999139)
         if not self._running:
@@ -175,7 +190,6 @@ class QuickTravel:
 qt = QuickTravel()
 qt.main()
 while qt._isRunning():
-    qt.gump.tick()
-    qt.gump.tickSubGumps()
-    qt.tick()
+    if not qt.tick():
+        break
     API.Pause(0.1)

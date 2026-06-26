@@ -4,7 +4,15 @@
 # Author: Dozen
 # Version: 3.0.0 - Enhanced with UI Color Customization
 # Credits: Original concept by Reetus for ClassicAssist
-import API
+try:
+    from typing import TYPE_CHECKING
+except Exception:
+    TYPE_CHECKING = False
+
+if TYPE_CHECKING:
+    import API
+    pass
+# API is injected by TazUO at runtime; the import above is IDE-only.
 import time
 import threading
 import json

@@ -1,0 +1,158 @@
+{
+  "1120044870": {
+    "Category": "Armor",
+    "ItemName": "Armor",
+    "Rows": [
+      {
+        "Prop": "Physical Resist",
+        "Val": 15
+      },
+      {
+        "Prop": "Lower Mana Cost",
+        "Val": 8
+      },
+      {
+        "Prop": "Mana Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Stamina Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Hit Point Increase",
+        "Val": 3
+      }
+    ]
+  },
+  "1120076711": {
+    "Category": "Armor",
+    "ItemName": "Armor",
+    "Rows": [
+      {
+        "Prop": "Physical Resist",
+        "Val": 15
+      },
+      {
+        "Prop": "Lower Mana Cost",
+        "Val": 8
+      },
+      {
+        "Prop": "Mana Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Stamina Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Hit Point Increase",
+        "Val": 3
+      }
+    ]
+  },
+  "1129572176": {
+    "Category": "Armor",
+    "ItemName": "Armor",
+    "Rows": [
+      {
+        "Prop": "Physical Resist",
+        "Val": 15
+      },
+      {
+        "Prop": "Lower Mana Cost",
+        "Val": 8
+      },
+      {
+        "Prop": "Mana Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Stamina Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Hit Point Increase",
+        "Val": 3
+      }
+    ]
+  },
+  "1145260998": {
+    "Category": "Armor",
+    "ItemName": "Armor",
+    "Rows": [
+      {
+        "Prop": "Lower Mana Cost",
+        "Val": 8
+      },
+      {
+        "Prop": "Mana Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Stamina Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Hit Point Increase",
+        "Val": 5
+      },
+      {
+        "Prop": "Mana Regeneration",
+        "Val": 1
+      }
+    ]
+  },
+  "1146224759": {
+    "Category": "Armor",
+    "ItemName": "Armor",
+    "Rows": [
+      {
+        "Prop": "Fire Resist",
+        "Val": 19
+      },
+      {
+        "Prop": "Lower Mana Cost",
+        "Val": 8
+      },
+      {
+        "Prop": "Mana Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Stamina Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Hit Point Increase",
+        "Val": 2
+      }
+    ]
+  },
+  "1164906057": {
+    "Category": "Armor",
+    "ItemName": "Armor",
+    "Rows": [
+      {
+        "Prop": "Lower Mana Cost",
+        "Val": 8
+      },
+      {
+        "Prop": "Mana Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Stamina Increase",
+        "Val": 8
+      },
+      {
+        "Prop": "Hit Point Increase",
+        "Val": 5
+      },
+      {
+        "Prop": "Mana Regeneration",
+        "Val": 1
+      }
+    ]
+  }
+}

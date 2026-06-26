@@ -1,5 +1,15 @@
-import API
+try:
+    from typing import TYPE_CHECKING
+except Exception:
+    TYPE_CHECKING = False
+
+if TYPE_CHECKING:
+    import API
+    pass
+# API is injected by TazUO at runtime; the import above is IDE-only.
+import os
 import re
+import time
 from collections import OrderedDict
 
 craftingSkills = OrderedDict(
@@ -278,6 +288,82 @@ craftingSkills = OrderedDict(
             },
         ),
         (
+            "Bowcraft/Fletching",
+            {
+                "tool": {"id": 0x1022, "buttonId": 28},
+                "resource": {"amount": 200, "minAmount": 1},
+                "disposeMethod": "Trash",
+                "items": sorted(
+                    [
+                        {
+                            "skill": 35.0,
+                            "name": "Shafts",
+                            "id": 0x1BD4,
+                            "buttonId": 2,
+                            "resourceAmount": 1,
+                            "resourceId": 0x1BD7,
+                            "resourceHue": 0x0000,
+                        },
+                        {
+                            "skill": 55.0,
+                            "name": "Bows",
+                            "id": 0x13B2,
+                            "buttonId": 6,
+                            "resourceAmount": 7,
+                            "resourceId": 0x1BD7,
+                            "resourceHue": 0x0000,
+                        },
+                        {
+                            "skill": 60.0,
+                            "name": "Fukiya Darts",
+                            "id": 0x2806,
+                            "buttonId": 5,
+                            "resourceAmount": 1,
+                            "resourceId": 0x1BD7,
+                            "resourceHue": 0x0000,
+                        },
+                        {
+                            "skill": 70.0,
+                            "name": "Crossbows",
+                            "id": 0x0F4F,
+                            "buttonId": 7,
+                            "resourceAmount": 7,
+                            "resourceId": 0x1BD7,
+                            "resourceHue": 0x0000,
+                        },
+                        {
+                            "skill": 80.0,
+                            "name": "Composite Bows",
+                            "id": 0x26C2,
+                            "buttonId": 9,
+                            "resourceAmount": 7,
+                            "resourceId": 0x1BD7,
+                            "resourceHue": 0x0000,
+                        },
+                        {
+                            "skill": 90.0,
+                            "name": "Heavy Crossbows",
+                            "id": 0x13FD,
+                            "buttonId": 8,
+                            "resourceAmount": 10,
+                            "resourceId": 0x1BD7,
+                            "resourceHue": 0x0000,
+                        },
+                        {
+                            "skill": 100.0,
+                            "name": "Repeating Crossbows",
+                            "id": 0x26C3,
+                            "buttonId": 10,
+                            "resourceAmount": 10,
+                            "resourceId": 0x1BD7,
+                            "resourceHue": 0x0000,
+                        },
+                    ],
+                    key=lambda x: x["skill"],
+                ),
+            },
+        ),
+        (
             "Cartography",
             {
                 "tool": {"id": 0x0FC0, "buttonId": 29},
@@ -327,6 +413,116 @@ statusLabel = None
 TOOL_BUFFER_COUNT = 3
 TINKER_TOOL_IDS = [0x1EB9, 0x1EB8]
 
+try:
+    CRAFTER_DEBUG_LOG = os.path.join(
+        os.path.dirname(os.path.abspath(__file__)),
+        "Crafter.debug.log",
+    )
+except Exception:
+    CRAFTER_DEBUG_LOG = "Crafter.debug.log"
+
+
+def _debugHex(value):
+    try:
+        return hex(int(value))
+    except Exception:
+        return str(value)
+
+
+def _debugSerial(value):
+    return _debugHex(getattr(value, "Serial", value))
+
+
+def _debugItemSummary(item):
+    if not item:
+        return "None"
+
+    serial = _debugSerial(item)
+    graphic = _debugHex(getattr(item, "Graphic", None))
+    hue = _debugHex(getattr(item, "Hue", None))
+    amount = getattr(item, "Amount", None)
+    container = _debugHex(getattr(item, "Container", None))
+    return (
+        f"serial={serial} graphic={graphic} hue={hue} "
+        f"amount={amount} container={container}"
+    )
+
+
+def debugLog(message):
+    try:
+        stamp = time.strftime("%Y-%m-%d %H:%M:%S")
+        with open(CRAFTER_DEBUG_LOG, "a") as logFile:
+            logFile.write(f"{stamp} {message}\n")
+    except Exception:
+        pass
+
+
+def _debugNotifyLogPath():
+    try:
+        API.SysMsg(f"Crafter debug log: {CRAFTER_DEBUG_LOG}", 48)
+    except Exception:
+        pass
+
+
+def _debugContainerContents(container):
+    try:
+        return API.Contents(getattr(container, "Serial", container))
+    except Exception as e:
+        return f"error={e}"
+
+
+def _debugMatchingItems(label, resourceId, container, resourceHue):
+    containerSerial = getattr(container, "Serial", container)
+    debugLog(
+        f"{label} container={_debugSerial(containerSerial)} "
+        f"contents={_debugContainerContents(containerSerial)}"
+    )
+
+    for mode, hue in [("hue-match", resourceHue), ("any-hue", None)]:
+        try:
+            if hue is None:
+                items = API.FindTypeAll(resourceId, containerSerial) or []
+            else:
+                items = API.FindTypeAll(resourceId, containerSerial, hue=hue) or []
+            summaries = [_debugItemSummary(item) for item in items[:10]]
+            debugLog(
+                f"{label} {mode} findTypeAll count={len(items)} "
+                f"items={summaries}"
+            )
+        except Exception as e:
+            debugLog(f"{label} {mode} findTypeAll error={e}")
+
+    try:
+        items = API.ItemsInContainer(containerSerial, True) or []
+        matches = [
+            item
+            for item in items
+            if getattr(item, "Graphic", None) == resourceId
+        ]
+        summaries = [_debugItemSummary(item) for item in matches[:10]]
+        debugLog(
+            f"{label} recursive graphic-match count={len(matches)} "
+            f"items={summaries}"
+        )
+    except Exception as e:
+        debugLog(f"{label} recursive graphic-match error={e}")
+
+
+def _debugResourceSnapshot(reason, item, resourceId, resourceHue):
+    debugLog(
+        f"resource snapshot reason={reason} item={item.get('name')} "
+        f"resourceId={_debugHex(resourceId)} resourceHue={_debugHex(resourceHue)} "
+        f"backpack={_debugSerial(API.Backpack)} chest={_debugSerial(resourceChestSerial)}"
+    )
+    _debugMatchingItems("backpack", resourceId, API.Backpack, resourceHue)
+    _debugMatchingItems("resourceChest", resourceId, resourceChestSerial, resourceHue)
+
+
+def findResource(resourceId, container, resourceHue, minamount=0):
+    if resourceHue is None:
+        return API.FindType(resourceId, container, minamount=minamount)
+    return API.FindType(resourceId, container, hue=resourceHue, minamount=minamount)
+
 
 def getSkill(skillName):
     skill = API.GetSkill(skillName)
@@ -337,18 +533,167 @@ def getSkill(skillName):
 
 def getContents(findTypeReturn):
     if not findTypeReturn:
-        return {"items": None, "stones": None}
+        return {"items": None, "itemMax": None, "stones": None, "stoneMax": None}
     props = API.ItemNameAndProps(findTypeReturn.Serial, True).split("\n")
     for prop in props:
         if "Contents" in prop:
             match = re.search(
-                r"Contents:\s*(\d+)/\d+\s+Items,\s*(\d+)/\d+\s+Stones", prop
+                r"Content[s]?:\s*(\d+)(?:/(\d+))?\s+Items,\s*(\d+)(?:/(\d+))?\s+Stones",
+                prop,
             )
             if match:
-                result = {"items": float(match.group(1)), "stones": float(match.group(2))}
+                result = {
+                    "items": float(match.group(1)),
+                    "itemMax": float(match.group(2)) if match.group(2) else None,
+                    "stones": float(match.group(3)),
+                    "stoneMax": float(match.group(4)) if match.group(4) else None,
+                }
             else:
-                result = {"items": None, "stones": None}
+                result = {
+                    "items": None,
+                    "itemMax": None,
+                    "stones": None,
+                    "stoneMax": None,
+                }
             return result
+    return {"items": None, "itemMax": None, "stones": None, "stoneMax": None}
+
+
+def _containerFullByContents(contents):
+    items = contents.get("items")
+    itemMax = contents.get("itemMax")
+    stones = contents.get("stones")
+    stoneMax = contents.get("stoneMax")
+
+    if items is not None and itemMax is not None and items >= itemMax:
+        return True
+    if stones is not None and stoneMax is not None and stones >= stoneMax:
+        return True
+    if items is not None and itemMax is None and items >= 125:
+        return True
+    return False
+
+
+def _contentsText(contents):
+    return (
+        f"items={contents.get('items')}/{contents.get('itemMax')} "
+        f"stones={contents.get('stones')}/{contents.get('stoneMax')}"
+    )
+
+
+def _waitForTrashBarrelSpace(trash):
+    lastNotice = 0
+    while True:
+        trashContents = getContents(trash)
+        if trashContents["items"] is None and trashContents["stones"] is None:
+            debugLog("trash barrel contents unknown; attempting disposal anyway")
+            return True
+        if not _containerFullByContents(trashContents):
+            debugLog(f"trash barrel has space {_contentsText(trashContents)}")
+            return True
+
+        now = time.time()
+        if now - lastNotice >= 10:
+            message = f"Trash barrel full; waiting. {_contentsText(trashContents)}"
+            API.SysMsg(message, 33)
+            debugLog(message)
+            lastNotice = now
+        API.Pause(2)
+
+
+def _trashMoveBlockedByCapacity():
+    messages = [
+        "That container cannot hold more weight",
+        "container cannot hold more weight",
+        "That container is full",
+        "container is full",
+    ]
+    try:
+        return API.InJournalAny(messages, True)
+    except Exception:
+        for message in messages:
+            try:
+                if API.InJournal(message, True):
+                    return True
+            except Exception:
+                pass
+    return False
+
+
+def _contentsDecreased(currentContents, previousContents):
+    for key in ["items", "stones"]:
+        current = currentContents.get(key)
+        previous = previousContents.get(key)
+        if current is not None and previous is not None and current < previous:
+            return True
+    return False
+
+
+def _waitForTrashBarrelEmptied(trash, blockedContents, reason):
+    lastNotice = 0
+    while True:
+        currentContents = getContents(trash)
+        if _contentsDecreased(currentContents, blockedContents):
+            debugLog(
+                f"trash barrel changed after {reason}; "
+                f"before={_contentsText(blockedContents)} "
+                f"after={_contentsText(currentContents)}"
+            )
+            return True
+
+        now = time.time()
+        if now - lastNotice >= 10:
+            message = (
+                f"Trash barrel blocked by {reason}; waiting for it to empty. "
+                f"{_contentsText(currentContents)}"
+            )
+            API.SysMsg(message, 33)
+            debugLog(message)
+            lastNotice = now
+        API.Pause(2)
+
+
+def _itemInBackpack(serial):
+    try:
+        item = API.FindItem(serial)
+        return bool(item and getattr(item, "Container", None) == API.Backpack)
+    except Exception as e:
+        debugLog(f"item lookup failed after trash move serial={_debugHex(serial)} error={e}")
+        return False
+
+
+def _disposeTrashItem(item, trash):
+    attempts = 0
+    itemSerial = getattr(item, "Serial", item)
+    while True:
+        _waitForTrashBarrelSpace(trash)
+        debugLog(f"trash dispose attempt item={_debugItemSummary(item)}")
+        moved = moveItem(itemSerial, trash.Serial)
+        API.Pause(0.5)
+        if moved and not _itemInBackpack(itemSerial):
+            debugLog(f"trash dispose succeeded item={_debugHex(itemSerial)}")
+            return True
+
+        trashContents = getContents(trash)
+        blockedByCapacity = _trashMoveBlockedByCapacity()
+        if blockedByCapacity or _containerFullByContents(trashContents):
+            debugLog(
+                f"trash dispose blocked by capacity moved={moved} "
+                f"contents={_contentsText(trashContents)}"
+            )
+            _waitForTrashBarrelEmptied(trash, trashContents, "capacity")
+            attempts = 0
+            continue
+
+        attempts += 1
+        debugLog(
+            f"trash dispose failed attempt={attempts} moved={moved} "
+            f"contents={_contentsText(trashContents)}"
+        )
+        if attempts >= 5:
+            stopCrafting("Could not move crafted item to trash barrel.")
+            return False
+        API.Pause(1)
 
 
 def openContainer(container):
@@ -377,6 +722,7 @@ def moveItem(item_serial, destination_serial, amount=0, max_retries=5):
 
 
 def stopCrafting(message, hue=33):
+    debugLog(f"stopCrafting message={message} hue={hue}")
     if statusLabel:
         statusLabel.Text = message
         statusLabel.Hue = hue
@@ -415,26 +761,74 @@ def checkResource(item, craftingSkill):
     resourceHue = item["resourceHue"]
     resourceMinAmount = craftingSkill["resource"]["minAmount"]
     resourceAmount = craftingSkill["resource"]["amount"]
+    requiredAmount = max(resourceMinAmount, item.get("resourceAmount", resourceMinAmount))
+    debugLog(
+        f"checkResource start item={item.get('name')} "
+        f"itemButton={item.get('buttonId')} resourceId={_debugHex(resourceId)} "
+        f"resourceHue={_debugHex(resourceHue)} min={resourceMinAmount} "
+        f"itemResourceAmount={item.get('resourceAmount')} required={requiredAmount} "
+        f"batch={resourceAmount} backpack={_debugSerial(API.Backpack)} "
+        f"chest={_debugSerial(resourceChestSerial)}"
+    )
 
-    resourceInBackpack = API.FindType(
-        resourceId, API.Backpack, hue=resourceHue, minamount=resourceMinAmount
+    resourceInBackpack = findResource(
+        resourceId, API.Backpack, resourceHue, requiredAmount
     )
     if not resourceInBackpack:
-        resourceInBackpack = API.FindType(resourceId, API.Backpack, hue=resourceHue)
-        amountInBackpack = 0
-        if resourceInBackpack:
-            amountInBackpack = resourceInBackpack.Amount
-        resourceInChest = API.FindType(
-            resourceId, resourceChestSerial, hue=resourceHue, minamount=resourceAmount
-        )
-        if not resourceInChest:
-            stopCrafting("Missing resources")
-        if not moveItem(
-            getattr(resourceInChest, "Serial", resourceInChest),
-            API.Backpack,
-            resourceAmount - amountInBackpack,
-        ):
-            stopCrafting("Could not move resources")
+        resourceInBackpack = findResource(resourceId, API.Backpack, resourceHue)
+    amountInBackpack = 0
+    if resourceInBackpack:
+        amountInBackpack = resourceInBackpack.Amount
+    debugLog(
+        f"checkResource backpack selected={_debugItemSummary(resourceInBackpack)} "
+        f"amountInBackpack={amountInBackpack}"
+    )
+
+    if amountInBackpack >= requiredAmount:
+        debugLog("checkResource enough resources already in backpack")
+        return
+
+    amountNeeded = requiredAmount - amountInBackpack
+    debugLog(f"checkResource chest lookup amountNeeded={amountNeeded}")
+    resourceInChest = findResource(
+        resourceId, resourceChestSerial, resourceHue, amountNeeded
+    )
+    if not resourceInChest:
+        debugLog("checkResource missing: no matching stack in resource chest")
+        _debugResourceSnapshot("no chest stack", item, resourceId, resourceHue)
+        _debugNotifyLogPath()
+        stopCrafting("Missing resources")
+    debugLog(f"checkResource chest selected={_debugItemSummary(resourceInChest)}")
+    amountAvailable = getattr(resourceInChest, "Amount", resourceAmount)
+    amountToMove = min(resourceAmount - amountInBackpack, amountAvailable)
+    debugLog(
+        f"checkResource move decision amountAvailable={amountAvailable} "
+        f"amountToMove={amountToMove} amountNeeded={amountNeeded}"
+    )
+    if amountToMove < amountNeeded:
+        debugLog("checkResource missing: matching stack amount below required amount")
+        _debugResourceSnapshot("stack below required", item, resourceId, resourceHue)
+        _debugNotifyLogPath()
+        stopCrafting("Missing resources")
+    if not moveItem(
+        getattr(resourceInChest, "Serial", resourceInChest),
+        API.Backpack,
+        amountToMove,
+    ):
+        debugLog("checkResource moveItem failed")
+        _debugResourceSnapshot("move failed", item, resourceId, resourceHue)
+        _debugNotifyLogPath()
+        stopCrafting("Could not move resources")
+    API.Pause(0.5)
+    resourceInBackpack = findResource(
+        resourceId, API.Backpack, resourceHue, requiredAmount
+    )
+    if not resourceInBackpack:
+        debugLog("checkResource move verification failed")
+        _debugResourceSnapshot("move verification failed", item, resourceId, resourceHue)
+        _debugNotifyLogPath()
+        stopCrafting("Could not move resources")
+    debugLog("checkResource moveItem succeeded")
 
 
 def checkToolsResource():
@@ -695,19 +1089,7 @@ def disposeItem(item, craftingSkill):
             if not trash:
                 API.SysMsg("Trash barrel not found; keeping crafted item.", 33)
                 continue
-            trashContents = getContents(trash)
-            if trashContents["items"] is None:
-                API.SysMsg("Trash barrel contents unknown; keeping crafted item.", 33)
-                continue
-            while trashContents["items"] == 125:
-                API.Pause(1)
-                trashContents = getContents(trash)
-                if trashContents["items"] is None:
-                    API.SysMsg("Trash barrel contents unknown; keeping crafted item.", 33)
-                    break
-            if trashContents["items"] == 125 or trashContents["items"] is None:
-                continue
-            moveItem(i.Serial, trash.Serial)
+            _disposeTrashItem(i, trash)
         if method == "Salvage Bag":
             salvageBag = API.FindType(0x0E76, API.Backpack, hue=0x024E)
             if not salvageBag:
@@ -737,6 +1119,11 @@ def makeFirst(item, skillName, skillTarget=None):
     targetSkill = item["skill"]
     if skillTarget is not None:
         targetSkill = min(float(targetSkill), float(skillTarget))
+    debugLog(
+        f"makeFirst skill={skillName} item={item.get('name')} "
+        f"itemTarget={item.get('skill')} runTarget={skillTarget} "
+        f"effectiveTarget={targetSkill}"
+    )
     statusLabel.Text = "Crafting..."
 
     disposeItem(item, craftingSkill)
@@ -754,6 +1141,12 @@ def trainCraftingSkill(skillName, targetSkill):
     items = craftingSkill["items"]
     targetSkillValue = float(targetSkill)
     currentSkillLevel = getSkill(skillName).Value
+    debugLog(
+        "----- trainCraftingSkill start "
+        f"skill={skillName} current={currentSkillLevel} target={targetSkillValue} "
+        f"resourceChest={_debugSerial(resourceChestSerial)} "
+        f"resourceChestObj={_debugItemSummary(resourceChest)}"
+    )
     while float(currentSkillLevel) < targetSkillValue:
         currentItem = items[-1] if items else None
         for item in items:

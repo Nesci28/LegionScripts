@@ -1,11 +1,12 @@
 import importlib
+
 from LegionPath import LegionPath
 
 LegionPath.addSubdirs()
 
 import _Caster
-import Util
 import Math
+import Util
 
 importlib.reload(_Caster)
 from _Caster import Caster
@@ -49,18 +50,28 @@ class Chivalry(Caster):
     ]
 
     @staticmethod
+    def _currentWeapon():
+        return API.FindLayer("OneHanded") or API.FindLayer("TwoHanded")
+
+    @staticmethod
+    def _findWeapon():
+        return (
+            Chivalry._currentWeapon()
+            or Util.Util.findItemWithProps(["One-handed Weapon"])
+            or Util.Util.findItemWithProps(["Two-handed Weapon"])
+        )
+
+    @staticmethod
     def validate(skillCap):
         errors = []
         hasSpellValidation = Caster.validate(skillCap, Chivalry.spells)
         if not hasSpellValidation:
             errors.append("Chivalry - Missing spells.")
-        hasOneHandedWeapon = bool(Util.Util.findItemWithProps(
-            ["One-handed Weapon"]
-        ))
-        hasTwoHandedWeapon = bool(Util.Util.findItemWithProps(["Two-handed Weapon"]))
-        hasWeapon = hasOneHandedWeapon or hasTwoHandedWeapon
+
+        hasWeapon = bool(Chivalry._findWeapon())
         if not hasWeapon:
             errors.append("Chivalry - Missing weapon.")
+
         return errors
 
     def __init__(
@@ -75,20 +86,24 @@ class Chivalry(Caster):
             "Chivalry", skillCap, label, skillLevelLabel, spellLabel, runningLabel
         )
         self.spells = Chivalry.spells
-        oneHandedWeapon = Util.Util.findItemWithProps(
-            ["One-handed Weapon"]
-        )
-        if oneHandedWeapon:
-            self.weapon = oneHandedWeapon
-        twoHandedWeapon = Util.Util.findItemWithProps(["Two-handed Weapon"])
-        if not oneHandedWeapon and twoHandedWeapon:
-            self.weapon = twoHandedWeapon
+        self.weapon = Chivalry._findWeapon()
+        self._ensureWeaponEquipped()
+
+    def _ensureWeaponEquipped(self):
+        if not self.weapon:
+            return
+
+        currentWeapon = Chivalry._currentWeapon()
+        if currentWeapon and currentWeapon.Serial == self.weapon.Serial:
+            return
+
+        API.EquipItem(self.weapon.Serial)
+        API.Pause(0.25)
 
     def _preCast(self, skillInfo, spellName, nextSpell):
         super()._preCast(skillInfo, spellName, nextSpell)
-        isWearingWeapon = Util.Util.isWearingWeapon()
-        if not isWearingWeapon:
-            API.EquipItem(self.weapon.Serial)
+        self._ensureWeaponEquipped()
 
     def _target(self):
-        API.TargetSelf()
+        # Chivalry training spells are all no-target spells in this script.
+        return

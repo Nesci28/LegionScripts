@@ -1,4 +1,13 @@
-import API
+try:
+    from typing import TYPE_CHECKING
+except Exception:
+    TYPE_CHECKING = False
+
+if TYPE_CHECKING:
+    import API
+    pass
+
+# API is injected by TazUO at runtime; the import above is IDE-only.
 import importlib
 import os
 import sys
@@ -44,6 +53,7 @@ import Tinkering as TinkeringModule
 import Tailoring as TailoringModule
 import Blacksmithy as BlacksmithyModule
 import Cartography as CartographyModule
+import BowcraftFletching as BowcraftFletchingModule
 
 importlib.reload(Gump)
 importlib.reload(Util)
@@ -71,6 +81,7 @@ importlib.reload(TinkeringModule)
 importlib.reload(TailoringModule)
 importlib.reload(BlacksmithyModule)
 importlib.reload(CartographyModule)
+importlib.reload(BowcraftFletchingModule)
 
 try:
     Veterinary.API = API
@@ -79,14 +90,17 @@ try:
     TailoringModule._Crafting.API = API
     BlacksmithyModule._Crafting.API = API
     CartographyModule._Crafting.API = API
+    BowcraftFletchingModule._Crafting.API = API
     TinkeringModule._Crafting.Crafter.API = API
     TailoringModule._Crafting.Crafter.API = API
     BlacksmithyModule._Crafting.Crafter.API = API
     CartographyModule._Crafting.Crafter.API = API
+    BowcraftFletchingModule._Crafting.Crafter.API = API
     TinkeringModule._Crafting.Util.API = API
     TailoringModule._Crafting.Util.API = API
     BlacksmithyModule._Crafting.Util.API = API
     CartographyModule._Crafting.Util.API = API
+    BowcraftFletchingModule._Crafting.Util.API = API
 except Exception:
     pass
 
@@ -114,6 +128,7 @@ from Tinkering import Tinkering as TinkeringSkill
 from Tailoring import Tailoring as TailoringSkill
 from Blacksmithy import Blacksmithy as BlacksmithySkill
 from Cartography import Cartography as CartographySkill
+from BowcraftFletching import BowcraftFletching as BowcraftFletchingSkill
 
 RESOURCE_CONTAINER_SHARED_VAR = "SKILL_TRAINER_RESOURCE_CONTAINER_SERIAL"
 
@@ -356,6 +371,11 @@ class CartographyTrainer(CraftingSkillTrainer):
     trainerClass = CartographySkill
 
 
+class BowcraftFletchingTrainer(CraftingSkillTrainer):
+    skillName = "Bowcraft/Fletching"
+    trainerClass = BowcraftFletchingSkill
+
+
 class Trainer:
     schools = {
         "Miscellaneous": [
@@ -383,7 +403,7 @@ class Trainer:
         "Trade Skills": [
             _skill("Alchemy"),
             _skill("Blacksmithy", BlacksmithyTrainer, True),
-            _skill("Bowcraft/Fletching"),
+            _skill("Bowcraft/Fletching", BowcraftFletchingTrainer, True),
             _skill("Carpentry"),
             _skill("Cooking"),
             _skill("Inscription"),
@@ -452,6 +472,7 @@ class Trainer:
         self.selectedSkillElements = []
         self.selectedSkillSummary = None
         self.selectedSkillsCache = []
+        self.selectedSkillOrder = []
         self.skillInfoCache = {}
         self.lastSelectedPanelUpdate = 0
         self.selectedPanelUpdateInterval = 0.75
@@ -513,7 +534,7 @@ class Trainer:
             school["trainer"] = SkillTrainerRemoveTrap.RemoveTrap
         return school["trainer"]
 
-    def _validate(self, school, skillCap):
+    def _validate(self, school, skillCap, projectedSkillValues=None):
         trainer = self._getTrainer(school)
         if not trainer:
             self.errors.append(f"{school['skillName']} - Training not implemented.")
@@ -521,7 +542,28 @@ class Trainer:
         if getattr(trainer, "setResourceContainerSerial", None):
             trainer.setResourceContainerSerial(self.resourceContainerSerial)
         errors = trainer.validate(skillCap)
+        errors = self._filterProjectedValidationErrors(
+            school, errors, projectedSkillValues
+        )
         self.errors.extend(errors)
+
+    def _filterProjectedValidationErrors(self, school, errors, projectedSkillValues):
+        if not projectedSkillValues:
+            return errors
+
+        skillName = school["skillName"]
+        tinkeringError = f"{skillName} - Tinkering must be at least 50.0."
+        if tinkeringError not in errors:
+            return errors
+
+        try:
+            projectedTinkering = Decimal(str(projectedSkillValues.get("Tinkering", 0)))
+        except Exception:
+            projectedTinkering = Decimal("0")
+
+        if projectedTinkering >= Decimal("50"):
+            return [error for error in errors if error != tinkeringError]
+        return errors
 
     def _hideStartButton(self):
         if not self.startBtn:
@@ -584,7 +626,26 @@ class Trainer:
                 current = Util.getSkillInfo(skillName)["value"]
             if desired > current:
                 selected.append((school, box, lbl, skillLbl, desired))
-        return selected
+
+        selectedNames = [school["skillName"] for school, *_ in selected]
+        for skillName in selectedNames:
+            if skillName not in self.selectedSkillOrder:
+                self.selectedSkillOrder.append(skillName)
+
+        selectedNameSet = set(selectedNames)
+        self.selectedSkillOrder = [
+            skillName
+            for skillName in self.selectedSkillOrder
+            if skillName in selectedNameSet
+        ]
+        order = {
+            skillName: index
+            for index, skillName in enumerate(self.selectedSkillOrder)
+        }
+        return sorted(
+            selected,
+            key=lambda row: order.get(row[0]["skillName"], len(order)),
+        )
 
     def _selectedSkillRowData(self, selected):
         rows = []
@@ -652,8 +713,10 @@ class Trainer:
                 self._setStatus("No skills selected.", 33)
                 return
 
+            projectedSkillValues = {}
             for school, _, _, _, desired in workingSkills:
-                self._validate(school, desired)
+                self._validate(school, desired, projectedSkillValues)
+                projectedSkillValues[school["skillName"]] = desired
 
             totalNeeded = sum(
                 Decimal(box.Text) - Util.getSkillInfo(school["skillName"])["value"]
@@ -681,7 +744,10 @@ class Trainer:
             API.SysMsg(str(e))
             API.SysMsg(traceback.format_exc())
 
-    def _setSkillToCap(self, textbox, maxValue):
+    def _setSkillToCap(self, school, textbox, maxValue):
+        skillName = school["skillName"]
+        if skillName not in self.selectedSkillOrder:
+            self.selectedSkillOrder.append(skillName)
         textbox.SetText(str(maxValue))
         self._updateSelectedSkillsPanel(force=True)
 
@@ -714,7 +780,9 @@ class Trainer:
                 y,
                 "radioGreen",
                 gump.onClick(
-                    lambda tb=textbox, maxV=maxValue: self._setSkillToCap(tb, maxV)
+                    lambda sh=school, tb=textbox, maxV=maxValue: self._setSkillToCap(
+                        sh, tb, maxV
+                    )
                 ),
             )
             school["skillLabel"] = gump.addLabel("", x + 115, y)
