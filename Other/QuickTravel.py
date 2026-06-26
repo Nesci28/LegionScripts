@@ -154,7 +154,7 @@ class QuickTravel:
                 y,
                 "radioGreen",
                 g.onClick(
-                    lambda idx=runeIndex: self._recallTo(idx),
+                    lambda idx=runeIndex + 1: self._recallTo(idx),
                     f"Recalling to: {label}",
                     "Ready",
                 ),
