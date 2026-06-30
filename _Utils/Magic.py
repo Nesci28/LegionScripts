@@ -31,10 +31,11 @@ class Magic:
 
     @staticmethod
     def regenMana(manaRequired):
-        if API.Player.Mana >= manaRequired:
+        targetMana = min(manaRequired, API.Player.ManaMax)
+        if API.Player.Mana >= targetMana:
             return
         lastAttempt = 0
-        while API.Player.Mana < API.Player.ManaMax:
+        while API.Player.Mana < targetMana:
             if not API.BuffExists("Actively Meditating"):
                 now = time.time()
                 if now - lastAttempt >= 11:

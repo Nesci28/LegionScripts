@@ -131,6 +131,19 @@ from Cartography import Cartography as CartographySkill
 from BowcraftFletching import BowcraftFletching as BowcraftFletchingSkill
 
 RESOURCE_CONTAINER_SHARED_VAR = "SKILL_TRAINER_RESOURCE_CONTAINER_SERIAL"
+POST_CAST_MOVE_DIRECTIONS = ("north", "south")
+POST_CAST_MOVE_PAUSE_SECONDS = 0.25
+MAGIC_POST_CAST_MOVE_SKILLS = {
+    "Bushido",
+    "Chivalry",
+    "Evaluating Intelligence",
+    "Magery",
+    "Meditation",
+    "Mysticism",
+    "Necromancy",
+    "Ninjitsu",
+    "Spellweaving",
+}
 
 
 def getResourceContainerSerial():
@@ -474,6 +487,7 @@ class Trainer:
         self.selectedSkillsCache = []
         self.selectedSkillOrder = []
         self.skillInfoCache = {}
+        self.sessionStartSkillValues = {}
         self.lastSelectedPanelUpdate = 0
         self.selectedPanelUpdateInterval = 0.75
         self.startBtn = None
@@ -488,6 +502,7 @@ class Trainer:
     def main(self):
         try:
             Util.openContainer(API.Backpack)
+            self._captureSessionStartSkillValues()
             self._showGump()
         except Exception as e:
             API.SysMsg(f"CasterTrainer e: {e}", 33)
@@ -533,6 +548,41 @@ class Trainer:
             importlib.reload(SkillTrainerRemoveTrap)
             school["trainer"] = SkillTrainerRemoveTrap.RemoveTrap
         return school["trainer"]
+
+    def _withMagicPostCastMovement(self, school, trainer):
+        skillName = school["skillName"]
+        if school.get("name") != "Magic" or skillName not in MAGIC_POST_CAST_MOVE_SKILLS:
+            return trainer
+
+        trainOnce = getattr(trainer, "trainOnce", None)
+        if trainOnce:
+            def trainOnceWithPostCastMovement(*args, **kwargs):
+                result = trainOnce(*args, **kwargs)
+                self._moveAfterMagicCast(skillName)
+                return result
+
+            trainer.trainOnce = trainOnceWithPostCastMovement
+            return trainer
+
+        afterCast = getattr(trainer, "_afterCast", None)
+        if not afterCast:
+            return trainer
+
+        def afterCastWithMovement(skillInfo, spellName, nextSpell):
+            result = afterCast(skillInfo, spellName, nextSpell)
+            self._moveAfterMagicCast(skillName)
+            return result
+
+        trainer._afterCast = afterCastWithMovement
+        return trainer
+
+    def _moveAfterMagicCast(self, skillName):
+        for direction in POST_CAST_MOVE_DIRECTIONS:
+            try:
+                API.Walk(direction)
+            except Exception as e:
+                API.SysMsg(f"{skillName} post-cast walk {direction} failed: {e}", 33)
+            API.Pause(POST_CAST_MOVE_PAUSE_SECONDS)
 
     def _validate(self, school, skillCap, projectedSkillValues=None):
         trainer = self._getTrainer(school)
@@ -611,6 +661,15 @@ class Trainer:
         except Exception:
             return str(serial)
 
+    def _captureSessionStartSkillValues(self):
+        for schools in self.schools.values():
+            for school in schools:
+                skillName = school["skillName"]
+                if skillName not in self.sessionStartSkillValues:
+                    self.sessionStartSkillValues[skillName] = Util.getSkillInfo(
+                        skillName
+                    )["value"]
+
     def _getSelectedSkills(self):
         selected = []
         for school, box, lbl, skillLbl in self.schoolInputs:
@@ -620,11 +679,15 @@ class Trainer:
             except Exception:
                 continue
 
-            try:
-                current = Decimal(skillLbl.Text)
-            except Exception:
-                current = Util.getSkillInfo(skillName)["value"]
-            if desired > current:
+            skillInfo = Util.getSkillInfo(skillName)
+            if str(skillInfo.get("lock", "")).lower() == "down":
+                continue
+
+            startValue = self.sessionStartSkillValues.get(skillName)
+            if startValue is None:
+                startValue = skillInfo["value"]
+                self.sessionStartSkillValues[skillName] = startValue
+            if desired > startValue:
                 selected.append((school, box, lbl, skillLbl, desired))
 
         selectedNames = [school["skillName"] for school, *_ in selected]
@@ -650,14 +713,21 @@ class Trainer:
     def _selectedSkillRowData(self, selected):
         rows = []
         for school, _, _, skillLbl, desired in selected:
+            skillName = school["skillName"]
             try:
-                current = Decimal(skillLbl.Text)
+                current = Util.getSkillInfo(skillName)["value"]
             except Exception:
-                current = Util.getSkillInfo(school["skillName"])["value"]
+                current = Decimal(skillLbl.Text)
+
+            startValue = self.sessionStartSkillValues.get(skillName, current)
+            gain = current - startValue
+            if gain < Decimal("0"):
+                gain = Decimal("0")
             rows.append(
                 (
-                    school["skillName"],
+                    skillName,
                     Math.truncateDecimal(current, 1),
+                    Math.truncateDecimal(gain, 1),
                     Math.truncateDecimal(desired, 1),
                 )
             )
@@ -695,11 +765,12 @@ class Trainer:
             self._addQueueScrollLabel("None selected.", 8, 0)
             return
 
-        for i, (skillName, current, target) in enumerate(self.selectedSkillsCache):
+        for i, (skillName, current, gain, target) in enumerate(self.selectedSkillsCache):
             y = i * 18
             self._addQueueScrollLabel(skillName, 8, y)
-            self._addQueueScrollLabel(str(current), 270, y)
-            self._addQueueScrollLabel(str(target), 350, y)
+            self._addQueueScrollLabel(str(current), 240, y)
+            self._addQueueScrollLabel(str(gain), 320, y)
+            self._addQueueScrollLabel(str(target), 390, y)
 
     def _onStart(self):
         try:
@@ -738,6 +809,7 @@ class Trainer:
                         )
                     else:
                         trainer = trainerClass(skillCap, lbl, skillLbl)
+                    trainer = self._withMagicPostCastMovement(school, trainer)
                     self._setStatus(f"Training {school['skillName']}...")
                     trainer.train(lambda shcoolName=school["name"]: self.calculateSkillLabels(shcoolName))
         except Exception as e:
@@ -811,8 +883,9 @@ class Trainer:
         y = listPanel["y"] + 2
 
         self.trainingQueueGump.addLabel("Skill", x, y)
-        self.trainingQueueGump.addLabel("Current", x + 262, y)
-        self.trainingQueueGump.addLabel("Target", x + 342, y)
+        self.trainingQueueGump.addLabel("Current", x + 242, y)
+        self.trainingQueueGump.addLabel("Gain", x + 322, y)
+        self.trainingQueueGump.addLabel("Target", x + 392, y)
 
         self.trainingQueueScrollArea = self.trainingQueueGump.addScrollArea(
             listPanel["x"],

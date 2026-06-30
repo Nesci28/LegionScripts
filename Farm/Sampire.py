@@ -8,6 +8,7 @@ if TYPE_CHECKING:
     pass
 # API is injected by TazUO at runtime; the import above is IDE-only.
 import importlib
+import time
 import traceback
 from LegionPath import LegionPath
 
@@ -46,6 +47,7 @@ class Sampire:
         {"name": "Honor", "isActive": True, "checkbox": None, "isBuff": False},
         {"name": "Onslaught", "isActive": True, "checkbox": None, "isBuff": False},
         {"name": "Consecrate Weapon", "isActive": True, "checkbox": None, "isBuff": False},
+        {"name": "Lightning Strike", "isActive": False, "checkbox": None, "isBuff": False},
         {"name": "Divine Fury", "isActive": True, "checkbox": None, "isBuff": True},
         {
             "name": "Momentum Strike",
@@ -68,6 +70,7 @@ class Sampire:
         {"name": "Enemy Of One", "isActive": False, "checkbox": None, "isBuff": True},
         {"name": "Bandage Heals", "isActive": False, "checkbox": None, "isBuff": False},
         {"name": "Auto Attack", "isActive": True, "checkbox": None, "isBuff": False},
+        {"name": "Meditate For Mana", "isActive": True, "checkbox": None, "isBuff": False},
     ]
     curses = [
         "Blood Oath",
@@ -90,6 +93,7 @@ class Sampire:
         self.currentHonorSerial = None
         self.currentAggros = []
         self.currentEnemy = None
+        self._lastLightningStrikeCastAttemptAt = 0
 
     def main(self):
         try:
@@ -136,19 +140,24 @@ class Sampire:
 
     def _attack(self):
         autoAttack = Python.find("Auto Attack", self.options, "name")
+        lightningStrikeOption = Python.find("Lightning Strike", self.options, "name")
+        lightningStrikeHandled = False
+        if lightningStrikeOption["isActive"]:
+            lightningStrikeHandled = self._handleLightningStrike(lightningStrikeOption)
+
         if not autoAttack["isActive"]:
             self.currentEnemy = None
             return
 
         enemies = Util.scanEnemies(2)
         enemiesCount = len(enemies)
-        currentMana = API.Player.Mana
         weaponName = Util.getWeaponName()
         if enemiesCount == 0:
             self.currentEnemy = None
             return
-        
+
         closestEnemy = enemies[0]
+
         found = False
         if self.currentEnemy:
             for enemy in enemies:
@@ -157,28 +166,47 @@ class Sampire:
                     break
         if not found:
             self.currentEnemy = closestEnemy.Serial
-        API.Attack(self.currentEnemy)
-        
+            API.Attack(self.currentEnemy)
+
+        if lightningStrikeHandled:
+            return
+
         onslaughtOption = Python.find("Onslaught", self.options, "name")
         consecrateWeaponOption = Python.find("Consecrate Weapon", self.options, "name")
         doubleStrikeOption = Python.find("Double Strike", self.options, "name")
         momentumStrikeOption = Python.find("Momentum Strike", self.options, "name")
         whirlwindOption = Python.find("Whirlwind", self.options, "name")
 
-        if onslaughtOption["isActive"] and not Timer.exists(4, "Onslaught", 43):
-            API.CastSpell("Onslaught")
+        if (
+            onslaughtOption["isActive"]
+            and not Timer.exists(4, "Onslaught", 43)
+            and self._castWithManaCost("Onslaught", self.onslaughtMana)
+        ):
             Timer.create(4, "Onslaught", 43)
 
         if consecrateWeaponOption["isActive"] and not Timer.exists(8, "Consecrate Weapon", 43):
-            self.magic.cast("Consecrate Weapon")
-            Timer.create(8, "Consecrate Weapon", 43)
-            
-        if doubleStrikeOption["isActive"] and enemiesCount == 1 and currentMana >= self.doubleStrikeMana:
+            if self._cast("Consecrate Weapon"):
+                Timer.create(8, "Consecrate Weapon", 43)
+
+        if (
+            doubleStrikeOption["isActive"]
+            and enemiesCount == 1
+            and self._hasManaForManaCost(self.doubleStrikeMana)
+        ):
             if "double axe" in weaponName.lower() and not API.PrimaryAbilityActive():
                 API.ToggleAbility("primary")
-        if momentumStrikeOption["isActive"] and enemiesCount == 2 and currentMana >= self.momentumStrikeMana and not API.BuffExists("Momentum Strike"):
-            self.magic.cast("Momentum Strike")
-        if whirlwindOption["isActive"] and enemiesCount > 2 and currentMana >= self.whirlwindMana:
+        if (
+            momentumStrikeOption["isActive"]
+            and enemiesCount == 2
+            and self._hasManaForManaCost(self.momentumStrikeMana)
+            and not API.BuffExists("Momentum Strike")
+        ):
+            self._cast("Momentum Strike")
+        if (
+            whirlwindOption["isActive"]
+            and enemiesCount > 2
+            and self._hasManaForManaCost(self.whirlwindMana)
+        ):
             if "double axe" in weaponName.lower() and not API.SecondaryAbilityActive():
                 API.ToggleAbility("secondary")
 
@@ -218,8 +246,7 @@ class Sampire:
     def _deCurse(self):
         for curse in self.curses:
             if API.BuffExists(curse):
-                self.magic.cast("Remove Curse")
-                if API.WaitForTarget():
+                if self._cast("Remove Curse") and API.WaitForTarget():
                     API.TargetSelf()
 
     def _checkBuffs(self):
@@ -229,7 +256,69 @@ class Sampire:
                 and option["isBuff"]
                 and not API.BuffExists(option["name"])
             ):
-                self.magic.cast(option["name"])
+                self._cast(option["name"])
+
+    def _cast(self, spellName, maxTries=3):
+        if self._canMeditateForMana():
+            manaNeeded = self._getManaNeededForSpell(spellName)
+            if manaNeeded and API.Player.ManaMax < manaNeeded:
+                return False
+            return self.magic.cast(spellName, maxTries)
+
+        if not self._hasManaForSpell(spellName):
+            return False
+
+        API.CastSpell(spellName)
+        return True
+
+    def _castWithManaCost(self, spellName, manaCost):
+        if not self._hasManaForManaCost(manaCost):
+            return False
+        API.CastSpell(spellName)
+        return True
+
+    def _canMeditateForMana(self):
+        meditateOption = Python.find("Meditate For Mana", self.options, "name")
+        if not meditateOption:
+            return True
+        return meditateOption["isActive"]
+
+    def _hasManaForSpell(self, spellName):
+        manaNeeded = self._getManaNeededForSpell(spellName)
+        if not manaNeeded:
+            return True
+        return self._hasManaForManaCost(manaNeeded)
+
+    def _getManaNeededForSpell(self, spellName):
+        spellDef = self.magic.findSpellDef(spellName)
+        if not spellDef:
+            return None
+        return self.magic.getManaCost(spellDef["manaCost"])
+
+    def _hasManaForManaCost(self, manaCost):
+        return API.Player.Mana >= max(1, manaCost)
+
+    def _handleLightningStrike(self, lightningStrikeOption):
+        if not lightningStrikeOption["isActive"]:
+            return False
+
+        lightningStrikeBuffExists = API.BuffExists("Lightning Strike")
+
+        if not self._hasManaForManaCost(self.lightningStrikeMana):
+            return True
+
+        if lightningStrikeBuffExists:
+            return True
+
+        now = time.time()
+        if now - self._lastLightningStrikeCastAttemptAt < 0.25:
+            return True
+
+        self._lastLightningStrikeCastAttemptAt = now
+        if self._castWithManaCost("Lightning Strike", self.lightningStrikeMana):
+            API.Pause(0.05)
+
+        return True
 
     def _settings(self):
         lowerManaCost = API.Player.LowerManaCost
@@ -254,6 +343,12 @@ class Sampire:
         )
         self.vampiricEmbraceMana = self.vampiricEmbraceMana - (
             self.vampiricEmbraceMana * (lowerManaCost / 100)
+        )
+        self.momentumStrikeMana = self.momentumStrikeMana - (
+            self.momentumStrikeMana * (lowerManaCost / 100)
+        )
+        self.onslaughtMana = self.onslaughtMana - (
+            self.onslaughtMana * (lowerManaCost / 100)
         )
         self.lightningStrikeMana = self.lightningStrikeMana - (
             self.lightningStrikeMana * (lowerManaCost / 100)
