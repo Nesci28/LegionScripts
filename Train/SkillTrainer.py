@@ -558,7 +558,11 @@ class Trainer:
         if trainOnce:
             def trainOnceWithPostCastMovement(*args, **kwargs):
                 result = trainOnce(*args, **kwargs)
-                self._moveAfterMagicCast(skillName)
+                recoveryDeadline = time.time() + self._getFcrDelay()
+                self._moveAfterMagicCast(skillName, recoveryDeadline)
+                remainingRecovery = recoveryDeadline - time.time()
+                if remainingRecovery > 0:
+                    API.Pause(remainingRecovery)
                 return result
 
             trainer.trainOnce = trainOnceWithPostCastMovement
@@ -568,21 +572,31 @@ class Trainer:
         if not afterCast:
             return trainer
 
-        def afterCastWithMovement(skillInfo, spellName, nextSpell):
-            result = afterCast(skillInfo, spellName, nextSpell)
-            self._moveAfterMagicCast(skillName)
+        def afterCastWithMovement(
+            skillInfo, spellName, nextSpell, recoveryDeadline=None
+        ):
+            result = afterCast(skillInfo, spellName, nextSpell, recoveryDeadline)
+            self._moveAfterMagicCast(skillName, recoveryDeadline)
             return result
 
         trainer._afterCast = afterCastWithMovement
         return trainer
 
-    def _moveAfterMagicCast(self, skillName):
+    def _moveAfterMagicCast(self, skillName, recoveryDeadline=None):
         for direction in POST_CAST_MOVE_DIRECTIONS:
             try:
                 API.Walk(direction)
             except Exception as e:
                 API.SysMsg(f"{skillName} post-cast walk {direction} failed: {e}", 33)
-            API.Pause(POST_CAST_MOVE_PAUSE_SECONDS)
+            pause = POST_CAST_MOVE_PAUSE_SECONDS
+            if recoveryDeadline is not None:
+                pause = min(pause, max(recoveryDeadline - time.time(), 0))
+            if pause > 0:
+                API.Pause(pause)
+
+    def _getFcrDelay(self):
+        fcr = getattr(API.Player, "FasterCastRecovery", 0)
+        return max(1.5 - (fcr * 0.25), 0)
 
     def _validate(self, school, skillCap, projectedSkillValues=None):
         trainer = self._getTrainer(school)

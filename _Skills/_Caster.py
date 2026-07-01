@@ -18,6 +18,8 @@ importlib.reload(Timer)
 
 MAX_BUFF_CLEAR_ATTEMPTS = 2
 BUFF_CLEAR_PAUSE_SECONDS = 1.0
+GEAR_CHECK_INTERVAL_SECONDS = 10.0
+LABEL_UPDATE_INTERVAL_SECONDS = 1.0
 
 
 class Caster:
@@ -52,13 +54,21 @@ class Caster:
         self.runningLabel = runningLabel
         self.magic = Magic.Magic()
         self.spells = []
+        self._lastGearCheck = 0
 
     def train(self, calculareSkillLabels):
+        lastLabelUpdate = 0
         skillInfo = Util.Util.getSkillInfo(self.skillName)
         while skillInfo["value"] < self.skillCap:
             self._trainer(skillInfo, self.spells)
             skillInfo = Util.Util.getSkillInfo(self.skillName)
-            calculareSkillLabels()
+            now = time.time()
+            if (
+                now - lastLabelUpdate >= LABEL_UPDATE_INTERVAL_SECONDS
+                or skillInfo["value"] >= self.skillCap
+            ):
+                calculareSkillLabels()
+                lastLabelUpdate = now
 
     def _trainer(self, skillInfo, spells):
         skillLevel = skillInfo["value"]
@@ -68,11 +78,13 @@ class Caster:
             self.skillLevelLabel.Hue = 88
             self.skillLevelLabel.Text = Math.Math.truncateDecimal(skillLevel, 1)
 
-        self.magic.healCure(ceil(API.Player.HitsMax / 3) * 2, API.Player.HitsMax - 1)
+        if self._needsHealCure():
+            self.magic.healCure(
+                ceil(API.Player.HitsMax / 3) * 2, API.Player.HitsMax - 1
+            )
 
         castInfo = self._getCastingInfo(skillLevel, spells)
-        manaCost, spellName, castTime, recoverTime, nextSpell = (
-            castInfo["manaCost"],
+        spellName, castTime, recoverTime, nextSpell = (
             castInfo["spellName"],
             castInfo["castTime"],
             castInfo["recoverTime"],
@@ -84,7 +96,8 @@ class Caster:
         if castTime > 0:
             Timer.Timer.create(castTime, f"Casting {spellName}", 88)
 
-        castSuccess = self.magic.cast(spellName)
+        castSuccess = self.magic.cast(spellName, castTime=castTime)
+        castStart = getattr(self.magic, "_lastCastTime", time.time())
         hasTargetCursor = Util.Util.isTargeting()
 
         # No-target spells still return success; only target when the server asks.
@@ -94,21 +107,24 @@ class Caster:
         if recoverTime > 0:
             Timer.Timer.create(recoverTime, f"Recovering {spellName}", 906)
 
-        recoveryStart = time.time()
-        self._afterCast(skillInfo, spellName, nextSpell)
-        remainingRecovery = recoverTime - (time.time() - recoveryStart)
+        recoveryDeadline = castStart + castTime + recoverTime
+        self._afterCast(skillInfo, spellName, nextSpell, recoveryDeadline)
+        remainingRecovery = recoveryDeadline - time.time()
         if remainingRecovery > 0:
             API.Pause(remainingRecovery)
 
-        self._checkIfGearBroken()
+        self._checkIfGearBrokenThrottled()
 
         self._postCast(skillInfo, spellName, nextSpell)
 
     def _postCast(self, skillInfo, spellName, nextSpell):
         self._transform(skillInfo, spellName, nextSpell)
 
-    def _afterCast(self, skillInfo, spellName, nextSpell):
+    def _afterCast(self, skillInfo, spellName, nextSpell, recoveryDeadline=None):
         pass
+
+    def _needsHealCure(self):
+        return API.BuffExists("Poisoned") or API.Player.Hits < API.Player.HitsMax / 3
 
     def _transform(self, skillInfo, spellName, nextSpell):
         currentSkillLevel = skillInfo["value"]
@@ -145,10 +161,7 @@ class Caster:
                 castTime = Magic.Magic.getFcDelay(entry["castingTime"])
                 recoverTime = Magic.Magic.getFcrDelay()
 
-                lmc = API.Player.LowerManaCost
-                manaCost = ceil(entry["manaCost"] * (1 - lmc / 100))
-
-                self._checkIfGearBroken()
+                self._checkIfGearBrokenThrottled()
                 nextSpell = None
                 if i + 1 < len(entries):
                     nextSpell = entries[i + 1]
@@ -157,7 +170,6 @@ class Caster:
                     "spellName": spellName,
                     "castTime": castTime,
                     "recoverTime": recoverTime,
-                    "manaCost": manaCost,
                     "nextSpell": nextSpell,
                 }
 
@@ -177,3 +189,10 @@ class Caster:
                 self.runningLabel.Hue = 33
             API.SysMsg("Repair your gear!", 33)
             API.Stop()
+
+    def _checkIfGearBrokenThrottled(self):
+        now = time.time()
+        if now - self._lastGearCheck < GEAR_CHECK_INTERVAL_SECONDS:
+            return
+        self._lastGearCheck = now
+        self._checkIfGearBroken()

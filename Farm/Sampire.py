@@ -8,6 +8,8 @@ if TYPE_CHECKING:
     pass
 # API is injected by TazUO at runtime; the import above is IDE-only.
 import importlib
+import json
+import os
 import time
 import traceback
 from LegionPath import LegionPath
@@ -37,6 +39,8 @@ from Python import Python
 
 
 class Sampire:
+    SETTINGS_FILE = "Sampire.settings.json"
+
     options = [
         {
             "name": "Vampiric Embrace",
@@ -81,6 +85,13 @@ class Sampire:
         self._running = True
 
         self.gump = None
+        self.options = []
+        for option in Sampire.options:
+            copiedOption = option.copy()
+            copiedOption["checkbox"] = None
+            self.options.append(copiedOption)
+        self._settingsFile = self._getSettingsPath()
+        self._loadCharacterSettings()
 
         self.lightningStrikeMana = 10
         self.whirlwindMana = 15
@@ -354,6 +365,73 @@ class Sampire:
             self.lightningStrikeMana * (lowerManaCost / 100)
         )
 
+    def _getSettingsPath(self):
+        try:
+            if "__file__" in globals():
+                baseDir = os.path.dirname(os.path.abspath(__file__))
+            else:
+                baseDir = os.getcwd()
+        except Exception:
+            baseDir = "."
+        return os.path.join(baseDir, Sampire.SETTINGS_FILE)
+
+    def _getCharacterSettingsKey(self):
+        serial = getattr(API.Player, "Serial", None)
+        if serial:
+            return str(serial)
+        return Util.getPlayerName()
+
+    def _loadSettingsFile(self):
+        try:
+            if not os.path.exists(self._settingsFile):
+                return {}
+            with open(self._settingsFile, "r") as settingsFile:
+                data = json.load(settingsFile)
+            if isinstance(data, dict):
+                return data
+        except Exception as e:
+            API.SysMsg(f"Sampire settings load failed: {e}", 33)
+        return {}
+
+    def _loadCharacterSettings(self):
+        data = self._loadSettingsFile()
+        characters = data.get("characters", {})
+        if not isinstance(characters, dict):
+            return
+
+        characterSettings = characters.get(self._getCharacterSettingsKey(), {})
+        if not isinstance(characterSettings, dict):
+            return
+
+        optionSettings = characterSettings.get("options", {})
+        if not isinstance(optionSettings, dict):
+            return
+
+        for option in self.options:
+            if option["name"] in optionSettings:
+                option["isActive"] = bool(optionSettings[option["name"]])
+
+    def _saveCharacterSettings(self):
+        data = self._loadSettingsFile()
+        characters = data.get("characters", {})
+        if not isinstance(characters, dict):
+            characters = {}
+        data["characters"] = characters
+
+        characters[self._getCharacterSettingsKey()] = {
+            "name": Util.getPlayerName(),
+            "options": {
+                option["name"]: bool(option["isActive"])
+                for option in self.options
+            },
+        }
+
+        try:
+            with open(self._settingsFile, "w") as settingsFile:
+                json.dump(data, settingsFile, indent=2, sort_keys=True)
+        except Exception as e:
+            API.SysMsg(f"Sampire settings save failed: {e}", 33)
+
     def _showGump(self):
         width, height = 210, 1 + 30 + (25 * len(self.options)) + 35
         g = Gump(width, height, self._onClose)
@@ -363,7 +441,12 @@ class Sampire:
         y += 30
 
         def toggleOption(option):
-            option["isActive"] = not option["isActive"]
+            checkbox = option.get("checkbox")
+            if checkbox:
+                option["isActive"] = bool(checkbox.IsChecked)
+            else:
+                option["isActive"] = not option["isActive"]
+            self._saveCharacterSettings()
 
         for i, option in enumerate(self.options):
             label = option["name"].capitalize()

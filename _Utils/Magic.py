@@ -9,6 +9,11 @@ import Util
 
 importlib.reload(Util)
 
+CAST_POLL_SECONDS = 0.025
+CAST_RETRY_PAUSE_SECONDS = 0.05
+TARGET_GRACE_SECONDS = 0.05
+SERVER_RESPONSE_CHECK_SECONDS = 0.05
+
 with open(LegionPath.createPath("_Jsons/spell-def-magic.json")) as f:
     SPELLS = json.load(f)
 
@@ -70,54 +75,88 @@ class Magic:
         API.Pause(0.1)
         return not self._checkNoSpell()
 
-    def cast(self, spellName, maxTries=3):
-        API.SysMsg(spellName)
+    def cast(self, spellName, maxTries=3, castTime=None):
         spellDef = self.findSpellDef(spellName)
         if not spellDef:
             API.SysMsg(f"Invalid spell name: {spellName}", 33)
             return False
 
         manaNeeded = self.getManaCost(spellDef["manaCost"])
+        effectiveCastTime = castTime
+        if effectiveCastTime is None:
+            effectiveCastTime = self.getFcDelay(spellDef["castTime"])
+        effectiveCastTime = max(effectiveCastTime, 0)
 
         for _ in range(maxTries):
             API.ClearJournal()
             if API.Player.Mana < manaNeeded:
                 self.regenMana(manaNeeded)
-            API.CastSpell(spellName)
-            self._lastCastTime = self._now()
             castStart = self._now()
+            self._lastCastTime = castStart
+            API.CastSpell(spellName)
             retry = False
-            while self._now() - castStart < spellDef["castTime"]:
-                if spellDef["hasTarget"] and Util.Util.isTargeting():
+
+            if spellDef["hasTarget"]:
+                while self._now() - castStart < effectiveCastTime:
+                    if Util.Util.isTargeting():
+                        return True
+                    if self._checkNoSpell():
+                        API.SysMsg(f"You do not have that spell: {spellName}", 33)
+                        return False
+                    if self._checkFizzleJournal():
+                        API.SysMsg(f"Spell fizzled: {spellName}", 33)
+                        retry = True
+                        break
+                    if self._checkManaFailureJournal():
+                        API.SysMsg("Not enough mana, retrying", 33)
+                        self.regenMana(manaNeeded)
+                        retry = True
+                        break
+                    if self._checkRecoveredJournal():
+                        retry = True
+                        break
+                    API.Pause(CAST_POLL_SECONDS)
+                if Util.Util.isTargeting():
                     return True
+                if Util.Util.isTargeting(TARGET_GRACE_SECONDS):
+                    return True
+                if not retry:
+                    API.SysMsg(f"No target cursor for: {spellName}", 33)
+                    return False
+            elif not retry:
+                responseDelay = min(SERVER_RESPONSE_CHECK_SECONDS, effectiveCastTime)
+                if responseDelay > 0:
+                    API.Pause(responseDelay)
                 if self._checkNoSpell():
                     API.SysMsg(f"You do not have that spell: {spellName}", 33)
                     return False
                 if self._checkFizzleJournal():
                     API.SysMsg(f"Spell fizzled: {spellName}", 33)
                     retry = True
-                    break
-                if self._checkManaFailureJournal():
+                elif self._checkManaFailureJournal():
                     API.SysMsg("Not enough mana, retrying", 33)
                     self.regenMana(manaNeeded)
                     retry = True
-                    break
-                if self._checkRecoveredJournal():
+                elif self._checkRecoveredJournal():
                     retry = True
-                    break
-                API.Pause(0.05)
-            if spellDef["hasTarget"] and Util.Util.isTargeting():
-                return True
-
-            if spellDef["hasTarget"]:
-                if Util.Util.isTargeting(0.5):
-                    return True
                 if not retry:
-                    API.SysMsg(f"No target cursor for: {spellName}", 33)
-                    return False
-            elif not retry:
+                    remainingCast = castStart + effectiveCastTime - self._now()
+                    if remainingCast > 0:
+                        API.Pause(remainingCast)
+                    if self._checkFizzleJournal():
+                        API.SysMsg(f"Spell fizzled: {spellName}", 33)
+                        retry = True
+                    elif self._checkManaFailureJournal():
+                        API.SysMsg("Not enough mana, retrying", 33)
+                        self.regenMana(manaNeeded)
+                        retry = True
+                    elif self._checkRecoveredJournal():
+                        retry = True
+                if retry:
+                    API.Pause(CAST_RETRY_PAUSE_SECONDS)
+                    continue
                 return True
-            API.Pause(0.1)
+            API.Pause(CAST_RETRY_PAUSE_SECONDS)
         return False
 
     def healCure(self, greaterHealOffset=20, healOffset=10):
